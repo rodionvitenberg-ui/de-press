@@ -1,0 +1,184 @@
+import { useMemo, useRef } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useNavigate, useParams } from "react-router-dom";
+import { api, ApiError } from "@/core/api/client";
+import type { Dialogue } from "@/core/api/types";
+import { useI18n } from "@/core/i18n/context";
+import { ListRow } from "@/components/tg/ListRow";
+import styles from "./ChatList.module.css";
+
+const ROW_ESTIMATE = 72;
+const VIRTUAL_THRESHOLD = 24;
+
+function timeAgo(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const mins = Math.floor((Date.now() - then) / 60_000);
+  if (mins < 1) return "";
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
+export function ChatList() {
+  const { id: activeId } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const dialoguesQuery = useQuery({
+    queryKey: ["dialogues"],
+    queryFn: () => api.myDialogues(),
+  });
+
+  const requestsQuery = useQuery({
+    queryKey: ["dialogue-requests"],
+    queryFn: () => api.dialogueInbox(),
+  });
+
+  const accept = useMutation({
+    mutationFn: (requestId: string) => api.acceptDialogueRequest(requestId),
+    onSuccess: async (dialogue) => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogues"] });
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-requests"] });
+      navigate(`/chat/${dialogue.id}`);
+    },
+  });
+
+  const decline = useMutation({
+    mutationFn: (requestId: string) => api.declineDialogueRequest(requestId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-requests"] });
+    },
+  });
+
+  const dialogues = dialoguesQuery.data ?? [];
+  const requests = useMemo(
+    () =>
+      (requestsQuery.data ?? []).filter(
+        (r) => r.status === "pending" || r.status === "approved" || !r.status,
+      ),
+    [requestsQuery.data],
+  );
+
+  const useVirtual = dialogues.length >= VIRTUAL_THRESHOLD;
+
+  const virtualizer = useVirtualizer({
+    count: useVirtual ? dialogues.length : 0,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_ESTIMATE,
+    overscan: 8,
+  });
+
+  const loading = dialoguesQuery.isLoading || requestsQuery.isLoading;
+  const error =
+    dialoguesQuery.isError || requestsQuery.isError
+      ? dialoguesQuery.error instanceof ApiError
+        ? dialoguesQuery.error.message
+        : t.common.error
+      : null;
+
+  function renderDialogue(
+    d: Dialogue,
+    style?: React.CSSProperties,
+  ) {
+    return (
+      <ListRow
+        key={d.id}
+        to={`/chat/${d.id}`}
+        title={d.intent}
+        subtitle={
+          d.status === "closed" ? t.chat.dialogueClosed : d.source || "…"
+        }
+        time={timeAgo(d.updated_at)}
+        avatarText={d.intent}
+        active={activeId === d.id}
+        style={style}
+      />
+    );
+  }
+
+  return (
+    <div className={styles.list}>
+      <div className={styles.searchWrap}>
+        <div className={styles.search}>
+          <span className={styles.searchIcon} aria-hidden>
+            ⌕
+          </span>
+          <input
+            type="search"
+            placeholder={t.shell.searchChat}
+            aria-label={t.shell.searchChat}
+            className={styles.searchInput}
+          />
+        </div>
+      </div>
+
+      <div className={styles.scroll} ref={scrollRef}>
+        {loading ? <p className={styles.empty}>{t.me.loading}</p> : null}
+        {error ? <p className={styles.empty}>{error}</p> : null}
+
+        {!loading && requests.length === 0 && dialogues.length === 0 ? (
+          <p className={styles.empty}>{t.me.dialoguesEmpty}</p>
+        ) : null}
+
+        {requests.map((r) => (
+          <div key={r.id} className={styles.requestBlock}>
+            <ListRow
+              asButton
+              muted
+              title={t.me.inboxTitle}
+              subtitle={`${r.intent}${r.note ? ` · ${r.note}` : ""}`}
+              time={timeAgo(r.created_at)}
+              avatarText="?"
+            />
+            <p className={styles.safety}>{t.shell.safetyBanner}</p>
+            <div className={styles.requestActions}>
+              <button
+                type="button"
+                className={styles.accept}
+                disabled={accept.isPending}
+                onClick={() => accept.mutate(r.id)}
+              >
+                {t.me.openDialogue}
+              </button>
+              <button
+                type="button"
+                className={styles.decline}
+                disabled={decline.isPending}
+                onClick={() => decline.mutate(r.id)}
+              >
+                {t.me.decline}
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {useVirtual ? (
+          <div
+            className={styles.virtualInner}
+            style={{ height: virtualizer.getTotalSize() }}
+          >
+            {virtualizer.getVirtualItems().map((vItem) => {
+              const d = dialogues[vItem.index]!;
+              return renderDialogue(d, {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: vItem.size,
+                transform: `translateY(${vItem.start}px)`,
+              });
+            })}
+          </div>
+        ) : (
+          dialogues.map((d) => renderDialogue(d))
+        )}
+      </div>
+    </div>
+  );
+}

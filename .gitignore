@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.sqlite3
+db.sqlite3
+
+# Django
+backend/staticfiles/
+backend/media/
+*.log
+local_settings.py
+
+# Node
+node_modules/
+apps/browser/dist/
+_archive/legacy/next-frontend/.next/
+_archive/legacy/next-frontend/out/
+_archive/legacy/next-frontend/build/
+_archive/legacy/next-frontend/coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker volumes (if ever mounted into repo)
+.pgdata/
+.redisdata/
+
+# Telegram Web A vendor (clone via scripts/fetch_telegram_tt.sh) — GPLv3, large
+apps/mini-app/vendor/telegram-tt/
+
+# Native Telegram upstream clones (android / desktop — now under _archive/)
+_archive/native/desktop/tdesktop/
+_archive/native/desktop/.env
+_archive/native/android/Telegram/
+_archive/native/android/.env
+
+# SDD / worktrees
+.superpowers/
+.worktrees/
+
+# Embedded clone, not part of this product
+_archive/AngelSlim/

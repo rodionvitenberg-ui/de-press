@@ -1,0 +1,114 @@
+.canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.circle {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent-hope);
+  background: var(--accent-hope-soft);
+  animation: breathe 19s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  21% {
+    /* ~4s inhale of 19s cycle */
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  58% {
+    /* hold ~7s */
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    /* exhale ~8s */
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+}
+
+.phase {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.hint {
+  max-width: 24rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.steps {
+  list-style: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 22rem;
+}
+
+.menu button {
+  width: 100%;
+  padding: var(--btn-padding);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.menu button:hover {
+  border-color: var(--accent-hope);
+}
+
+.back {
+  margin-top: var(--space-4);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.vent {
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.menuBtn {
+  padding: var(--btn-padding);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-hope);
+  background: var(--accent-hope-soft);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.menuBtn:disabled {
+  opacity: 0.5;
+}

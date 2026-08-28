@@ -1,0 +1,22 @@
+.page {
+  max-width: var(--max-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.page p {
+  color: var(--text-muted);
+}
+
+.box {
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}

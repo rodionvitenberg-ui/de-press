@@ -1,0 +1,66 @@
+"""AI provider adapters (OpenAI-compatible HTTP)."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Protocol
+
+from django.conf import settings
+
+
+@dataclass(frozen=True, slots=True)
+class ChatMessage:
+    role: str  # system | user | assistant
+    content: str
+
+
+class AIGateway(Protocol):
+    def complete(self, messages: list[ChatMessage]) -> str: ...
+
+
+class OfflineGateway:
+    """Deterministic fallback when no API key — still useful for dev/tests."""
+
+    def complete(self, messages: list[ChatMessage]) -> str:
+        last_user = ""
+        for m in reversed(messages):
+            if m.role == "user":
+                last_user = m.content
+                break
+        snippet = (last_user[:120] + "…") if len(last_user) > 120 else last_user
+        return (
+            "Я рядом в тексте. То, что ты описываешь, звучит тяжело — и это имеет право "
+            f"так ощущаться. Что из этого сейчас давит сильнее всего?"
+            + (f" (про «{snippet}»)" if snippet else "")
+            + "\n\n[офлайн-режим: API-ключ не настроен; ответ шаблонный]"
+        )
+
+
+class OpenAICompatibleGateway:
+    def __init__(self, *, api_key: str, base_url: str, model: str):
+        from openai import OpenAI
+
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
+        self._model = model
+
+    def complete(self, messages: list[ChatMessage]) -> str:
+        payload = [{"role": m.role, "content": m.content} for m in messages]
+        resp = self._client.chat.completions.create(
+            model=self._model,
+            messages=payload,
+            temperature=0.6,
+            max_tokens=500,
+        )
+        choice = resp.choices[0].message.content
+        return (choice or "").strip() or "…"
+
+
+def get_gateway() -> AIGateway:
+    key = getattr(settings, "AI_API_KEY", "") or ""
+    if not key.strip():
+        return OfflineGateway()
+    return OpenAICompatibleGateway(
+        api_key=key.strip(),
+        base_url=settings.AI_BASE_URL,
+        model=settings.AI_MODEL,
+    )

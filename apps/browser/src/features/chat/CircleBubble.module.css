@@ -1,0 +1,112 @@
+.wrapMe,
+.wrapThem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.wrapMe {
+  align-items: flex-end;
+}
+
+.wrapThem {
+  align-items: flex-start;
+}
+
+.ring {
+  width: 11rem;
+  height: 11rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-soft);
+  background: var(--bg-chat);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.stage {
+  position: relative;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.stage:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Thin progress ring hugging the circle edge. */
+.ringSvg {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  pointer-events: none;
+}
+
+.playGlyph {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 14px 0 14px 24px;
+  border-color: transparent transparent transparent
+    color-mix(in srgb, var(--text-bubble) 82%, transparent);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+.muteBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-main) 62%, transparent);
+  color: var(--text-bubble);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.muteBtn:hover {
+  background: color-mix(in srgb, var(--bg-main) 80%, transparent);
+}
+
+.muteBtnOff {
+  color: var(--accent-panic);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+  font-weight: 600;
+}
+
+.dur {
+  font-variant-numeric: tabular-nums;
+}

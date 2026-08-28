@@ -1,0 +1,126 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 12rem;
+  max-width: 21rem;
+}
+
+.play {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--accent-hope);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play:hover {
+  background: var(--bg-hover);
+}
+
+.playMark {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  border-color: transparent transparent transparent currentColor;
+  margin-left: 2px;
+}
+
+.pauseMark {
+  width: 10px;
+  height: 12px;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: var(--accent-hope);
+  border-radius: inherit;
+}
+
+.time {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-bubble-muted);
+  min-width: 3.4rem;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.middle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.trackHit {
+  flex: 1;
+  display: flex;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  border-radius: 999px;
+  min-width: 3rem;
+}
+
+.trackHit:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.volPanel {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.muteBtn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-bubble-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.muteBtn:hover,
+.muteBtn[aria-pressed="true"] {
+  color: var(--accent-hope);
+  background: var(--bg-hover);
+}
+
+.volRange {
+  width: 3.75rem;
+  accent-color: var(--accent-hope);
+  margin: 0;
+}
+
+.me .play {
+  background: var(--accent-hope-soft);
+}
+
+.them .play {
+  background: var(--bg-elevated);
+}

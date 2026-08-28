@@ -1,0 +1,139 @@
+/* Yellow zone — TG chat list for monologues */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-main);
+  border-right: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.searchWrap {
+  flex-shrink: 0;
+  padding: 0.5rem 0.65rem 0.35rem;
+  background: var(--bg-main);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--tg-search-height);
+  padding: 0 0.85rem;
+  background: var(--bg-input);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+}
+
+.searchIcon {
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--tg-row-height);
+  padding: 0 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  transition-property: background-color;
+  transition-duration: var(--duration-fast);
+}
+
+.addRow:hover {
+  background: var(--bg-hover);
+}
+
+.addAvatar {
+  width: var(--tg-avatar-list);
+  height: var(--tg-avatar-list);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+  font-size: 1.5rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.addText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.addText strong {
+  color: var(--accent-hope);
+  font-size: 0.95rem;
+}
+
+.addText small {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+.virtualInner {
+  width: 100%;
+  position: relative;
+}
+
+.empty {
+  padding: 1.25rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.loadMore {
+  margin: 0.5rem 0.85rem 1rem;
+  width: calc(100% - 1.7rem);
+  min-height: 2.5rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition-property: background-color, color;
+  transition-duration: var(--duration-fast);
+}
+
+.loadMore:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-active);
+}
+
+.loadMore:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

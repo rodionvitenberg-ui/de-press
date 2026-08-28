@@ -1,0 +1,52 @@
+.wrapMe,
+.wrapThem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.wrapMe {
+  align-items: flex-end;
+}
+
+.wrapThem {
+  align-items: flex-start;
+}
+
+.ring {
+  width: 11rem;
+  height: 11rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-soft);
+  background: var(--bg-chat);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+  font-weight: 600;
+}
+
+.dur {
+  font-variant-numeric: tabular-nums;
+}

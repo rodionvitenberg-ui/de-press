@@ -1,0 +1,141 @@
+/* Создание мысли — «ДОБАВИТЬ ЗАПИСЬ» (v2) */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  flex: 1;
+  background-color: var(--bg-chat);
+  background-image: var(--chat-wallpaper);
+  background-size: var(--chat-wallpaper-size);
+  background-position: var(--chat-wallpaper-pos);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backLink {
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.textarea,
+.input,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.textarea {
+  min-height: 8rem;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.textarea:focus-visible,
+.input:focus-visible,
+.select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mic {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.mic:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.submit {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+  font-weight: 600;
+  transition-property: background-color, transform, opacity;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--accent-hope-mid);
+}
+
+.submit:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  color: var(--accent-panic);
+  font-size: 0.9rem;
+}

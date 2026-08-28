@@ -1,0 +1,136 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+  max-width: 28rem;
+  line-height: 1.5;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.empty,
+.error {
+  color: var(--text-muted);
+  padding: var(--space-6);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.compose {
+  margin-bottom: var(--space-8);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border-radius: var(--radius-cloud);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-cloud);
+}
+
+.composeTitle {
+  font-size: var(--text-md);
+  font-weight: 500;
+}
+
+.composeHint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.msg {
+  font-size: var(--text-sm);
+  color: var(--accent-hope);
+}
+
+.select {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  max-width: 16rem;
+}
+
+.select:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.fieldLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.chip {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.chip:hover {
+  border-color: var(--border-soft);
+  color: var(--text-primary);
+}
+
+.chip:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.chipActive {
+  background: var(--accent-hope-soft);
+  border-color: var(--border-soft);
+  color: var(--accent-hope);
+  font-weight: 500;
+}
+
+.feedLabel {
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-5);
+}

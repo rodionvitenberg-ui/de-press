@@ -1,0 +1,29 @@
+/* Переключатель тем — группа кнопок в сайдбаре */
+
+.group {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--bg-input);
+  border-radius: 0.75rem;
+}
+
+.button {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.button:hover {
+  color: var(--text-primary);
+}
+
+.buttonActive {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}

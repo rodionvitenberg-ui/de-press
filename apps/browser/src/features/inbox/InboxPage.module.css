@@ -1,0 +1,36 @@
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.action {
+  align-self: flex-start;
+  border: none;
+  background: var(--accent-hope-soft);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-md);
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.action:hover:not(:disabled) {
+  background: var(--bg-active);
+}

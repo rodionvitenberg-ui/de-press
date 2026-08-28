@@ -1,0 +1,145 @@
+/* Дизайн-токены v2 — все цвета через CSS-переменные.
+   :root = тёмная тема (базовая), [data-theme="light"] = «рассвет».
+   Будущие темы добавляются через [data-theme="..."] без рефакторинга. */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg-main: #0c0e12;
+  --bg-surface: #161a21;
+  --bg-elevated: #1e232c;
+  --bg-sidebar: #12151b;
+  --bg-chat: #0b0d11;
+  --bg-input: #1a1f27;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-active: rgba(126, 184, 162, 0.18);
+
+  /* Bubbles */
+  --bg-bubble-me: #1e5346;
+  --bg-bubble-them: #1e232c;
+
+  /* Text */
+  --text-primary: #e6e9ef;
+  --text-muted: #8b929e;
+  --text-bubble: #eef2f6;
+  --text-bubble-muted: rgba(238, 242, 246, 0.62);
+
+  /* Accents */
+  --accent-hope: #7eb8a2;
+  --accent-hope-soft: rgba(126, 184, 162, 0.14);
+  --accent-hope-mid: rgba(126, 184, 162, 0.28);
+  --accent-panic: #c47a7a;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-soft: rgba(126, 184, 162, 0.18);
+
+  /* Elevation */
+  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-elev-2: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-cloud: 0 10px 28px rgba(0, 0, 0, 0.28);
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--accent-hope-mid);
+
+  /* Layout — Telegram Desktop geometry (see TG_SHELL_SPEC.md) */
+  --tg-rail-width: 4.5rem; /* 72px icon rail */
+  --tg-list-width: 26.5rem; /* ~424px chat list */
+  --tg-row-height: 4.5rem; /* 72px */
+  --tg-avatar-list: 3.375rem; /* 54px */
+  --tg-header-height: 3.5rem; /* 56px */
+  --tg-composer-height: 3.25rem; /* 52px */
+  --tg-search-height: 2.625rem; /* 42px */
+  --tg-bubble-max: 70%;
+  --sidebar-width-desktop: var(--tg-rail-width);
+
+  --radius-sm: 0.35rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 1.375rem;
+  --radius-bubble-me: 1.15rem 1.15rem 0.4rem 1.15rem;
+  --radius-bubble-them: 1.15rem 1.15rem 1.15rem 0.4rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+
+  --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue",
+    Ubuntu, Cantarell, sans-serif;
+  --duration-fast: 120ms;
+  --duration-ui: 150ms;
+
+  /* Dense chat wallpaper (TG-like abstract mesh, our palette) */
+  --chat-pattern-a: rgba(126, 184, 162, 0.07);
+  --chat-pattern-b: rgba(255, 255, 255, 0.035);
+  --chat-pattern-c: rgba(126, 184, 162, 0.04);
+  --chat-wallpaper:
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-a) 1.1px, transparent 0),
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-b) 1px, transparent 0),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--chat-pattern-c) 0.8px,
+      transparent 0.9px
+    ),
+    var(--bg-chat);
+  --chat-wallpaper-size: 14px 14px, 22px 22px, 9px 9px, auto;
+  --chat-wallpaper-pos: 0 0, 7px 11px, 4px 2px, 0 0;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces — тёплый «рассвет» */
+  --bg-main: #f3efe9;
+  --bg-surface: #fbf8f2;
+  --bg-elevated: #ffffff;
+  --bg-sidebar: #ece6dc;
+  --bg-chat: #f6f2eb;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(88, 146, 124, 0.16);
+
+  /* Bubbles */
+  --bg-bubble-me: #1e5346;
+  --bg-bubble-them: #e4ddd1;
+
+  /* Text */
+  --text-primary: #23282f;
+  --text-muted: #6b7280;
+  --text-bubble: #f3f7f4;
+  --text-bubble-muted: rgba(243, 247, 244, 0.7);
+
+  /* Accents */
+  --accent-hope: #2f7d63;
+  --accent-hope-soft: rgba(47, 125, 99, 0.12);
+  --accent-hope-mid: rgba(47, 125, 99, 0.24);
+  --accent-panic: #b35858;
+
+  /* Borders */
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(47, 125, 99, 0.2);
+
+  /* Elevation */
+  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-elev-2: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-cloud: 0 10px 28px rgba(0, 0, 0, 0.12);
+
+  --focus-ring: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--accent-hope-mid);
+
+  --chat-pattern-a: rgba(47, 125, 99, 0.08);
+  --chat-pattern-b: rgba(0, 0, 0, 0.04);
+  --chat-pattern-c: rgba(47, 125, 99, 0.05);
+  --chat-wallpaper:
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-a) 1.1px, transparent 0),
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-b) 1px, transparent 0),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--chat-pattern-c) 0.8px,
+      transparent 0.9px
+    ),
+    var(--bg-chat);
+  --chat-wallpaper-size: 14px 14px, 22px 22px, 9px 9px, auto;
+  --chat-wallpaper-pos: 0 0, 7px 11px, 4px 2px, 0 0;
+}

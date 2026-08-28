@@ -1,0 +1,158 @@
+"""Identity domain: Account and AnonymousSession."""
+
+from __future__ import annotations
+
+import uuid
+
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+from django.utils import timezone
+
+
+class VoiceRetention(models.TextChoices):
+    DELETE_ON_CLOSE = "delete_on_close", "Delete on close"
+    KEEP = "keep", "Keep"
+
+
+class AccountManager(BaseUserManager):
+    def create_user(
+        self,
+        email: str,
+        password: str | None = None,
+        **extra_fields,
+    ) -> Account:
+        if not email:
+            raise ValueError("Email is required")
+        email = self.normalize_email(email)
+        account = self.model(email=email, **extra_fields)
+        account.set_password(password)
+        account.save(using=self._db)
+        return account
+
+    def create_superuser(
+        self,
+        email: str,
+        password: str | None = None,
+        **extra_fields,
+    ) -> Account:
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True")
+        return self.create_user(email, password, **extra_fields)
+
+
+class Account(AbstractBaseUser, PermissionsMixin):
+    """Optional registered identity (email + password)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(unique=True)
+    default_pseudonym = models.CharField(max_length=64, blank=True, default="")
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    # Helper: verified volunteer / partner-org listener (ADR-0010). Not a clinician by default.
+    is_helper = models.BooleanField(default=False, db_index=True)
+    helper_org = models.CharField(max_length=120, blank=True, default="")
+    date_joined = models.DateTimeField(default=timezone.now)
+    # Soft-notify preferences (P1: email/web).
+    notify_email_opt_in = models.BooleanField(default=False)
+    notify_digest_frequency = models.CharField(
+        max_length=16,
+        choices=[
+            ("off", "Off"),
+            ("immediate", "Immediate"),
+            ("daily", "Daily digest"),
+        ],
+        default="daily",
+    )
+    email_verified = models.BooleanField(default=False)
+    # Telegram Mini App host (ADR-0013): stable TG user id for seamless login.
+    # Null for email-only accounts. Unique when set.
+    telegram_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+    )
+    telegram_username = models.CharField(max_length=64, blank=True, default="")
+    # Soft-notify via Telegram Bot (Mini App host). Opt-in only; never default spam.
+    notify_telegram_opt_in = models.BooleanField(default=False)
+    # Last successful Telegram daily digest (for incremental unread window).
+    telegram_digest_last_at = models.DateTimeField(null=True, blank=True)
+    voice_retention = models.CharField(
+        max_length=32,
+        choices=VoiceRetention.choices,
+        default=VoiceRetention.DELETE_ON_CLOSE,
+    )
+
+    objects = AccountManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS: list[str] = []
+
+    class Meta:
+        verbose_name = "Account"
+        verbose_name_plural = "Accounts"
+        ordering = ("-date_joined",)
+
+    def __str__(self) -> str:
+        return self.email
+
+    @property
+    def display_pseudonym(self) -> str:
+        return self.default_pseudonym or self.email.split("@")[0]
+
+    @property
+    def helper_badge_label(self) -> str:
+        """Author-private badge text, e.g. 'Helper · org'."""
+        if not self.is_helper:
+            return ""
+        org = (self.helper_org or "").strip()
+        return f"Helper · {org}" if org else "Helper"
+
+
+class AnonymousSession(models.Model):
+    """Server-side Visitor identity bound to a cookie."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pseudonym = models.CharField(max_length=64, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(auto_now=True)
+    # Soft-notify for anonymous authors: optional contact email (magic link).
+    contact_email = models.EmailField(blank=True, default="")
+    contact_email_verified = models.BooleanField(default=False)
+    notify_email_opt_in = models.BooleanField(default=False)
+    notify_digest_frequency = models.CharField(
+        max_length=16,
+        choices=[
+            ("off", "Off"),
+            ("immediate", "Immediate"),
+            ("daily", "Daily digest"),
+        ],
+        default="daily",
+    )
+    voice_retention = models.CharField(
+        max_length=32,
+        choices=VoiceRetention.choices,
+        default=VoiceRetention.DELETE_ON_CLOSE,
+    )
+
+    class Meta:
+        verbose_name = "Anonymous session"
+        verbose_name_plural = "Anonymous sessions"
+        ordering = ("-last_seen_at",)
+
+    def __str__(self) -> str:
+        return f"anon:{self.id}"
+
+    @property
+    def display_pseudonym(self) -> str:
+        return self.pseudonym or "аноним"
+
+    @property
+    def notify_email(self) -> str:
+        """Best contact email for soft-notify (empty if unset)."""
+        return (self.contact_email or "").strip()

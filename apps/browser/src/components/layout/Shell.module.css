@@ -1,0 +1,50 @@
+/* Трёхзонный каркас v2: нав | список+контент (outlet) */
+
+.shell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "rail main";
+  height: 100dvh;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+:global(html[data-layout="phone"]) .shell,
+:global(html[data-layout="tablet"]) .shell {
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "main"
+    "tab";
+  padding-top: env(safe-area-inset-top);
+}
+
+:global(html[data-layout="phone"]) [data-chrome="rail"],
+:global(html[data-layout="tablet"]) [data-chrome="rail"] {
+  display: none;
+}
+
+.content {
+  grid-area: main;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}

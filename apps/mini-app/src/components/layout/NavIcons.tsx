@@ -1,0 +1,151 @@
+/** Sidebar icons: outline default, currentColor, stroke 1.5 (regular text). */
+
+interface IconProps {
+  className?: string;
+  active?: boolean;
+}
+
+function base(
+  children: React.ReactNode,
+  { className, active }: IconProps,
+) {
+  return (
+    <svg
+      className={className}
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={active ? 0 : 1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {children}
+    </svg>
+  );
+}
+
+export function IconFeed(props: IconProps) {
+  return base(
+    props.active ? (
+      <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z" />
+    ) : (
+      <>
+        <path d="M4 6h16" />
+        <path d="M4 12h16" />
+        <path d="M4 18h10" />
+      </>
+    ),
+    props,
+  );
+}
+
+export function IconChat(props: IconProps) {
+  return base(
+    props.active ? (
+      <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+    ) : (
+      <path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 3v-3H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+    ),
+    props,
+  );
+}
+
+export function IconHelp(props: IconProps) {
+  return base(
+    props.active ? (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path
+          d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8"
+          fill="none"
+          stroke="var(--bg-sidebar)"
+          strokeWidth={1.5}
+        />
+        <circle cx="12" cy="17" r="0.9" fill="var(--bg-sidebar)" stroke="none" />
+      </>
+    ) : (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8" />
+        <path d="M12 17h.01" />
+      </>
+    ),
+    props,
+  );
+}
+
+export function IconPatterns(props: IconProps) {
+  return base(
+    props.active ? (
+      <path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0" stroke="none" />
+    ) : (
+      <path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0" />
+    ),
+    props,
+  );
+}
+
+export function IconBell(props: IconProps) {
+  return base(
+    props.active ? (
+      <>
+        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7" />
+        <path d="M10 19a2 2 0 0 0 4 0" stroke="none" fill="currentColor" />
+      </>
+    ) : (
+      <>
+        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7" />
+        <path d="M10 19a2 2 0 0 0 4 0" />
+      </>
+    ),
+    props,
+  );
+}
+
+export function IconShield(props: IconProps) {
+  return base(
+    props.active ? (
+      <path d="M12 3 5 6v6c0 5 3.5 8 7 9 3.5-1 7-4 7-9V6l-7-3z" />
+    ) : (
+      <path d="M12 3 5 6v6c0 5 3.5 8 7 9 3.5-1 7-4 7-9V6l-7-3z" />
+    ),
+    props,
+  );
+}
+
+export type NavIconName =
+  | "feed"
+  | "chat"
+  | "help"
+  | "patterns"
+  | "bell"
+  | "shield";
+
+export function NavIcon({
+  name,
+  active,
+  className,
+}: {
+  name: NavIconName;
+  active?: boolean;
+  className?: string;
+}) {
+  const props = { active, className };
+  switch (name) {
+    case "feed":
+      return <IconFeed {...props} />;
+    case "chat":
+      return <IconChat {...props} />;
+    case "help":
+      return <IconHelp {...props} />;
+    case "patterns":
+      return <IconPatterns {...props} />;
+    case "bell":
+      return <IconBell {...props} />;
+    case "shield":
+      return <IconShield {...props} />;
+  }
+}

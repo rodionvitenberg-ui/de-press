@@ -1,0 +1,237 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+
+.panel {
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-elev-2);
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.body,
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  color: var(--accent-hope);
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+}
+
+.meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.themeBlock {
+  padding-top: 0.25rem;
+}
+
+.localeRow {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.localeBtn,
+.localeActive {
+  flex: 1;
+  min-height: 2.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.localeActive {
+  background: var(--bg-active);
+  color: var(--text-primary);
+  border-color: var(--border-soft);
+}
+
+.voiceField {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.voiceField legend {
+  padding: 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.radio input {
+  margin-top: 0.15rem;
+  accent-color: var(--accent-hope);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.field input {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.65rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.field input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.primaryBtn,
+.ghostBtn,
+.dangerBtn {
+  min-height: 2.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition-property: background-color, transform, opacity;
+  transition-duration: 0.15s;
+}
+
+.primaryBtn {
+  border: 1px solid var(--border-soft);
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: var(--accent-hope-mid);
+}
+
+.ghostBtn {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.ghostBtn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.dangerBtn {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--accent-panic);
+}
+
+.dangerBtn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.primaryBtn:active:not(:disabled),
+.ghostBtn:active:not(:disabled),
+.dangerBtn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.primaryBtn:disabled,
+.ghostBtn:disabled,
+.dangerBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  color: var(--accent-panic);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,131 @@
+/* Telegram Desktop-style icon rail — 72px */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--tg-rail-width);
+  min-width: var(--tg-rail-width);
+  height: 100%;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-subtle);
+  padding: 0.5rem 0;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.burger {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.35rem;
+  flex-shrink: 0;
+}
+
+.burgerAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  color: var(--accent-hope);
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+  font-size: 1rem;
+}
+
+.burger:hover .burgerAvatar {
+  background: var(--bg-hover);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+
+.item {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  color: var(--text-muted);
+  transition-property: background-color, color;
+  transition-duration: var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.itemActive {
+  background: var(--bg-active);
+  color: var(--accent-hope);
+}
+
+.dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-hope);
+  border: 1.5px solid var(--bg-sidebar);
+}
+
+.panic {
+  width: 48px;
+  height: 48px;
+  margin-top: auto;
+  border: none;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--accent-panic);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition-property: background-color, transform;
+  transition-duration: var(--duration-fast);
+}
+
+.panic:hover {
+  background: var(--bg-hover);
+}
+
+.panic:active {
+  transform: scale(0.96);
+}
+
+.panicMark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-panic);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1;
+}

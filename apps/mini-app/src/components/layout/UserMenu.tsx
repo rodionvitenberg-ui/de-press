@@ -1,0 +1,452 @@
+import { useEffect, useId, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, ApiError } from "@/core/api/client";
+import type { VoiceRetention } from "@/core/api/types";
+import { useHost } from "@/core/host/HostContext";
+import { useI18n } from "@/core/i18n/context";
+import { readVoiceRetention, writeVoiceRetention } from "@/core/mediaPrefs";
+import { ThemeSwitch } from "./ThemeSwitch";
+import styles from "./UserMenu.module.css";
+
+interface UserMenuProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+type Mode = "menu" | "login" | "register";
+
+export function UserMenu({ open, onClose }: UserMenuProps) {
+  const { t, locale, setLocale } = useI18n();
+  const { isTelegram, telegramAuthError } = useHost();
+  const queryClient = useQueryClient();
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const firstFieldRef = useRef<HTMLInputElement | null>(null);
+
+  const [mode, setMode] = useState<Mode>("menu");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pseudonym, setPseudonym] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [voiceRetention, setVoiceRetention] = useState<VoiceRetention>(() =>
+    readVoiceRetention(),
+  );
+
+  const meQuery = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.me(),
+    enabled: open,
+  });
+
+  const notifyQuery = useQuery({
+    queryKey: ["notify-settings"],
+    queryFn: () => api.notifySettings(),
+    enabled: open,
+  });
+
+  const me = meQuery.data;
+  const isAccount = Boolean(me?.is_authenticated && me.kind === "account");
+  const notifySettings = notifyQuery.data;
+  const hasTelegram = Boolean(notifySettings?.has_telegram);
+
+  useEffect(() => {
+    if (!open) {
+      setMode("menu");
+      setError(null);
+      setPassword("");
+      return;
+    }
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const tmr = window.setTimeout(() => {
+      firstFieldRef.current?.focus();
+    }, 0);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.clearTimeout(tmr);
+    };
+  }, [open, onClose, mode]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (ev: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(ev.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open, onClose]);
+
+  const login = useMutation({
+    mutationFn: () => api.login(email.trim(), password),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      setPassword("");
+      setMode("menu");
+      setError(null);
+      onClose();
+    },
+    onError: (err) => {
+      setError(
+        err instanceof ApiError ? err.message : t.auth.loginErrorFallback,
+      );
+    },
+  });
+
+  const register = useMutation({
+    mutationFn: () =>
+      api.register(email.trim(), password, pseudonym.trim()),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      setPassword("");
+      setMode("menu");
+      setError(null);
+      onClose();
+    },
+    onError: (err) => {
+      setError(
+        err instanceof ApiError ? err.message : t.auth.registerErrorFallback,
+      );
+    },
+  });
+
+  const logout = useMutation({
+    mutationFn: () => api.logout(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      onClose();
+    },
+    onError: (err) => {
+      setError(err instanceof ApiError ? err.message : t.common.error);
+    },
+  });
+
+  const saveTelegramNotify = useMutation({
+    mutationFn: (payload: {
+      optIn: boolean;
+      frequency?: "immediate" | "daily" | "off";
+    }) =>
+      api.updateNotifySettings({
+        notify_telegram_opt_in: payload.optIn,
+        notify_email_opt_in: notifySettings?.notify_email_opt_in ?? false,
+        notify_digest_frequency: payload.optIn
+          ? (payload.frequency ??
+            (notifySettings?.notify_digest_frequency === "off"
+              ? "daily"
+              : (notifySettings?.notify_digest_frequency ?? "daily")))
+          : (notifySettings?.notify_digest_frequency ?? "off"),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notify-settings"] });
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err instanceof ApiError ? err.message : t.common.error);
+    },
+  });
+
+  const testTelegramDigest = useMutation({
+    mutationFn: () => api.testTelegramDigest(),
+    onSuccess: (res) => {
+      setError(null);
+      // reuse error line for soft status is awkward; show as error style only on fail
+      if (!res.ok) setError(res.message);
+    },
+    onError: (err) => {
+      setError(err instanceof ApiError ? err.message : t.common.error);
+    },
+  });
+
+  if (!open) return null;
+
+  const busy =
+    login.isPending ||
+    register.isPending ||
+    logout.isPending ||
+    saveTelegramNotify.isPending ||
+    testTelegramDigest.isPending;
+
+  const tgFreq =
+    notifySettings?.notify_digest_frequency === "immediate"
+      ? "immediate"
+      : "daily";
+
+  return (
+    <div className={styles.backdrop} role="presentation">
+      <div
+        ref={panelRef}
+        className={styles.panel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
+        <header className={styles.head}>
+          <h2 id={titleId} className={styles.title}>
+            {mode === "login"
+              ? t.auth.loginTitle
+              : mode === "register"
+                ? t.auth.registerTitle
+                : t.nav.account}
+          </h2>
+          <button
+            type="button"
+            className={styles.close}
+            onClick={onClose}
+            aria-label={t.auth.closeMenu}
+          >
+            ×
+          </button>
+        </header>
+
+        {mode === "menu" ? (
+          <div className={styles.body}>
+            <div className={styles.profile}>
+              <span className={styles.avatar} aria-hidden>
+                {(me?.pseudonym || "·").slice(0, 1).toUpperCase()}
+              </span>
+              <div>
+                <strong>{me?.pseudonym || "…"}</strong>
+                <p className={styles.meta}>
+                  {isTelegram
+                    ? t.auth.telegramHostLabel
+                    : isAccount
+                      ? me?.email?.endsWith("@users.de-press.local")
+                        ? t.auth.accountLabel
+                        : me?.email || t.auth.accountLabel
+                      : t.auth.anonymousLabel}
+                </p>
+                {telegramAuthError ? (
+                  <p className={styles.meta} role="status">
+                    TG auth: {telegramAuthError}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className={styles.themeBlock}>
+              <ThemeSwitch />
+            </div>
+
+            <div className={styles.localeRow} role="group" aria-label={t.locale.label}>
+              <button
+                type="button"
+                className={
+                  locale === "ru" ? styles.localeActive : styles.localeBtn
+                }
+                onClick={() => setLocale("ru")}
+              >
+                {t.locale.ru}
+              </button>
+              <button
+                type="button"
+                className={
+                  locale === "en" ? styles.localeActive : styles.localeBtn
+                }
+                onClick={() => setLocale("en")}
+              >
+                {t.locale.en}
+              </button>
+            </div>
+
+            <fieldset className={styles.voiceField}>
+              <legend>{t.chat.voiceRetention}</legend>
+              <label className={styles.radio}>
+                <input
+                  type="radio"
+                  name="voice-retention"
+                  checked={voiceRetention === "delete_on_close"}
+                  onChange={() => {
+                    setVoiceRetention("delete_on_close");
+                    writeVoiceRetention("delete_on_close");
+                  }}
+                />
+                <span>{t.chat.voiceRetentionDelete}</span>
+              </label>
+              <label className={styles.radio}>
+                <input
+                  type="radio"
+                  name="voice-retention"
+                  checked={voiceRetention === "keep"}
+                  onChange={() => {
+                    setVoiceRetention("keep");
+                    writeVoiceRetention("keep");
+                  }}
+                />
+                <span>{t.chat.voiceRetentionKeep}</span>
+              </label>
+            </fieldset>
+
+            {hasTelegram ? (
+              <fieldset className={styles.voiceField}>
+                <legend>{t.notify.telegramOptIn}</legend>
+                <label className={styles.radio}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(notifySettings?.notify_telegram_opt_in)}
+                    disabled={busy || notifyQuery.isLoading}
+                    onChange={(e) => {
+                      saveTelegramNotify.mutate({ optIn: e.target.checked });
+                    }}
+                  />
+                  <span>{t.notify.telegramOptIn}</span>
+                </label>
+                {notifySettings?.notify_telegram_opt_in ? (
+                  <>
+                    <label className={styles.radio}>
+                      <input
+                        type="radio"
+                        name="tg-freq"
+                        checked={tgFreq === "immediate"}
+                        disabled={busy}
+                        onChange={() =>
+                          saveTelegramNotify.mutate({
+                            optIn: true,
+                            frequency: "immediate",
+                          })
+                        }
+                      />
+                      <span>{t.notify.telegramFreqImmediate}</span>
+                    </label>
+                    <label className={styles.radio}>
+                      <input
+                        type="radio"
+                        name="tg-freq"
+                        checked={tgFreq === "daily"}
+                        disabled={busy}
+                        onChange={() =>
+                          saveTelegramNotify.mutate({
+                            optIn: true,
+                            frequency: "daily",
+                          })
+                        }
+                      />
+                      <span>{t.notify.telegramFreqDaily}</span>
+                    </label>
+                    <button
+                      type="button"
+                      className={styles.ghostBtn}
+                      disabled={busy}
+                      onClick={() => testTelegramDigest.mutate()}
+                    >
+                      {t.notify.telegramTest}
+                    </button>
+                  </>
+                ) : null}
+                <p className={styles.hint}>{t.notify.telegramHint}</p>
+              </fieldset>
+            ) : null}
+
+            {error ? <p className={styles.error}>{error}</p> : null}
+
+            {isAccount ? (
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                disabled={busy}
+                onClick={() => logout.mutate()}
+              >
+                {t.auth.logout}
+              </button>
+            ) : (
+              <div className={styles.actions}>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={() => {
+                    setMode("login");
+                    setError(null);
+                  }}
+                >
+                  {t.auth.submitLogin}
+                </button>
+                <button
+                  type="button"
+                  className={styles.ghostBtn}
+                  onClick={() => {
+                    setMode("register");
+                    setError(null);
+                  }}
+                >
+                  {t.auth.submitRegister}
+                </button>
+                <p className={styles.hint}>{t.auth.registerOptional}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (mode === "login") login.mutate();
+              else register.mutate();
+            }}
+          >
+            <label className={styles.field}>
+              <span>{t.auth.email}</span>
+              <input
+                ref={firstFieldRef}
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={busy}
+              />
+            </label>
+            <label className={styles.field}>
+              <span>
+                {mode === "register" ? t.auth.passwordMin : t.auth.password}
+              </span>
+              <input
+                type="password"
+                autoComplete={
+                  mode === "login" ? "current-password" : "new-password"
+                }
+                required
+                minLength={mode === "register" ? 8 : undefined}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={busy}
+              />
+            </label>
+            {mode === "register" ? (
+              <label className={styles.field}>
+                <span>{t.auth.pseudonym}</span>
+                <input
+                  type="text"
+                  autoComplete="nickname"
+                  placeholder={t.auth.pseudonymPlaceholder}
+                  value={pseudonym}
+                  onChange={(e) => setPseudonym(e.target.value)}
+                  maxLength={64}
+                  disabled={busy}
+                />
+              </label>
+            ) : null}
+
+            {error ? <p className={styles.error}>{error}</p> : null}
+
+            <button type="submit" className={styles.primaryBtn} disabled={busy}>
+              {mode === "login" ? t.auth.submitLogin : t.auth.submitRegister}
+            </button>
+            <button
+              type="button"
+              className={styles.ghostBtn}
+              disabled={busy}
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError(null);
+              }}
+            >
+              {mode === "login" ? t.auth.toRegister : t.auth.toLogin}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}

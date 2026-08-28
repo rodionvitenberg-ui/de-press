@@ -1,0 +1,50 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: var(--header-height);
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(12, 14, 18, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.inner {
+  max-width: 56rem;
+  margin: 0 auto;
+  min-height: var(--header-height);
+  padding: var(--space-2) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.brand:focus-visible {
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.panic {
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  /* Desktop: sidebar carries the brand + tools; header is compact */
+  .header .brand {
+    display: block;
+  }
+}

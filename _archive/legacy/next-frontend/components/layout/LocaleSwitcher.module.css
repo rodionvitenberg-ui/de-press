@@ -1,0 +1,39 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.btn,
+.active {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.active {
+  color: var(--accent-hope);
+  font-weight: 600;
+}
+
+.btn:hover {
+  color: var(--text-primary);
+}
+
+.btn:focus-visible,
+.active:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.sep {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  opacity: 0.6;
+}

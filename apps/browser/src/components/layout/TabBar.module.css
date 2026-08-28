@@ -1,0 +1,79 @@
+.bar {
+  grid-area: tab;
+  display: flex;
+  align-items: stretch;
+  min-height: var(--tg-tabbar-height);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg-sidebar);
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.tab,
+.panic {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--hit-touch);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.15rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.tabActive {
+  color: var(--accent-hope);
+}
+
+.iconWrap {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  position: absolute;
+  top: -0.1rem;
+  right: -0.15rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-hope);
+  border: 1.5px solid var(--bg-sidebar);
+}
+
+.label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.65rem;
+  line-height: 1.2;
+}
+
+.panic {
+  color: var(--accent-panic);
+}
+
+.panicMark {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent-panic);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  line-height: 1;
+}

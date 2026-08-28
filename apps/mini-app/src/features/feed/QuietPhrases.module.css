@@ -1,0 +1,77 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.chip,
+.chipSent {
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  text-align: left;
+  max-width: 100%;
+  transition-property: background-color, border-color, transform, opacity;
+  transition-duration: 0.15s;
+}
+
+.chip {
+  background: var(--accent-hope-soft);
+  color: var(--text-primary);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--border-soft);
+  background: var(--accent-hope-mid);
+}
+
+.chip:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.chip:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.chipSent {
+  background: transparent;
+  color: var(--text-muted);
+  border-style: dashed;
+  cursor: default;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

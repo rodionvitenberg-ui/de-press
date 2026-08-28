@@ -1,0 +1,39 @@
+.emptyPane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--text-muted);
+  background-color: var(--bg-chat);
+  background-image: var(--chat-wallpaper);
+  background-size: var(--chat-wallpaper-size);
+  background-position: var(--chat-wallpaper-pos);
+  text-align: center;
+}
+
+.emptyMark {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-hope);
+  font-size: 1.75rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.emptyText {
+  max-width: 16rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

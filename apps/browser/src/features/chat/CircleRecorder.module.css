@@ -1,0 +1,116 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 1.25rem 5rem 0;
+  pointer-events: none;
+}
+
+.panel {
+  width: min(15rem, calc(100vw - 2rem));
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.15rem;
+  box-shadow: var(--shadow-elev-2);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.ring {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--border-soft);
+  box-shadow: var(--shadow-elev-1);
+  background: var(--bg-chat);
+  flex-shrink: 0;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.recBadge {
+  position: absolute;
+  left: 50%;
+  bottom: 0.65rem;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-main) 75%, transparent);
+  color: var(--accent-panic);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.primary,
+.ghost {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition-property: background-color, transform, opacity;
+  transition-duration: 0.15s;
+}
+
+.primary {
+  border: 1px solid var(--border-soft);
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hope-mid);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.primary:active:not(:disabled),
+.ghost:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.primary:disabled,
+.ghost:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.error {
+  margin: 0;
+  color: var(--accent-panic);
+  font-size: 0.9rem;
+  text-align: center;
+}

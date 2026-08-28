@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-depress}
+      POSTGRES_USER: ${POSTGRES_USER:-depress}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-depress}
+    ports:
+      # Host 5433 avoids clash with a system Postgres on 5432
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-depress} -d ${POSTGRES_DB:-depress}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: host Redis on 6379 is fine for local dev.
+  # Uncomment if you need a dedicated container (maps host 6380).
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6380:6379"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+
+volumes:
+  postgres_data:

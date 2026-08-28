@@ -1,0 +1,165 @@
+"""Deep moderation module: submit and resolve reports."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from uuid import UUID
+
+from django.db import IntegrityError, transaction
+from django.utils import timezone
+
+from apps.common.rate_limit import RateLimitExceeded, assert_under_limit
+from apps.identity.services import Actor
+from apps.moderation.models import Report, ReportReason, ReportStatus
+from apps.stories.models import StoryStatus
+from apps.stories.services import StoryNotFound, get_story, moderate_story
+
+REPORT_LIMIT = 20
+REPORT_WINDOW_SECONDS = 3600
+
+
+class ReportError(Exception):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class SubmitResult:
+    report: Report
+    created: bool
+
+
+@transaction.atomic
+def submit_report(
+    actor: Actor,
+    story_id: UUID,
+    *,
+    reason: str,
+    details: str = "",
+    message_id: UUID | None = None,
+) -> SubmitResult:
+    if reason not in ReportReason.values:
+        raise ReportError("Invalid report reason")
+    if actor.account is None and actor.session is None:
+        raise ReportError("Actor has no identity")
+
+    try:
+        assert_under_limit(
+            actor=actor,
+            queryset=Report.objects.all(),
+            account_field="from_account",
+            session_field="from_session",
+            limit=REPORT_LIMIT,
+            window_seconds=REPORT_WINDOW_SECONDS,
+        )
+    except RateLimitExceeded as exc:
+        raise ReportError(str(exc)) from exc
+
+    story = get_story(story_id, for_public=True)
+    text = (details or "").strip()[:2000]
+    message = None
+    if message_id is not None:
+        from apps.dialogue.models import Message
+
+        try:
+            message = Message.objects.select_related("dialogue").get(pk=message_id)
+        except Message.DoesNotExist as exc:
+            raise ReportError("Message not found") from exc
+        if message.dialogue.story_id != story.id:
+            raise ReportError("Message does not belong to this story")
+
+    try:
+        if actor.account is not None:
+            report, created = Report.objects.get_or_create(
+                story=story,
+                from_account=actor.account,
+                status=ReportStatus.OPEN,
+                defaults={
+                    "reason": reason,
+                    "details": text,
+                    "from_session": None,
+                    "message": message,
+                },
+            )
+        else:
+            assert actor.session is not None
+            report, created = Report.objects.get_or_create(
+                story=story,
+                from_session=actor.session,
+                status=ReportStatus.OPEN,
+                defaults={
+                    "reason": reason,
+                    "details": text,
+                    "from_account": None,
+                    "message": message,
+                },
+            )
+    except IntegrityError:
+        qs = Report.objects.filter(story=story, status=ReportStatus.OPEN)
+        if actor.account is not None:
+            report = qs.filter(from_account=actor.account).first()
+        else:
+            report = qs.filter(from_session=actor.session).first()
+        if report is None:
+            raise ReportError("Could not create report") from None
+        return SubmitResult(report=report, created=False)
+
+    if not created:
+        return SubmitResult(report=report, created=False)
+
+    return SubmitResult(report=report, created=True)
+
+
+@transaction.atomic
+def submit_message_report(
+    actor: Actor,
+    message_id: UUID,
+    *,
+    reason: str,
+    details: str = "",
+) -> SubmitResult:
+    from apps.dialogue.models import Message
+
+    try:
+        message = Message.objects.select_related("dialogue", "dialogue__story").get(
+            pk=message_id
+        )
+    except Message.DoesNotExist as exc:
+        raise ReportError("Message not found") from exc
+    return submit_report(
+        actor,
+        message.dialogue.story_id,
+        reason=reason,
+        details=details,
+        message_id=message_id,
+    )
+
+
+@transaction.atomic
+def resolve_report(
+    report_id: UUID,
+    *,
+    status: str,
+    note: str = "",
+    hide_story: bool = False,
+) -> Report:
+    if status not in (
+        ReportStatus.RESOLVED_HIDDEN,
+        ReportStatus.RESOLVED_DISMISSED,
+        ReportStatus.REVIEWING,
+    ):
+        raise ReportError("Invalid resolution status")
+
+    try:
+        report = Report.objects.select_for_update().get(pk=report_id)
+    except Report.DoesNotExist as exc:
+        raise ReportError("Report not found") from exc
+
+    report.status = status
+    report.resolved_note = (note or "").strip()[:2000]
+    report.updated_at = timezone.now()
+    report.save(update_fields=["status", "resolved_note", "updated_at"])
+
+    if hide_story or status == ReportStatus.RESOLVED_HIDDEN:
+        moderate_story(report.story_id, StoryStatus.HIDDEN)
+
+    return report

@@ -1,0 +1,225 @@
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--bg-chat);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.banner {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--accent-hope-soft);
+  border: 1px solid var(--border-soft);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.stat {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.check input {
+  margin-top: 0.2rem;
+  accent-color: var(--accent-hope);
+}
+
+.howFeel {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.levels {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.level,
+.levelActive {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition-property: background-color, border-color, transform;
+  transition-duration: 0.15s;
+}
+
+.level:hover {
+  background: var(--bg-hover);
+}
+
+.levelActive {
+  background: var(--accent-hope-soft);
+  border-color: var(--border-soft);
+  color: var(--accent-hope);
+}
+
+.level:active,
+.levelActive:active {
+  transform: scale(0.96);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.field input {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.65rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.field input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.primary,
+.danger {
+  align-self: flex-start;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  transition-property: background-color, transform, opacity;
+  transition-duration: 0.15s;
+}
+
+.primary {
+  border: 1px solid var(--border-soft);
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hope-mid);
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.primary:active:not(:disabled),
+.danger:active {
+  transform: scale(0.96);
+}
+
+.danger {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--accent-panic);
+}
+
+.danger:hover {
+  background: var(--bg-hover);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.9rem;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowMain {
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.rowTime {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  color: var(--accent-panic);
+  font-size: 0.9rem;
+}
+
+.actions {
+  padding-bottom: 1rem;
+}
