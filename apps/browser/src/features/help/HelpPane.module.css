@@ -98,6 +98,94 @@
   transform: scale(0.96);
 }
 
+.paths {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.choice {
+  gap: 0.75rem;
+}
+
+.noteLabel {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.note {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.note:focus-visible {
+  outline: 2px solid var(--accent-hope);
+  outline-offset: 2px;
+}
+
+.note:disabled {
+  opacity: 0.6;
+}
+
+.humanCta,
+.aiCta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.6rem 1.15rem;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition-property: background-color, transform, opacity;
+  transition-duration: 0.15s;
+}
+
+.humanCta {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.humanCta:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.humanCta:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.humanCta:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.aiCta {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--accent-hope);
+}
+
+.aiCta:hover {
+  background: var(--bg-hover);
+}
+
+.aiCta:active {
+  transform: scale(0.96);
+}
+
 .footerLinks {
   margin: 0 0 1.5rem;
   font-size: 0.9rem;

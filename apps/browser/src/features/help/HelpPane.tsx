@@ -1,15 +1,34 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "@/core/api/client";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
 import styles from "./HelpPane.module.css";
 
+const HELP_REQUEST_ID_KEY = "depress_help_request_id";
+
 /**
- * Help surface: crisis orienters + safety notes + short support guides.
+ * Help surface: crisis orienters + human/AI path cards + safety notes + guides.
  * Content from i18n; not medical advice.
  */
 export function HelpPane() {
   const { t } = useI18n();
   const { enter } = useAntiPanic();
+  const navigate = useNavigate();
+  const [note, setNote] = useState("");
+
+  const createRequest = useMutation({
+    mutationFn: (text: string) => api.createHelpRequest(text),
+    onSuccess: (req) => {
+      sessionStorage.setItem(HELP_REQUEST_ID_KEY, req.id);
+      navigate("/help/wait");
+    },
+    onError: () => {
+      // Backend is idempotent for pending; still leave the wait surface.
+      navigate("/help/wait");
+    },
+  });
 
   return (
     <div className={styles.pane}>
@@ -26,6 +45,41 @@ export function HelpPane() {
         <button type="button" className={styles.panicBtn} onClick={enter}>
           {t.nav.panic}
         </button>
+      </section>
+
+      <section className={styles.paths} aria-label={t.help.title}>
+        <article className={`${styles.card} ${styles.choice}`}>
+          <h2 className={styles.sectionTitle}>{t.help.humanTitle}</h2>
+          <p className={styles.body}>{t.help.humanLead}</p>
+          <label className={styles.noteLabel} htmlFor="help-human-note">
+            {t.help.humanNoteLabel}
+          </label>
+          <textarea
+            id="help-human-note"
+            className={styles.note}
+            rows={3}
+            value={note}
+            placeholder={t.help.humanNotePlaceholder}
+            disabled={createRequest.isPending}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <button
+            type="button"
+            className={styles.humanCta}
+            disabled={createRequest.isPending}
+            onClick={() => createRequest.mutate(note.trim())}
+          >
+            {t.help.humanCta}
+          </button>
+        </article>
+
+        <article className={`${styles.card} ${styles.choice}`}>
+          <h2 className={styles.sectionTitle}>{t.help.aiTitle}</h2>
+          <p className={styles.body}>{t.help.aiLead}</p>
+          <Link to="/help/ai" className={styles.aiCta}>
+            {t.help.aiCta}
+          </Link>
+        </article>
       </section>
 
       {t.help.resources.map((block) => (
