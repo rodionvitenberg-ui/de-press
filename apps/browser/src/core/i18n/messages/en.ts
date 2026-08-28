@@ -492,6 +492,27 @@ export const en: Messages = {
       },
     ],
     linksIntro: "",
+    humanTitle: "Talk to a person",
+    humanLead:
+      "A Helper volunteer. Not a doctor and not an emergency service. You may need to wait.",
+    humanCta: "Ask for a person nearby",
+    humanNoteLabel: "You can briefly write what’s going on (optional)",
+    humanNotePlaceholder: "Right now I…",
+    aiTitle: "Talk to AI",
+    aiLead:
+      "A quiet assistant. This is AI, not a live person. No diagnoses and no “just smile”.",
+    aiCta: "Open",
+    waitTitle: "Looking for a person nearby",
+    waitBody:
+      "This is not 112 and not an ambulance. If you are at risk — emergency services 112 / 103. You can wait, open AI, or cancel the request.",
+    waitCancel: "Cancel request",
+    waitOpenChat: "Open chat",
+    waitToAi: "Talk to AI",
+    requestTitle: "Someone is asking for a person nearby",
+    requestPlaque:
+      "A volunteer conversation. You are not a therapist and not an emergency service.",
+    requestAccept: "Accept",
+    requestSkip: "Skip",
   },
   safety: {
     title: "Safety",
@@ -539,8 +560,8 @@ export const en: Messages = {
       message: "New message in the dialogue",
       dialogue_deleted: "The other person deleted the dialogue",
       silent_empathy: "Someone sent you support rays",
-      help_requested: "Someone asked for help",
-      help_accepted: "A helper accepted your request",
+      help_requested: "Someone is asking for a person nearby",
+      help_accepted: "A Helper accepted your request",
     },
   },
   common: {
