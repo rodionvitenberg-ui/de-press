@@ -6,6 +6,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 
 class DialogueIntent(models.TextChoices):
@@ -30,6 +31,7 @@ class DialogueStatus(models.TextChoices):
 class DialogueSource(models.TextChoices):
     REQUEST = "request", "Dialogue request accepted"
     AUTHOR_OUTREACH = "author_outreach", "Author outreach to Hearer"
+    HELP = "help", "Help request accepted"
 
 
 class DialogueRequest(models.Model):
@@ -87,12 +89,105 @@ class DialogueRequest(models.Model):
         return f"dreq:{self.id}:{self.status}"
 
 
+class HelpRequestStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    ACCEPTED = "accepted", "Accepted"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+class HelpRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    from_account = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="help_requests_sent",
+    )
+    from_session = models.ForeignKey(
+        "identity.AnonymousSession",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="help_requests_sent",
+    )
+    note = models.CharField(max_length=280, blank=True, default="")
+    status = models.CharField(
+        max_length=16,
+        choices=HelpRequestStatus.choices,
+        default=HelpRequestStatus.PENDING,
+        db_index=True,
+    )
+    accepted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="help_requests_accepted",
+    )
+    dialogue = models.OneToOneField(
+        "dialogue.Dialogue",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="help_request",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    (Q(from_account__isnull=False) & Q(from_session__isnull=True))
+                    | (Q(from_account__isnull=True) & Q(from_session__isnull=False))
+                ),
+                name="help_request_exactly_one_actor",
+            ),
+            models.UniqueConstraint(
+                fields=["from_account"],
+                condition=Q(from_account__isnull=False, status="pending"),
+                name="unique_pending_help_account",
+            ),
+            models.UniqueConstraint(
+                fields=["from_session"],
+                condition=Q(from_session__isnull=False, status="pending"),
+                name="unique_pending_help_session",
+            ),
+        ]
+
+
+class HelpRequestSkip(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    request = models.ForeignKey(
+        HelpRequest,
+        on_delete=models.CASCADE,
+        related_name="skips",
+    )
+    helper = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="help_request_skips",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["request", "helper"],
+                name="unique_help_skip_helper",
+            ),
+        ]
+
+
 class Dialogue(models.Model):
     """1-on-1 dialogue opened only by Story author (request accept or outreach)."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     story = models.ForeignKey(
         "stories.Story",
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="dialogues",
     )

@@ -18,6 +18,8 @@ class NotificationKind(models.TextChoices):
     MESSAGE = "message", "New chat message"
     DIALOGUE_DELETED = "dialogue_deleted", "Dialogue deleted"
     SILENT_EMPATHY = "silent_empathy", "Silent empathy / rays"
+    HELP_REQUESTED = "help_requested", "Help request"
+    HELP_ACCEPTED = "help_accepted", "Help request accepted"
 
 
 class Notification(models.Model):

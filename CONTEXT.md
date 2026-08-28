@@ -61,8 +61,12 @@ A Support Cloud with free-form text that stays pending until a Helper (or modera
 _Avoid_: public comment awaiting review
 
 **Helper**:
-A verified volunteer or partner-org listener with elevated trust (queue moderation, optional badge to the author only). Not a licensed clinician by default.
+A verified volunteer or partner-org listener with elevated trust (queue moderation, optional badge to the author only). Besides cloud moderation, a Helper may accept Help Requests from `/chat` (grey rows). Still not a clinician.
 _Avoid_: therapist (medical claim), admin (ops role only)
+
+**Help Request**:
+A Visitor or Account asking from `/help` to talk with a Helper. Not tied to a Story. Lives in a shared pending pool until a Helper accepts (opens Initiated Dialogue with source `help`) or the requester cancels. Helpers may skip a request for themselves without rejecting it for others.
+_Avoid_: ticket, crisis hotline inside the app, open matching
 
 **Author Outreach**:
 The Story author starting Initiated Dialogue toward a Hearer (chosen or random), without the Hearer having sent a DialogueRequest first.
