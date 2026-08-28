@@ -97,3 +97,42 @@ def test_cancel_then_helper_list_empty(helper_client):
     inbox = helper_client.get("/api/v1/help/requests")
     assert inbox.status_code == 200
     assert inbox.json() == []
+
+
+@pytest.mark.django_db
+def test_anon_create_then_mine_returns_same_pending():
+    anon = Client()
+    created = anon.post(
+        "/api/v1/help/requests",
+        data={"note": "мое"},
+        content_type="application/json",
+    )
+    assert created.status_code == 200
+    req_id = created.json()["id"]
+
+    mine = anon.get("/api/v1/help/requests/mine")
+    assert mine.status_code == 200
+    body = mine.json()
+    assert body["id"] == req_id
+    assert body["status"] == "pending"
+
+
+@pytest.mark.django_db
+def test_helper_skip_hides_from_inbox(helper_client):
+    anon = Client()
+    created = anon.post(
+        "/api/v1/help/requests",
+        data={"note": "скип"},
+        content_type="application/json",
+    )
+    assert created.status_code == 200
+    req_id = created.json()["id"]
+
+    skipped = helper_client.post(f"/api/v1/help/requests/{req_id}/skip")
+    assert skipped.status_code == 200
+    assert skipped.json()["status"] == "pending"
+    assert skipped.json()["id"] == req_id
+
+    inbox = helper_client.get("/api/v1/help/requests")
+    assert inbox.status_code == 200
+    assert req_id not in [r["id"] for r in inbox.json()]
