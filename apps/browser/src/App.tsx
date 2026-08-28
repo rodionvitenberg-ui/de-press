@@ -42,6 +42,11 @@ const HelpWaitPane = lazy(() =>
     default: m.HelpWaitPane,
   })),
 );
+const CompanionPane = lazy(() =>
+  import("@/features/help/CompanionPane").then((m) => ({
+    default: m.CompanionPane,
+  })),
+);
 const InboxPage = lazy(() =>
   import("@/features/inbox/InboxPage").then((m) => ({ default: m.InboxPage })),
 );
@@ -102,6 +107,7 @@ function AppRoutes() {
           <Route path="/patterns" element={<PatternsPane />} />
           <Route path="/help" element={<HelpPane />} />
           <Route path="/help/wait" element={<HelpWaitPane />} />
+          <Route path="/help/ai" element={<CompanionPane />} />
           <Route path="/helper" element={<HelperQueue />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/more" element={<MorePane />} />
