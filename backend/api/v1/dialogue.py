@@ -72,7 +72,7 @@ class RequestOut(Schema):
 
 class DialogueOut(Schema):
     id: str
-    story_id: str
+    story_id: str | None
     intent: str
     status: str
     source: str
@@ -178,7 +178,7 @@ def _dialogue_out(d, actor=None) -> DialogueOut:
     flags = dialogue_flags(d, actor) if actor is not None else {}
     return DialogueOut(
         id=str(d.id),
-        story_id=str(d.story_id),
+        story_id=str(d.story_id) if d.story_id else None,
         intent=d.intent,
         status=d.status,
         source=getattr(d, "source", "request") or "request",
