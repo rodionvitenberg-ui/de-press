@@ -109,7 +109,7 @@ export interface DialogueRequest {
 
 export interface Dialogue {
   id: string;
-  story_id: string;
+  story_id: string | null;
   intent: string;
   status: string;
   source?: string;
@@ -125,6 +125,14 @@ export interface Dialogue {
   pinned?: boolean;
   muted?: boolean;
   unread_count?: number;
+}
+
+export interface HelpRequest {
+  id: string;
+  note: string;
+  status: "pending" | "accepted" | "cancelled" | string;
+  dialogue_id: string | null;
+  created_at: string;
 }
 
 /** Message kinds in Initiated Dialogue. `circle` = short ephemeral video. */
@@ -231,7 +239,9 @@ export type NotificationKind =
   | "outreach_intro"
   | "message"
   | "dialogue_deleted"
-  | "silent_empathy";
+  | "silent_empathy"
+  | "help_requested"
+  | "help_accepted";
 
 export interface AppNotification {
   id: string;

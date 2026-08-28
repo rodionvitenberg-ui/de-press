@@ -483,6 +483,8 @@ export type Messages = {
       message: string;
       dialogue_deleted: string;
       silent_empathy: string;
+      help_requested: string;
+      help_accepted: string;
     };
   };
   inbox: {

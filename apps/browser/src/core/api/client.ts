@@ -14,6 +14,7 @@ import type {
   FeedResponse,
   HealthResponse,
   Hearer,
+  HelpRequest,
   InboxOpenResponse,
   IntentOption,
   MarkAllNotificationsReadResponse,
@@ -51,6 +52,7 @@ export type {
   FeedResponse,
   HealthResponse,
   Hearer,
+  HelpRequest,
   InboxOpenResponse,
   IntentOption,
   MarkAllNotificationsReadResponse,
@@ -354,6 +356,27 @@ export const api = {
 
   declineDialogueRequest: (requestId: string) =>
     request<DialogueRequest>(`/api/v1/dialogue-requests/${requestId}/decline`, {
+      method: "POST",
+    }),
+
+  createHelpRequest: (note = "") =>
+    request<HelpRequest>("/api/v1/help/requests", {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    }),
+
+  myHelpRequest: () => request<HelpRequest>("/api/v1/help/requests/mine"),
+
+  helpInbox: () => request<HelpRequest[]>("/api/v1/help/requests"),
+
+  acceptHelpRequest: (id: string) =>
+    request<Dialogue>(`/api/v1/help/requests/${id}/accept`, { method: "POST" }),
+
+  skipHelpRequest: (id: string) =>
+    request<HelpRequest>(`/api/v1/help/requests/${id}/skip`, { method: "POST" }),
+
+  cancelHelpRequest: (id: string) =>
+    request<HelpRequest>(`/api/v1/help/requests/${id}/cancel`, {
       method: "POST",
     }),
 

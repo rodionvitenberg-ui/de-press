@@ -541,6 +541,8 @@ export const ru: Messages = {
       message: "Новое сообщение в диалоге",
       dialogue_deleted: "Собеседник удалил диалог",
       silent_empathy: "Тебе послали лучи поддержки",
+      help_requested: "Кто-то попросил помощи",
+      help_accepted: "Хелпер принял твою просьбу",
     },
   },
   common: {

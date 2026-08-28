@@ -539,6 +539,8 @@ export const en: Messages = {
       message: "New message in the dialogue",
       dialogue_deleted: "The other person deleted the dialogue",
       silent_empathy: "Someone sent you support rays",
+      help_requested: "Someone asked for help",
+      help_accepted: "A helper accepted your request",
     },
   },
   common: {
