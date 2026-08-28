@@ -150,6 +150,13 @@ export function useNotifications(
           void queryClient.invalidateQueries({ queryKey: ["my-stories"] });
           void queryClient.invalidateQueries({ queryKey: ["hearers"] });
         }
+        if (kind === "help_requested") {
+          void queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+        }
+        if (kind === "help_accepted") {
+          void queryClient.invalidateQueries({ queryKey: ["help-mine"] });
+          void queryClient.invalidateQueries({ queryKey: ["dialogues"] });
+        }
         if (
           kind !== "support_cloud" &&
           kind !== "cloud_approved" &&

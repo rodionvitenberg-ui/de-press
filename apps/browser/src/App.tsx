@@ -37,6 +37,11 @@ const PatternsPane = lazy(() =>
 const HelpPane = lazy(() =>
   import("@/features/help/HelpPane").then((m) => ({ default: m.HelpPane })),
 );
+const HelpWaitPane = lazy(() =>
+  import("@/features/help/HelpWaitPane").then((m) => ({
+    default: m.HelpWaitPane,
+  })),
+);
 const InboxPage = lazy(() =>
   import("@/features/inbox/InboxPage").then((m) => ({ default: m.InboxPage })),
 );
@@ -96,6 +101,7 @@ function AppRoutes() {
           <Route path="/notifications" element={<NotificationsPane />} />
           <Route path="/patterns" element={<PatternsPane />} />
           <Route path="/help" element={<HelpPane />} />
+          <Route path="/help/wait" element={<HelpWaitPane />} />
           <Route path="/helper" element={<HelperQueue />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/more" element={<MorePane />} />
