@@ -12,6 +12,7 @@ from apps.dialogue.help import (
     skip_help_request,
 )
 from apps.dialogue.models import Dialogue, DialogueSource, HelpRequest, HelpRequestSkip
+from apps.dialogue.services import list_messages, send_message
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
 from apps.moderation.blocks import block_actor
@@ -188,6 +189,29 @@ def test_accept_blocked_between_raises():
     block_actor(helper, target_session_id=sess.id)
     with pytest.raises(HelpError):
         accept_help_request(helper, req.id)
+
+
+@pytest.mark.django_db
+def test_help_dialogue_both_participants_can_send_message():
+    """Story-less Help chat: send_message must not join story under FOR UPDATE."""
+    helper_acc = Account.objects.create_user(
+        email="send-h@ex.com", password="password123", is_helper=True
+    )
+    helper = Actor(kind="account", account=helper_acc)
+    sess = AnonymousSession.objects.create(pseudonym="гость")
+    visitor = Actor(kind="anonymous", session=sess)
+
+    req = create_help_request(visitor, note="нужно поговорить")
+    dialogue = accept_help_request(helper, req.id)
+    assert dialogue.story_id is None
+
+    send_message(visitor, dialogue.id, "привет, мне тяжело")
+    send_message(helper, dialogue.id, "я здесь, слушаю")
+
+    bodies = [m.body for m in list_messages(visitor, dialogue.id)]
+    assert "привет, мне тяжело" in bodies
+    assert "я здесь, слушаю" in bodies
+    assert [m.body for m in list_messages(helper, dialogue.id)] == bodies
 
 
 @pytest.mark.django_db

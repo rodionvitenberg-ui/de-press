@@ -506,11 +506,8 @@ def send_message(
     if len(text) > 4000:
         raise DialogueError("Message too long")
 
-    d = (
-        Dialogue.objects.select_for_update()
-        .select_related("story")
-        .get(pk=dialogue_id)
-    )
+    # of=("self",): story is nullable (Help); Postgres forbids FOR UPDATE on outer join NULL side
+    d = Dialogue.objects.select_for_update(of=("self",)).get(pk=dialogue_id)
     if not _is_participant(d, actor):
         raise DialogueError("Not a participant")
     if _hidden_for(d, actor) or _abandoned(d):
@@ -730,11 +727,8 @@ def send_voice_message(
     if actor.account is None and actor.session is None:
         raise DialogueError("No identity")
 
-    d = (
-        Dialogue.objects.select_for_update()
-        .select_related("story")
-        .get(pk=dialogue_id)
-    )
+    # of=("self",): story is nullable (Help); Postgres forbids FOR UPDATE on outer join NULL side
+    d = Dialogue.objects.select_for_update(of=("self",)).get(pk=dialogue_id)
     if not _is_participant(d, actor):
         raise DialogueError("Not a participant")
     if _hidden_for(d, actor) or _abandoned(d):
@@ -826,11 +820,8 @@ def send_circle_message(
     if actor.account is None and actor.session is None:
         raise DialogueError("No identity")
 
-    d = (
-        Dialogue.objects.select_for_update()
-        .select_related("story")
-        .get(pk=dialogue_id)
-    )
+    # of=("self",): story is nullable (Help); Postgres forbids FOR UPDATE on outer join NULL side
+    d = Dialogue.objects.select_for_update(of=("self",)).get(pk=dialogue_id)
     if not _is_participant(d, actor):
         raise DialogueError("Not a participant")
     if _hidden_for(d, actor) or _abandoned(d):
