@@ -18,6 +18,12 @@ describe("resolveTarget", () => {
     expect(resolveTarget(note("outreach_intro", { dialogue_id: "d2" }))).toBe("/chat/d2");
   });
 
+  it("routes help request notifications", () => {
+    expect(resolveTarget(note("help_requested", { request_id: "r1" }))).toBe("/chat");
+    expect(resolveTarget(note("help_accepted", { dialogue_id: "d3" }))).toBe("/chat/d3");
+    expect(resolveTarget(note("help_accepted"))).toBe("/help/wait");
+  });
+
   it("points silent empathy at the story", () => {
     expect(resolveTarget(note("silent_empathy", { story_id: "s5" }))).toBe("/feed/s5");
     expect(resolveTarget(note("silent_empathy"))).toBe("/feed");

@@ -243,6 +243,8 @@ cd _archive/legacy/next-frontend && npm install && npm run dev   # :3005, арх
 | `/notifications` | Приватные уведомления |
 | `/patterns` | ZK mood notes (IndexedDB) |
 | `/help` | Помощь / safety / гайды |
+| `/help/wait` | Ожидание ответа Helper (human path) |
+| `/help/ai` | AI-компаньон (CompanionPane) |
 | `/helper` | Очередь Helper (роль) |
 
 Shell: **icon rail 72px** · **resizable list** · **main** (см. `TG_SHELL_SPEC.md`).

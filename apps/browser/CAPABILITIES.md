@@ -147,10 +147,15 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `helper.queue` | Очередь облачков | `GET /api/v1/moderation/clouds` + approve/reject | HelperQueue | live |
 | `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | client | wired |
 | `moderation.blocks` | Общий блок | `POST /api/v1/blocks` | нет (блок через чат) | api |
-| `ai.support` | DeepSeek | `POST /api/v1/ai/support` | client; Anti-Panic не зовёт | wired |
+| `ai.support` | DeepSeek | `POST /api/v1/ai/support` | client + CompanionPane live; Anti-Panic не зовёт | live |
 | `panic.overlay` | Anti-Panic | нет | overlay, рвёт WS | local |
 | `patterns.local` | ZK паттерны | нет | IndexedDB | local |
 | `help.static` | Помощь | нет | HelpPane | local |
+| `help.human` | Путь «человек рядом» | `POST /api/v1/help/requests` | HelpPane → wait | live |
+| `help.wait` | Ожидание ответа Helper | `GET …/help/requests/mine` | `/help/wait` | live |
+| `help.ai` | Компаньон-чат | `POST /api/v1/ai/support` | `/help/ai` CompanionPane | live |
+| `help.request` | Запрос помощи | API + UI | HelpPane / ChatList | live (API+UI) |
+| `helper.helpInbox` | Inbox запросов Helper | `GET /api/v1/help/requests` | ChatList grey rows | live |
 | `shell.theme` | Тема | нет | UserMenu | local |
 | `shell.locale` | Язык | нет | UserMenu | local |
 | `shell.navOrder` | Порядок rail | нет | localStorage | local |

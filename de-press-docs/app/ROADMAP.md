@@ -10,7 +10,8 @@
 **Кружочки + voice retention на сервере закрыты.**  
 Дальше по продукту: **нативный динамический мультиязык** (P1).  
 По hosts: **Telegram Mini App** (этап), затем/параллельно **own mobile** и **own desktop**.  
-**AI-помощник — в самую последнюю очередь.**
+**AI-помощник (полный продукт) — в самую последнюю очередь.**  
+В browser уже есть Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — это companion surface, не закрытый AI-помощник.
 
 > **Решение (2026-08, уточнено):** этот репозиторий — только приложения.  
 > **Четыре App Hosts:** browser · Telegram Mini App · own desktop · own mobile — см. [`PLATFORMS.md`](./PLATFORMS.md), [ADR 0013](./adr/0013-four-app-hosts.md).  
