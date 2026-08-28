@@ -6,8 +6,9 @@
 
 ---
 
-## YYYY-MM-DD  agent=A  id=Gate0
-status: started
-branch: feat/help-human-ai → main
-notes: MAINPLAN.md + PROGRESS.md created. UI click-through of /help still needs a human (no browser tools in this session). API E2E already passed earlier (create/accept/send/skip/cancel/AI).
+## 2026-08-29  agent=A  id=Gate0
+status: done
+branch: main (ff-merge feat/help-human-ai)
+commit: 2ca15ab
+notes: MAINPLAN.md + PROGRESS.md on main. Branches feat/agent-a-helper-ops and feat/agent-b-companion-hosts created from main. UI click-through of /help still for a human (no browser tools). API E2E already passed (create/accept/send/skip/cancel/AI). Agent B may start B1.
 files: MAINPLAN.md, PROGRESS.md
