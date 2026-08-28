@@ -188,3 +188,17 @@ def test_accept_blocked_between_raises():
     block_actor(helper, target_session_id=sess.id)
     with pytest.raises(HelpError):
         accept_help_request(helper, req.id)
+
+
+@pytest.mark.django_db
+def test_existing_story_dialogue_still_requires_story_in_request_flow():
+    from apps.dialogue.services import accept_request, create_request
+    from apps.stories.services import publish_story
+
+    author = Account.objects.create_user(email="a@ex.com", password="password123")
+    story = publish_story(Actor(kind="account", account=author), "монолог")
+    sess = AnonymousSession.objects.create()
+    req = create_request(Actor(kind="anonymous", session=sess), story.id, intent="listen")
+    d = accept_request(Actor(kind="account", account=author), req.id)
+    assert d.story_id == story.id
+    assert d.source == "request"

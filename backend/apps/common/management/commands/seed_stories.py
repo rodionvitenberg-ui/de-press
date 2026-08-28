@@ -20,6 +20,27 @@ class Command(BaseCommand):
     help = "Create sample Stories if the feed is empty"
 
     def handle(self, *args, **options):
+        helper, helper_created = Account.objects.get_or_create(
+            email="helper@de-press.local",
+            defaults={
+                "default_pseudonym": "helper",
+                "is_helper": True,
+                "helper_org": "pilot",
+            },
+        )
+        if helper_created:
+            helper.set_password("helperhelper12")
+            helper.save()
+            self.stdout.write(self.style.SUCCESS("Created helper@de-press.local"))
+        elif not helper.is_helper:
+            helper.is_helper = True
+            helper.helper_org = "pilot"
+            helper.default_pseudonym = "helper"
+            helper.save(
+                update_fields=["is_helper", "helper_org", "default_pseudonym"]
+            )
+            self.stdout.write(self.style.SUCCESS("Updated helper@de-press.local flags"))
+
         if Story.objects.exists():
             self.stdout.write("Stories already exist; skip seed.")
             return
