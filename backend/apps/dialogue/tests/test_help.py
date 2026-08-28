@@ -2,16 +2,19 @@ import pytest
 from django.db import IntegrityError
 
 from apps.dialogue.help import (
+    HELP_CREATE_LIMIT,
     HelpError,
     accept_help_request,
     cancel_help_request,
     create_help_request,
     list_help_inbox,
+    my_help_request,
     skip_help_request,
 )
 from apps.dialogue.models import Dialogue, DialogueSource, HelpRequest, HelpRequestSkip
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
+from apps.moderation.blocks import block_actor
 from apps.notifications.models import Notification, NotificationKind
 
 
@@ -132,3 +135,56 @@ def test_helper_cannot_accept_own_request():
     assert list_help_inbox(actor) == []
     with pytest.raises(HelpError):
         accept_help_request(actor, req.id)
+
+
+@pytest.mark.django_db
+def test_my_help_request_returns_pending():
+    sess = AnonymousSession.objects.create()
+    visitor = Actor(kind="anonymous", session=sess)
+    req = create_help_request(visitor, note="жду")
+    mine = my_help_request(visitor)
+    assert mine is not None
+    assert mine.id == req.id
+    assert mine.status == "pending"
+
+
+@pytest.mark.django_db
+def test_my_help_request_returns_accepted_within_24h():
+    helper_acc = Account.objects.create_user(
+        email="mh@ex.com", password="password123", is_helper=True
+    )
+    helper = Actor(kind="account", account=helper_acc)
+    sess = AnonymousSession.objects.create()
+    visitor = Actor(kind="anonymous", session=sess)
+    req = create_help_request(visitor)
+    dialogue = accept_help_request(helper, req.id)
+    mine = my_help_request(visitor)
+    assert mine is not None
+    assert mine.id == req.id
+    assert mine.status == "accepted"
+    assert mine.dialogue_id == dialogue.id
+
+
+@pytest.mark.django_db
+def test_create_rate_limit_after_five_in_window():
+    sess = AnonymousSession.objects.create()
+    visitor = Actor(kind="anonymous", session=sess)
+    for _ in range(HELP_CREATE_LIMIT):
+        req = create_help_request(visitor)
+        cancel_help_request(visitor, req.id)
+    with pytest.raises(HelpError):
+        create_help_request(visitor)
+
+
+@pytest.mark.django_db
+def test_accept_blocked_between_raises():
+    helper_acc = Account.objects.create_user(
+        email="blk-h@ex.com", password="password123", is_helper=True
+    )
+    helper = Actor(kind="account", account=helper_acc)
+    sess = AnonymousSession.objects.create()
+    visitor = Actor(kind="anonymous", session=sess)
+    req = create_help_request(visitor)
+    block_actor(helper, target_session_id=sess.id)
+    with pytest.raises(HelpError):
+        accept_help_request(helper, req.id)

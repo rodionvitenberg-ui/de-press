@@ -140,10 +140,12 @@ def list_help_inbox(actor: Actor) -> list[HelpRequest]:
     skipped_ids = HelpRequestSkip.objects.filter(helper=actor.account).values_list(
         "request_id", flat=True
     )
+    # Null-safe own-request filter: anonymous rows have from_account_id NULL;
+    # plain .exclude(from_account=...) can drop them under SQL three-valued logic.
     qs = (
         HelpRequest.objects.filter(status=HelpRequestStatus.PENDING)
         .exclude(id__in=skipped_ids)
-        .exclude(from_account=actor.account)
+        .filter(Q(from_account__isnull=True) | ~Q(from_account=actor.account))
         .select_related("from_account", "from_session")
         .order_by("-created_at")
     )
