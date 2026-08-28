@@ -126,7 +126,7 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `chat.voiceRetention` | Хранить голос | `GET/POST /api/v1/me/voice-retention` | UserMenu | live |
 | `chat.deleteMessage.me` | Удалить у себя | `DELETE /api/v1/messages/{id}?scope=me` | MessageMenu | live |
 | `chat.deleteMessage.everyone` | Удалить у всех | `DELETE …?scope=everyone` | MessageMenu; пир может стереть чужое | live |
-| `chat.reportMessage` | Репорт сообщения | `POST /api/v1/messages/{id}/report` | MessageMenu | live |
+| `chat.reportMessage` | Репорт сообщения | `POST /api/v1/messages/{id}/report` | MessageMenu; help-чат без Story | live |
 | `chat.reportStory` | Репорт истории | `POST /api/v1/stories/{id}/report` | StoryPage ⋯ | live |
 | `chat.typing` | Печатает | WS | три точки | live |
 

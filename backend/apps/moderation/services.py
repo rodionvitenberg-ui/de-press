@@ -109,6 +109,50 @@ def submit_report(
     return SubmitResult(report=report, created=True)
 
 
+def _submit_help_message_report(
+    actor: Actor,
+    message,
+    *,
+    reason: str,
+    details: str,
+) -> SubmitResult:
+    """Help dialogue has no Story; uniqueness is per message × actor."""
+    text = (details or "").strip()[:2000]
+    defaults = {
+        "reason": reason,
+        "details": text,
+        "story": None,
+    }
+    try:
+        if actor.account is not None:
+            report, created = Report.objects.get_or_create(
+                message=message,
+                from_account=actor.account,
+                status=ReportStatus.OPEN,
+                defaults={**defaults, "from_session": None},
+            )
+        else:
+            assert actor.session is not None
+            report, created = Report.objects.get_or_create(
+                message=message,
+                from_session=actor.session,
+                status=ReportStatus.OPEN,
+                defaults={**defaults, "from_account": None},
+            )
+    except IntegrityError:
+        qs = Report.objects.filter(
+            message=message, status=ReportStatus.OPEN, story__isnull=True
+        )
+        if actor.account is not None:
+            report = qs.filter(from_account=actor.account).first()
+        else:
+            report = qs.filter(from_session=actor.session).first()
+        if report is None:
+            raise ReportError("Could not create report") from None
+        return SubmitResult(report=report, created=False)
+    return SubmitResult(report=report, created=created)
+
+
 @transaction.atomic
 def submit_message_report(
     actor: Actor,
@@ -119,15 +163,36 @@ def submit_message_report(
 ) -> SubmitResult:
     from apps.dialogue.models import Message
 
+    if reason not in ReportReason.values:
+        raise ReportError("Invalid report reason")
+    if actor.account is None and actor.session is None:
+        raise ReportError("Actor has no identity")
+
     try:
-        message = Message.objects.select_related("dialogue", "dialogue__story").get(
-            pk=message_id
-        )
+        message = Message.objects.select_related("dialogue").get(pk=message_id)
     except Message.DoesNotExist as exc:
         raise ReportError("Message not found") from exc
+
+    story_id = message.dialogue.story_id
+    if story_id is None:
+        try:
+            assert_under_limit(
+                actor=actor,
+                queryset=Report.objects.all(),
+                account_field="from_account",
+                session_field="from_session",
+                limit=REPORT_LIMIT,
+                window_seconds=REPORT_WINDOW_SECONDS,
+            )
+        except RateLimitExceeded as exc:
+            raise ReportError(str(exc)) from exc
+        return _submit_help_message_report(
+            actor, message, reason=reason, details=details
+        )
+
     return submit_report(
         actor,
-        message.dialogue.story_id,
+        story_id,
         reason=reason,
         details=details,
         message_id=message_id,
@@ -159,7 +224,7 @@ def resolve_report(
     report.updated_at = timezone.now()
     report.save(update_fields=["status", "resolved_note", "updated_at"])
 
-    if hide_story or status == ReportStatus.RESOLVED_HIDDEN:
+    if report.story_id and (hide_story or status == ReportStatus.RESOLVED_HIDDEN):
         moderate_story(report.story_id, StoryStatus.HIDDEN)
 
     return report

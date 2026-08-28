@@ -22,7 +22,7 @@ files: backend/apps/ai/gateway.py, backend/apps/ai/services.py, backend/api/v1/a
 
 
 ## 2026-08-29  agent=A  id=A1
-status: started
+status: done
 branch: feat/agent-a-helper-ops
-notes: Help-chat message report without Story.
-files: backend/apps/moderation/**
+notes: Help-chat message report without Story. Report.story nullable; XOR story|message; unique open help report per message×actor. Dashboard/admin tolerate null story. Did not stage Agent B files (ai/gateway.py, ai/services.py).
+files: backend/apps/moderation/**, backend/api/v1/moderation.py, apps/browser/CAPABILITIES.md

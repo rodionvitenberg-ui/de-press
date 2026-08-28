@@ -28,6 +28,8 @@ class Report(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     story = models.ForeignKey(
         "stories.Story",
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="reports",
     )
@@ -37,7 +39,7 @@ class Report(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="reports",
-        help_text="Optional: report targets a chat message (story still set for queue).",
+        help_text="Story report may omit this; help-chat report has a message and no story.",
     )
     reason = models.CharField(max_length=32, choices=ReportReason.choices)
     details = models.TextField(blank=True, default="")
@@ -70,15 +72,47 @@ class Report(models.Model):
         verbose_name_plural = "Reports"
         ordering = ("-created_at",)
         constraints = [
+            models.CheckConstraint(
+                condition=models.Q(story__isnull=False) | models.Q(message__isnull=False),
+                name="report_story_or_message",
+            ),
             models.UniqueConstraint(
                 fields=["story", "from_account"],
-                condition=models.Q(from_account__isnull=False, status="open"),
+                condition=models.Q(
+                    from_account__isnull=False,
+                    status="open",
+                    story__isnull=False,
+                ),
                 name="unique_open_report_per_account_story",
             ),
             models.UniqueConstraint(
                 fields=["story", "from_session"],
-                condition=models.Q(from_session__isnull=False, status="open"),
+                condition=models.Q(
+                    from_session__isnull=False,
+                    status="open",
+                    story__isnull=False,
+                ),
                 name="unique_open_report_per_session_story",
+            ),
+            models.UniqueConstraint(
+                fields=["message", "from_account"],
+                condition=models.Q(
+                    from_account__isnull=False,
+                    status="open",
+                    story__isnull=True,
+                    message__isnull=False,
+                ),
+                name="unique_open_help_report_account_message",
+            ),
+            models.UniqueConstraint(
+                fields=["message", "from_session"],
+                condition=models.Q(
+                    from_session__isnull=False,
+                    status="open",
+                    story__isnull=True,
+                    message__isnull=False,
+                ),
+                name="unique_open_help_report_session_message",
             ),
         ]
         indexes = [

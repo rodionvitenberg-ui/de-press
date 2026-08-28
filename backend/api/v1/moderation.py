@@ -127,6 +127,8 @@ def report_message(request, message_id: UUID, payload: ReportIn):
             reason=payload.reason,
             details=payload.details,
         )
+    except StoryNotFound as exc:
+        raise HttpError(404, str(exc)) from exc
     except ReportError as exc:
         raise HttpError(400, str(exc)) from exc
     return ReportOut(
