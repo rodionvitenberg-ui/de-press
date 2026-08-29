@@ -26,3 +26,12 @@ status: done
 branch: feat/agent-a-helper-ops
 notes: Help-chat message report without Story. Report.story nullable; XOR story|message; unique open help report per message×actor. Dashboard/admin tolerate null story. Did not stage Agent B files (ai/gateway.py, ai/services.py).
 files: backend/apps/moderation/**, backend/api/v1/moderation.py, apps/browser/CAPABILITIES.md
+
+## 2026-08-29  agent=A  id=A2
+status: done
+branch: feat/agent-a-helper-ops
+notes: Dialogue Request waits for Helper (awaiting_helper) before author inbox. contract:ready GET/POST /api/v1/moderation/dialogue-requests. Left B1 WIP unstaged (ai/*, CompanionPane, memory/db.ts). client.ts also had B stream helpers in the same working tree — kept additive methods, did not revert them.
+files: backend/apps/dialogue/**, backend/apps/notifications/models.py, backend/api/v1/moderation.py, ChatList.tsx, i18n helper/review, client.ts
+api: GET /api/v1/moderation/dialogue-requests
+api: POST /api/v1/moderation/dialogue-requests/{id}/approve
+api: POST /api/v1/moderation/dialogue-requests/{id}/reject

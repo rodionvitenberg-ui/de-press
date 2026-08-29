@@ -209,6 +209,10 @@ export type Messages = {
     reasonSpam: string;
     reasonSelfHarm: string;
     reasonOther: string;
+    reviewTitle: string;
+    reviewPlaque: string;
+    reviewApprove: string;
+    reviewReject: string;
   };
   notify: {
     title: string;
@@ -310,6 +314,8 @@ export type Messages = {
     send: string;
     sending: string;
     error: string;
+    wipe: string;
+    wipeConfirm: string;
   };
   antiPanic: {
     menuTitle: string;
@@ -502,6 +508,7 @@ export type Messages = {
       silent_empathy: string;
       help_requested: string;
       help_accepted: string;
+      dialogue_request_review: string;
     };
   };
   inbox: {

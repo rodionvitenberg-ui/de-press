@@ -140,6 +140,11 @@ export function useNotifications(
             queryKey: ["dialogue-requests"],
           });
         }
+        if (kind === "dialogue_request_review") {
+          void queryClient.invalidateQueries({
+            queryKey: ["dialogue-review"],
+          });
+        }
         if (
           kind === "support_cloud" ||
           kind === "cloud_approved" ||

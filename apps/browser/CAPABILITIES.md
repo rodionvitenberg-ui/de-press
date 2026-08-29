@@ -145,6 +145,7 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `notify.testEmail` | Тест дайджеста | `POST …/notify-settings/test` | client | wired |
 | `notify.testTelegram` | Тест TG | `POST …/test-telegram` | нет в client | api |
 | `helper.queue` | Очередь облачков | `GET /api/v1/moderation/clouds` + approve/reject | HelperQueue | live |
+| `helper.dialogueReview` | Проверка Dialogue Request | `GET/POST /api/v1/moderation/dialogue-requests*` | ChatList grey rows | live |
 | `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | client | wired |
 | `moderation.blocks` | Общий блок | `POST /api/v1/blocks` | нет (блок через чат) | api |
 | `ai.support` | DeepSeek | `POST /api/v1/ai/support` | client + CompanionPane live; Anti-Panic не зовёт | live |

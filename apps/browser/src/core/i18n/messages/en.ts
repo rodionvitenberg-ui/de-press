@@ -212,6 +212,11 @@ export const en: Messages = {
     reasonSpam: "Spam",
     reasonSelfHarm: "Self-harm concern",
     reasonOther: "Other",
+    reviewTitle: "Dialogue request to review",
+    reviewPlaque:
+      "Check whether it is safe for the author to accept. You are not a clinician or emergency services.",
+    reviewApprove: "Approved",
+    reviewReject: "Decline",
   },
   notify: {
     title: "Email notifications",
@@ -318,6 +323,8 @@ export const en: Messages = {
     send: "Send",
     sending: "…",
     error: "Couldn’t reply",
+    wipe: "Erase AI dialogs and local memory",
+    wipeConfirm: "Erase AI dialogs and all local records on this device?",
   },
   antiPanic: {
     menuTitle: "What do you need right now?",
@@ -562,6 +569,7 @@ export const en: Messages = {
       silent_empathy: "Someone sent you support rays",
       help_requested: "Someone is asking for a person nearby",
       help_accepted: "A Helper accepted your request",
+      dialogue_request_review: "A dialogue request is waiting for review",
     },
   },
   common: {

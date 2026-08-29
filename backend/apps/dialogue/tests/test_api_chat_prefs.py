@@ -5,7 +5,8 @@ import json
 import pytest
 from django.test import Client
 
-from apps.dialogue.services import accept_request, create_request, send_message
+from apps.dialogue.services import accept_request, send_message
+from apps.dialogue.tests.helpers import create_reviewed_request
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
 from apps.stories.services import publish_story
@@ -17,7 +18,9 @@ def test_chat_prefs_http_contract():
     author = Actor(kind="account", account=acc)
     story = publish_story(author, "prefs story")
     peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
-    d = accept_request(author, create_request(peer, story.id, intent="listen").id)
+    d = accept_request(
+        author, create_reviewed_request(peer, story, intent="listen").id
+    )
     send_message(peer, d.id, "hi")
 
     client = Client()
@@ -64,7 +67,9 @@ def test_get_one_dialogue():
     author = Actor(kind="account", account=acc)
     story = publish_story(author, "one story")
     peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
-    d = accept_request(author, create_request(peer, story.id, intent="listen").id)
+    d = accept_request(
+        author, create_reviewed_request(peer, story, intent="listen").id
+    )
     client = Client()
     client.force_login(acc)
     res = client.get(f"/api/v1/dialogues/{d.id}")

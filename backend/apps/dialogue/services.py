@@ -19,7 +19,7 @@ from apps.empathy.services import (
     get_empathy_for_hearer,
     hearer_ref_for_empathy,
 )
-from apps.identity.models import VoiceRetention
+from apps.identity.models import Account, VoiceRetention
 from apps.identity.services import Actor
 from apps.moderation.blocks import is_blocked_between
 from apps.notifications.models import NotificationKind
@@ -291,7 +291,7 @@ def create_request(
             req, created = DialogueRequest.objects.get_or_create(
                 story=story,
                 from_account=actor.account,
-                status=DialogueRequestStatus.PENDING,
+                status=DialogueRequestStatus.AWAITING_HELPER,
                 defaults={
                     "intent": intent,
                     "note": note_s,
@@ -302,7 +302,7 @@ def create_request(
             req, created = DialogueRequest.objects.get_or_create(
                 story=story,
                 from_session=actor.session,
-                status=DialogueRequestStatus.PENDING,
+                status=DialogueRequestStatus.AWAITING_HELPER,
                 defaults={
                     "intent": intent,
                     "note": note_s,
@@ -314,16 +314,100 @@ def create_request(
 
     if not created:
         raise DialogueError("Запрос уже отправлен")
+    _notify_helpers_dialogue_review(req, actor)
+    return req
+
+
+def _is_helper(actor: Actor) -> bool:
+    if actor.account is None:
+        return False
+    return bool(
+        actor.account.is_helper
+        or actor.account.is_staff
+        or actor.account.is_superuser
+    )
+
+
+def _notify_helpers_dialogue_review(req: DialogueRequest, requester: Actor) -> None:
+    payload = {
+        "story_id": str(req.story_id),
+        "request_id": str(req.id),
+        "intent": req.intent,
+    }
+    for acc in Account.objects.filter(is_helper=True, is_active=True):
+        if requester.account_id is not None and acc.id == requester.account_id:
+            continue
+        notify(
+            Actor(kind="account", account=acc),
+            NotificationKind.DIALOGUE_REQUEST_REVIEW,
+            payload,
+        )
+
+
+def list_review_inbox(actor: Actor) -> list[DialogueRequest]:
+    """Dialogue requests waiting for Helper review."""
+    if not _is_helper(actor):
+        return []
+    return list(
+        DialogueRequest.objects.filter(status=DialogueRequestStatus.AWAITING_HELPER)
+        .select_related("story", "from_account", "from_session")
+        .order_by("-created_at")
+    )
+
+
+@transaction.atomic
+def approve_dialogue_request(actor: Actor, request_id: UUID) -> DialogueRequest:
+    if not _is_helper(actor):
+        raise DialogueError("Only a Helper can review dialogue requests")
+    try:
+        req = (
+            DialogueRequest.objects.select_for_update(of=("self",))
+            .select_related("story", "from_account", "from_session")
+            .get(pk=request_id)
+        )
+    except DialogueRequest.DoesNotExist as exc:
+        raise DialogueError("Request not found") from exc
+    if req.status != DialogueRequestStatus.AWAITING_HELPER:
+        raise DialogueError("Request is not awaiting review")
+    req.status = DialogueRequestStatus.PENDING
+    req.save(update_fields=["status", "updated_at"])
+    story = req.story
+    author = Actor(
+        kind="account" if story.author_account_id else "anonymous",
+        account=story.author_account,
+        session=story.author_session,
+    )
     notify(
         author,
         NotificationKind.DIALOGUE_REQUEST,
-        {"story_id": str(story.id), "request_id": str(req.id), "intent": intent},
+        {
+            "story_id": str(story.id),
+            "request_id": str(req.id),
+            "intent": req.intent,
+        },
     )
     return req
 
 
+@transaction.atomic
+def reject_dialogue_request(actor: Actor, request_id: UUID) -> DialogueRequest:
+    if not _is_helper(actor):
+        raise DialogueError("Only a Helper can review dialogue requests")
+    try:
+        req = DialogueRequest.objects.select_for_update(of=("self",)).get(
+            pk=request_id
+        )
+    except DialogueRequest.DoesNotExist as exc:
+        raise DialogueError("Request not found") from exc
+    if req.status != DialogueRequestStatus.AWAITING_HELPER:
+        raise DialogueError("Request is not awaiting review")
+    req.status = DialogueRequestStatus.DECLINED
+    req.save(update_fields=["status", "updated_at"])
+    return req
+
+
 def list_inbox(actor: Actor) -> list[DialogueRequest]:
-    """Pending requests on stories authored by actor."""
+    """Pending (helper-approved) requests on stories authored by actor."""
     q = Q(status=DialogueRequestStatus.PENDING)
     if actor.account:
         q &= Q(story__author_account=actor.account)

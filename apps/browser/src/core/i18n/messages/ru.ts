@@ -213,6 +213,11 @@ export const ru: Messages = {
     reasonSpam: "Спам",
     reasonSelfHarm: "Риск самоповреждения",
     reasonOther: "Другое",
+    reviewTitle: "Запрос диалога на проверке",
+    reviewPlaque:
+      "Проверь, безопасно ли автору принять этот запрос. Ты не терапевт и не 112.",
+    reviewApprove: "Проверено",
+    reviewReject: "Отклонить",
   },
   notify: {
     title: "Уведомления на почту",
@@ -319,6 +324,9 @@ export const ru: Messages = {
     send: "Отправить",
     sending: "…",
     error: "Не удалось ответить",
+    wipe: "Стереть диалоги с ИИ и локальную память",
+    wipeConfirm:
+      "Стереть диалоги с ИИ и все локальные записи на этом устройстве?",
   },
   antiPanic: {
     menuTitle: "Чего ты сейчас хочешь?",
@@ -564,6 +572,7 @@ export const ru: Messages = {
       silent_empathy: "Тебе послали лучи поддержки",
       help_requested: "Кто-то просит человека рядом",
       help_accepted: "Helper принял запрос",
+      dialogue_request_review: "Запрос диалога ждёт проверки",
     },
   },
   common: {

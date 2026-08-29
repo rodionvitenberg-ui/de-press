@@ -216,13 +216,16 @@ def test_help_dialogue_both_participants_can_send_message():
 
 @pytest.mark.django_db
 def test_existing_story_dialogue_still_requires_story_in_request_flow():
-    from apps.dialogue.services import accept_request, create_request
+    from apps.dialogue.services import accept_request
+    from apps.dialogue.tests.helpers import create_reviewed_request
     from apps.stories.services import publish_story
 
     author = Account.objects.create_user(email="a@ex.com", password="password123")
     story = publish_story(Actor(kind="account", account=author), "монолог")
     sess = AnonymousSession.objects.create()
-    req = create_request(Actor(kind="anonymous", session=sess), story.id, intent="listen")
+    req = create_reviewed_request(
+        Actor(kind="anonymous", session=sess), story, intent="listen"
+    )
     d = accept_request(Actor(kind="account", account=author), req.id)
     assert d.story_id == story.id
     assert d.source == "request"

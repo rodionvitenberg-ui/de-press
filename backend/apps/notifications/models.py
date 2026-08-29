@@ -20,6 +20,7 @@ class NotificationKind(models.TextChoices):
     SILENT_EMPATHY = "silent_empathy", "Silent empathy / rays"
     HELP_REQUESTED = "help_requested", "Help request"
     HELP_ACCEPTED = "help_accepted", "Help request accepted"
+    DIALOGUE_REQUEST_REVIEW = "dialogue_request_review", "Dialogue request helper review"
 
 
 class Notification(models.Model):
