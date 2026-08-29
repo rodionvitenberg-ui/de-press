@@ -156,3 +156,9 @@ status: done
 branch: main
 notes: Trimmed /help to just the gate per user request: removed the below-the-fold .rest block (crisis/panic card, resources regions, safety paragraphs, guides, feed/patterns footer links). Header + AI half + human half remain; phone/tablet stacking and optional note unchanged; desktop .gate fills the first screen on its own (flex 1 0 auto + min-height), no CSS change needed. Dropped now-unused useAntiPanic import. i18n keys (help.resources, safety.*, guides.*, antiPanic.menuHint) left in messages/types as data-only dead weight, reusable later — no UI references left. Verify: tsc -b ok, vitest 43/43, vite build ok.
 files: apps/browser/src/features/help/HelpPane.tsx, PROGRESS.md
+
+## 2026-08-30  agent=human  id=pwa-prod-verify
+status: done
+branch: main
+notes: PWA build verification (deferred from frontend-hardening) — closed. vite build + vite preview :4173: index serves <link rel="manifest">; /sw.js 200 (PROD-only registration in main.tsx); manifest valid — name/short_name de-press, start_url /feed, scope /, display standalone, theme/bg #0c0e12, icons 192/512/maskable-512 all 200; hashed /assets 200. sw.js re-audited against MOBILE_PWA.md: SHELL v1 pre-cache (/ , /index.html, manifest), network-only /api /ws /media /docs /openapi.json, cache-first /assets/*, navigate network-first with cached /index.html fallback (non-ok not cached). Install row in More has 3 states (installed / beforeinstallprompt / iOS manual). Not verifiable locally: real beforeinstallprompt + offline shell on device — pilot QA on the user's phone. Preview left running on :4173 for desktop install check. ROADMAP P1 PWA bridge 🟡→✅.
+files: de-press-docs/app/ROADMAP.md, PROGRESS.md
