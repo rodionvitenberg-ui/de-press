@@ -179,6 +179,8 @@ export function DialoguePage() {
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const deletingEveryone = useRef(false);
   const translateInflight = useRef(new Set<string>());
+  const markingRead = useRef(false);
+  const lastReadMarked = useRef<string | null>(null);
   const [translating, setTranslating] = useState<Record<string, true>>({});
 
   const actions = useDialogueActions({
@@ -278,15 +280,52 @@ export function DialoguePage() {
     el.scrollTop = el.scrollHeight;
   }, [messages, peerTyping]);
 
-  useEffect(() => {
-    if (!dialogueId) return;
-    void api.markDialogueRead(dialogueId).then((d) => {
-      setDialogue((prev) => (prev ? { ...prev, ...d } : d));
-      void queryClient.invalidateQueries({ queryKey: ["dialogues"] });
-    }).catch(() => {
-      /* list will catch up on next poll */
-    });
+  const markRead = useCallback(() => {
+    if (!dialogueId || markingRead.current) return;
+    markingRead.current = true;
+    void api
+      .markDialogueRead(dialogueId)
+      .then((d) => {
+        setDialogue((prev) => (prev ? { ...prev, ...d } : d));
+        void queryClient.invalidateQueries({ queryKey: ["dialogues"] });
+      })
+      .catch(() => {
+        /* list will catch up on next poll */
+      })
+      .finally(() => {
+        markingRead.current = false;
+      });
   }, [dialogueId, queryClient]);
+
+  // Opening the dialogue (or switching between dialogues) reads it.
+  useEffect(() => {
+    lastReadMarked.current = null;
+    markRead();
+  }, [markRead]);
+
+  // A peer message landing while the chat is open and the page is visible
+  // is read immediately — the active chat must never gain an unread badge.
+  useEffect(() => {
+    if (document.visibilityState !== "visible") return;
+    const last = messages[messages.length - 1];
+    if (!last || last.from_me) return;
+    if (lastReadMarked.current === last.id) return;
+    lastReadMarked.current = last.id;
+    markRead();
+  }, [messages, markRead]);
+
+  // Coming back to a hidden/minimized window with the chat open → drop badge.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") markRead();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [markRead]);
 
   function onBodyChange(value: string) {
     setBody(value);
