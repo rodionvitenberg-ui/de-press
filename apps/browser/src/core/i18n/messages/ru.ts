@@ -528,6 +528,8 @@ export const ru: Messages = {
       },
     ],
     linksIntro: "",
+    aiTag: "ИИ",
+    humanTag: "Человек",
     humanTitle: "Поговорить с человеком",
     humanLead:
       "Волонтёр Helper. Не врач и не экстренная служба. Может понадобиться подождать.",
@@ -610,6 +612,7 @@ export const ru: Messages = {
     error: "Ошибка",
     save: "Сохранить",
     cancel: "Отмена",
+    back: "Назад",
   },
   inbox: {
     title: "Приватный инбокс",

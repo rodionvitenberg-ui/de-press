@@ -475,6 +475,8 @@ export type Messages = {
       items: string[];
     }[];
     linksIntro: string;
+    aiTag: string;
+    humanTag: string;
     humanTitle: string;
     humanLead: string;
     humanCta: string;
@@ -550,6 +552,7 @@ export type Messages = {
     error: string;
     save: string;
     cancel: string;
+    back: string;
   };
   topics: Record<string, string>;
 };

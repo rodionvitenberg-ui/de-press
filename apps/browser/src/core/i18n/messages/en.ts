@@ -525,6 +525,8 @@ export const en: Messages = {
       },
     ],
     linksIntro: "",
+    aiTag: "AI",
+    humanTag: "Human",
     humanTitle: "Talk to a person",
     humanLead:
       "A Helper volunteer. Not a doctor and not an emergency service. You may need to wait.",
@@ -607,6 +609,7 @@ export const en: Messages = {
     error: "Error",
     save: "Save",
     cancel: "Cancel",
+    back: "Back",
   },
   inbox: {
     title: "Private inbox",

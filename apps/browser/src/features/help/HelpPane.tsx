@@ -8,9 +8,20 @@ import styles from "./HelpPane.module.css";
 
 const HELP_REQUEST_ID_KEY = "depress_help_request_id";
 
+function goBackOr(
+  navigate: ReturnType<typeof useNavigate>,
+  fallback: string,
+): void {
+  if (window.history.state?.idx > 0) navigate(-1);
+  else navigate(fallback);
+}
+
 /**
- * Help surface: crisis orienters + human/AI path cards + safety notes + guides.
- * Content from i18n; not medical advice.
+ * Help gate: on desktop the whole page splits into two halves — AI (link to
+ * the full-width /help/ai) and human (one click creates a HelpRequest and
+ * leads to /help/wait, where an on-duty Helper can pick it up). Crisis
+ * orienters, resources and guides stay below the fold. On phone/tablet the
+ * halves stack (≈ the previous card layout) and the optional note stays.
  */
 export function HelpPane() {
   const { t } = useI18n();
@@ -33,26 +44,39 @@ export function HelpPane() {
   });
 
   return (
-    <div className={styles.pane}>
-      <header className={styles.head}>
+    <div className={styles.page}>
+      <header className={styles.top}>
+        <button
+          type="button"
+          className={styles.back}
+          onClick={() => goBackOr(navigate, "/feed")}
+        >
+          ← {t.common.back}
+        </button>
         <h1 className={styles.title}>{t.help.title}</h1>
         <p className={styles.intro}>{t.help.intro}</p>
       </header>
 
-      <section className={styles.card} aria-labelledby="help-crisis">
-        <h2 id="help-crisis" className={styles.sectionTitle}>
-          {t.nav.panic}
-        </h2>
-        <p className={styles.body}>{t.antiPanic.menuHint}</p>
-        <button type="button" className={styles.panicBtn} onClick={enter}>
-          {t.nav.panic}
-        </button>
-      </section>
+      <section className={styles.gate} aria-label={t.help.title}>
+        <Link to="/help/ai" className={`${styles.half} ${styles.halfAi}`}>
+          <span className={styles.tag}>{t.help.aiTag}</span>
+          <h2 className={styles.halfTitle}>{t.help.aiTitle}</h2>
+          <p className={styles.halfLead}>{t.help.aiLead}</p>
+          <span className={styles.halfCta}>{t.help.aiCta}</span>
+        </Link>
 
-      <section className={styles.paths} aria-label={t.help.title}>
-        <article className={`${styles.card} ${styles.choice}`}>
-          <h2 className={styles.sectionTitle}>{t.help.humanTitle}</h2>
-          <p className={styles.body}>{t.help.humanLead}</p>
+        <article className={`${styles.half} ${styles.halfHuman}`}>
+          <span className={styles.tag}>{t.help.humanTag}</span>
+          <h2 className={styles.halfTitle}>{t.help.humanTitle}</h2>
+          <p className={styles.halfLead}>{t.help.humanLead}</p>
+          <button
+            type="button"
+            className={styles.halfCta}
+            disabled={createRequest.isPending}
+            onClick={() => createRequest.mutate(note.trim())}
+          >
+            {t.help.humanCta}
+          </button>
           <label className={styles.noteLabel} htmlFor="help-human-note">
             {t.help.humanNoteLabel}
           </label>
@@ -65,76 +89,72 @@ export function HelpPane() {
             disabled={createRequest.isPending}
             onChange={(e) => setNote(e.target.value)}
           />
-          <button
-            type="button"
-            className={styles.humanCta}
-            disabled={createRequest.isPending}
-            onClick={() => createRequest.mutate(note.trim())}
-          >
-            {t.help.humanCta}
-          </button>
-        </article>
-
-        <article className={`${styles.card} ${styles.choice}`}>
-          <h2 className={styles.sectionTitle}>{t.help.aiTitle}</h2>
-          <p className={styles.body}>{t.help.aiLead}</p>
-          <Link to="/help/ai" className={styles.aiCta}>
-            {t.help.aiCta}
-          </Link>
         </article>
       </section>
 
-      {t.help.resources.map((block) => (
-        <section key={block.region} className={styles.card}>
-          <h2 className={styles.sectionTitle}>{block.region}</h2>
+      <div className={styles.rest}>
+        <section className={styles.card} aria-labelledby="help-crisis">
+          <h2 id="help-crisis" className={styles.sectionTitle}>
+            {t.nav.panic}
+          </h2>
+          <p className={styles.body}>{t.antiPanic.menuHint}</p>
+          <button type="button" className={styles.panicBtn} onClick={enter}>
+            {t.nav.panic}
+          </button>
+        </section>
+
+        {t.help.resources.map((block) => (
+          <section key={block.region} className={styles.card}>
+            <h2 className={styles.sectionTitle}>{block.region}</h2>
+            <ul className={styles.list}>
+              {block.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+
+        <section className={styles.card} aria-labelledby="help-safety">
+          <h2 id="help-safety" className={styles.sectionTitle}>
+            {t.safety.title}
+          </h2>
+          <p className={styles.body}>{t.safety.body1}</p>
+          <p className={styles.body}>{t.safety.body2}</p>
+          <p className={styles.body}>{t.safety.body3}</p>
+          <p className={styles.body}>{t.safety.body4}</p>
+          <p className={styles.body}>{t.safety.body5}</p>
+        </section>
+
+        <section className={styles.card} aria-labelledby="help-guides">
+          <h2 id="help-guides" className={styles.sectionTitle}>
+            {t.guides.title}
+          </h2>
+          <p className={styles.body}>{t.guides.intro}</p>
+
+          <h3 className={styles.subTitle}>{t.guides.whatYouCanTitle}</h3>
           <ul className={styles.list}>
-            {block.items.map((item) => (
+            {t.guides.whatYouCan.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
+
+          <h3 className={styles.subTitle}>{t.guides.whatNotTitle}</h3>
+          <ul className={styles.list}>
+            {t.guides.whatNot.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+
+          <h3 className={styles.subTitle}>{t.guides.professionalHelpTitle}</h3>
+          <p className={styles.body}>{t.guides.professionalHelpBody}</p>
         </section>
-      ))}
 
-      <section className={styles.card} aria-labelledby="help-safety">
-        <h2 id="help-safety" className={styles.sectionTitle}>
-          {t.safety.title}
-        </h2>
-        <p className={styles.body}>{t.safety.body1}</p>
-        <p className={styles.body}>{t.safety.body2}</p>
-        <p className={styles.body}>{t.safety.body3}</p>
-        <p className={styles.body}>{t.safety.body4}</p>
-        <p className={styles.body}>{t.safety.body5}</p>
-      </section>
-
-      <section className={styles.card} aria-labelledby="help-guides">
-        <h2 id="help-guides" className={styles.sectionTitle}>
-          {t.guides.title}
-        </h2>
-        <p className={styles.body}>{t.guides.intro}</p>
-
-        <h3 className={styles.subTitle}>{t.guides.whatYouCanTitle}</h3>
-        <ul className={styles.list}>
-          {t.guides.whatYouCan.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-
-        <h3 className={styles.subTitle}>{t.guides.whatNotTitle}</h3>
-        <ul className={styles.list}>
-          {t.guides.whatNot.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-
-        <h3 className={styles.subTitle}>{t.guides.professionalHelpTitle}</h3>
-        <p className={styles.body}>{t.guides.professionalHelpBody}</p>
-      </section>
-
-      <p className={styles.footerLinks}>
-        <Link to="/feed">{t.nav.feed}</Link>
-        <span aria-hidden> · </span>
-        <Link to="/patterns">{t.nav.patterns}</Link>
-      </p>
+        <p className={styles.footerLinks}>
+          <Link to="/feed">{t.nav.feed}</Link>
+          <span aria-hidden> · </span>
+          <Link to="/patterns">{t.nav.patterns}</Link>
+        </p>
+      </div>
     </div>
   );
 }

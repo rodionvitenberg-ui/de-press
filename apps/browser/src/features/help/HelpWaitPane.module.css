@@ -9,6 +9,7 @@
   flex: 1;
   background: var(--bg-chat);
   max-width: 42rem;
+  margin-inline: auto;
 }
 
 .head {

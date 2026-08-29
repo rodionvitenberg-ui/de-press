@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api, ApiError, type AiStreamHandlers } from "@/core/api/client";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
@@ -25,6 +26,7 @@ export function CompanionPane() {
   const { t } = useI18n();
   const { enter } = useAntiPanic();
   const toast = useToast();
+  const navigate = useNavigate();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [input, setInput] = useState("");
@@ -149,6 +151,16 @@ export function CompanionPane() {
     <div className={styles.pane}>
       <header className={styles.head}>
         <div className={styles.headRow}>
+          <button
+            type="button"
+            className={styles.back}
+            onClick={() => {
+              if (window.history.state?.idx > 0) navigate(-1);
+              else navigate("/help");
+            }}
+          >
+            ← {t.common.back}
+          </button>
           <h1 className={styles.title}>{t.companion.title}</h1>
           <button
             type="button"
