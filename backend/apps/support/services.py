@@ -121,8 +121,23 @@ def _file_url(field) -> str | None:
         return None
 
 
+def _thread_root(story: Story) -> Story:
+    if story.parent_id:
+        return story.parent
+    return story
+
+
+def _thread_ids_for(story: Story) -> list[UUID]:
+    root_id = _root_id(story)
+    child_ids = list(
+        Story.objects.filter(parent_id=root_id).values_list("id", flat=True)
+    )
+    return [root_id, *child_ids]
+
+
 def _existing_cloud(actor: Actor, story: Story) -> SupportCloud | None:
-    qs = SupportCloud.objects.filter(story=story).exclude(
+    """Any non-rejected cloud from this actor on the author's monologue."""
+    qs = SupportCloud.objects.filter(story_id__in=_thread_ids_for(story)).exclude(
         status=SupportCloudStatus.REJECTED
     )
     if actor.account is not None:
@@ -194,9 +209,15 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
     _assert_can_send_to_story(actor, story)
     existing = _existing_cloud(actor, story)
     if existing is not None:
-        if existing.phrase_id and existing.phrase and existing.phrase.key == key:
+        same_thought = (
+            existing.story_id == story.id
+            and existing.phrase_id
+            and existing.phrase
+            and existing.phrase.key == key
+        )
+        if same_thought:
             return SendCloudResult(cloud=existing, created=False)
-        raise SupportError("Можно одно облачко на историю")
+        raise SupportError("Можно одно облачко на этот монолог")
 
     try:
         phrase = QuietPhrase.objects.get(key=key, is_active=True)
@@ -219,6 +240,7 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
     pseudonym = actor.display_pseudonym
     badge = _helper_badge_for_actor(actor)
     priority = bool(badge)
+    root = _thread_root(story)
 
     try:
         if actor.account is not None:
@@ -228,6 +250,7 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
                 phrase=phrase,
                 defaults={
                     "from_session": None,
+                    "thread_root": root,
                     "kind": SupportCloudKind.QUIET_PHRASE,
                     "body_snapshot": body,
                     "pseudonym_snapshot": pseudonym,
@@ -244,6 +267,7 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
                 phrase=phrase,
                 defaults={
                     "from_account": None,
+                    "thread_root": root,
                     "kind": SupportCloudKind.QUIET_PHRASE,
                     "body_snapshot": body,
                     "pseudonym_snapshot": pseudonym,
@@ -256,8 +280,14 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
         existing = _existing_cloud(actor, story)
         if existing is None:
             raise
-        cloud = existing
-        created = False
+        if (
+            existing.story_id == story.id
+            and existing.phrase_id
+            and existing.phrase
+            and existing.phrase.key == key
+        ):
+            return SendCloudResult(cloud=existing, created=False)
+        raise SupportError("Можно одно облачко на этот монолог") from exc
 
     if created and cloud.status == SupportCloudStatus.DELIVERED:
         notify(
@@ -284,7 +314,7 @@ def submit_moderated_cloud(actor: Actor, story_id: UUID, body: str) -> SendCloud
     story = get_story(story_id, for_public=True)
     _assert_can_send_to_story(actor, story)
     if _existing_cloud(actor, story) is not None:
-        raise SupportError("Можно одно облачко на историю")
+        raise SupportError("Можно одно облачко на этот монолог")
 
     try:
         assert_under_limit(
@@ -308,6 +338,7 @@ def submit_moderated_cloud(actor: Actor, story_id: UUID, body: str) -> SendCloud
 
     cloud = SupportCloud.objects.create(
         story=story,
+        thread_root=_thread_root(story),
         from_account=actor.account,
         from_session=actor.session if actor.account is None else None,
         kind=SupportCloudKind.FREE_TEXT,

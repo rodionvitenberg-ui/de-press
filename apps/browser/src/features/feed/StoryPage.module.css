@@ -1,5 +1,13 @@
 /* Open story — chat chrome for the monologue thread; guest footer stays actions. */
 
+.cloudPick {
+  box-shadow: 0 0 0 1.5px var(--accent-hope);
+}
+
+.pickable {
+  cursor: pointer;
+}
+
 .page {
   display: flex;
   flex-direction: column;

@@ -51,6 +51,14 @@ class SupportCloud(models.Model):
         on_delete=models.CASCADE,
         related_name="support_clouds",
     )
+    # Root of the author's monologue; one non-rejected cloud per sender × thread.
+    thread_root = models.ForeignKey(
+        "stories.Story",
+        on_delete=models.CASCADE,
+        related_name="thread_support_clouds",
+        null=True,
+        blank=True,
+    )
     from_account = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -128,9 +136,24 @@ class SupportCloud(models.Model):
                 condition=Q(from_session__isnull=False) & ~Q(status="rejected"),
                 name="unique_cloud_per_session_story",
             ),
+            models.UniqueConstraint(
+                fields=["thread_root", "from_account"],
+                condition=Q(from_account__isnull=False)
+                & Q(thread_root__isnull=False)
+                & ~Q(status="rejected"),
+                name="unique_cloud_per_account_thread",
+            ),
+            models.UniqueConstraint(
+                fields=["thread_root", "from_session"],
+                condition=Q(from_session__isnull=False)
+                & Q(thread_root__isnull=False)
+                & ~Q(status="rejected"),
+                name="unique_cloud_per_session_thread",
+            ),
         ]
         indexes = [
             models.Index(fields=["story", "status", "-created_at"]),
+            models.Index(fields=["thread_root", "status", "-created_at"]),
         ]
 
     def __str__(self) -> str:

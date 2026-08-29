@@ -557,7 +557,9 @@ export function StoryPage() {
                 <div
                   key={entry.id}
                   id={`story-${entry.id}`}
-                  className={`${chat.msgBlock} ${withPrev ? chat.msgTight : chat.msgLoose}`}
+                  className={`${chat.msgBlock} ${withPrev ? chat.msgTight : chat.msgLoose}${
+                    isAuthor ? "" : ` ${styles.pickable}`
+                  }`}
                   onClick={() => setCloudTarget(entry.id)}
                   onContextMenu={(e) => openCtx(e, entry)}
                   onPointerDown={(e) => onBubblePointerDown(e, entry)}
@@ -575,7 +577,12 @@ export function StoryPage() {
                     </div>
                   ) : null}
                   <div
-                    className={`${chat.msg} ${fromMe ? chat.me : chat.them} ${groupClass}`}
+                    className={`${chat.msg} ${fromMe ? chat.me : chat.them} ${groupClass}${
+                      !fromMe && entry.id === cloudId ? ` ${styles.cloudPick}` : ""
+                    }`}
+                    aria-current={
+                      !fromMe && entry.id === cloudId ? "true" : undefined
+                    }
                   >
                     {entry.audio_url ? (
                       <VoiceBubble
@@ -604,7 +611,7 @@ export function StoryPage() {
                 key={cloudId}
                 storyId={cloudId}
                 sentKey={
-                  thread.find((s) => s.id === cloudId)?.my_phrase_key || ""
+                  thread.find((s) => s.my_phrase_key)?.my_phrase_key || ""
                 }
                 onSent={(key) => {
                   queryClient.setQueryData<StoryThread>(

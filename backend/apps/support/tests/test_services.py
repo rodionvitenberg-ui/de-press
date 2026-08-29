@@ -361,17 +361,39 @@ def test_one_cloud_on_post_and_one_on_comment(phrase):
     comment = add_comment(author, post.id, "ещё мысль")
     visitor = Actor(kind="anonymous", session=AnonymousSession.objects.create())
 
-    send_quiet_phrase(visitor, post.id, "i_am_here")
-    send_quiet_phrase(visitor, comment.id, "i_am_here")
+    first = send_quiet_phrase(visitor, post.id, "i_am_here")
+    assert first.created is True
+    with pytest.raises(SupportError, match="одно"):
+        send_quiet_phrase(visitor, comment.id, "i_am_here")
     again = send_quiet_phrase(visitor, post.id, "i_am_here")
     assert again.created is False
-    assert SupportCloud.objects.filter(from_session=visitor.session).count() == 2
+    assert SupportCloud.objects.filter(from_session=visitor.session).count() == 1
+    assert first.cloud.story_id == post.id
+    assert first.cloud.thread_root_id == post.id
 
     keys = my_phrase_keys_for(visitor, [post.id, comment.id])
     assert keys[post.id] == "i_am_here"
-    assert keys[comment.id] == "i_am_here"
+    assert comment.id not in keys
     stranger = Actor(kind="anonymous", session=AnonymousSession.objects.create())
     assert my_phrase_keys_for(stranger, [post.id]) == {}
+
+
+@pytest.mark.django_db
+def test_one_cloud_on_comment_blocks_root(phrase):
+    from apps.stories.services import add_comment
+
+    author = Actor(
+        kind="account",
+        account=Account.objects.create_user(email="th2@ex.com", password="password123"),
+    )
+    post = publish_story(author, "пост")
+    comment = add_comment(author, post.id, "ещё мысль")
+    visitor = Actor(kind="anonymous", session=AnonymousSession.objects.create())
+    sent = send_quiet_phrase(visitor, comment.id, "i_am_here")
+    assert sent.cloud.story_id == comment.id
+    assert sent.cloud.thread_root_id == post.id
+    with pytest.raises(SupportError, match="одно"):
+        send_quiet_phrase(visitor, post.id, "i_am_here")
 
 
 @pytest.mark.django_db
@@ -389,11 +411,12 @@ def test_cloud_unread_and_mark_read(phrase):
     post = publish_story(author, "пост")
     comment = add_comment(author, post.id, "коммент")
     visitor = Actor(kind="anonymous", session=AnonymousSession.objects.create())
+    other = Actor(kind="anonymous", session=AnonymousSession.objects.create())
     post.refresh_from_db()
     before = post.last_activity_at
 
     send_quiet_phrase(visitor, post.id, "i_am_here")
-    send_quiet_phrase(visitor, comment.id, "i_am_here")
+    send_quiet_phrase(other, comment.id, "i_am_here")
     post.refresh_from_db()
     assert post.last_activity_at == before
 

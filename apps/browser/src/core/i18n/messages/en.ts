@@ -105,7 +105,7 @@ export const en: Messages = {
   },
   support: {
     title: "Quiet support",
-    lead: "One tap. Only the author sees it — no likes, no advice.",
+    lead: "One tap for the whole monologue. Only the author sees it — no likes, no advice.",
     freeTitle: "Your own words (after review)",
     freeLead:
       "Keep it short, no “just cheer up”. The author sees it only after Helper review. Not a public comment.",
@@ -113,7 +113,7 @@ export const en: Messages = {
     freePlaceholder: "e.g. I’m here, no words needed…",
     freeSubmit: "Send for review",
     sentPhrase: "Sent",
-    pickOne: "A quiet gesture",
+    pickOne: "A quiet gesture for this thought",
     alreadySent: "You already sent a cloud.",
     gestureHere: "Here",
     gestureHear: "I hear",
