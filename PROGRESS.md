@@ -162,3 +162,9 @@ status: done
 branch: main
 notes: PWA build verification (deferred from frontend-hardening) — closed. vite build + vite preview :4173: index serves <link rel="manifest">; /sw.js 200 (PROD-only registration in main.tsx); manifest valid — name/short_name de-press, start_url /feed, scope /, display standalone, theme/bg #0c0e12, icons 192/512/maskable-512 all 200; hashed /assets 200. sw.js re-audited against MOBILE_PWA.md: SHELL v1 pre-cache (/ , /index.html, manifest), network-only /api /ws /media /docs /openapi.json, cache-first /assets/*, navigate network-first with cached /index.html fallback (non-ok not cached). Install row in More has 3 states (installed / beforeinstallprompt / iOS manual). Not verifiable locally: real beforeinstallprompt + offline shell on device — pilot QA on the user's phone. Preview left running on :4173 for desktop install check. ROADMAP P1 PWA bridge 🟡→✅.
 files: de-press-docs/app/ROADMAP.md, PROGRESS.md
+
+## 2026-08-30  agent=human  id=full-test-pass
+status: done
+branch: main
+notes: Full test pass before deploy prep. browser: tsc -b ok, vitest 43/43, vite build ok; mini-app: tsc -b ok, vite build ok. backend: full pytest 197 passed (was 1 failed: test_publish_voice_http asserted non-empty body — stale expectation from before the STT rollback; offline voice publish is audio + optional caption, body==""; assertion updated to pin current contract). smoke_api.sh: full pass (exit 0) — fixed stale "moderated free-text" step: it sent a second cloud from the same hearer session and hit the one-cloud-per-story rule (HTTP 400 "Можно одно облачко на этот монолог"); now the free-text cloud is sent from a fresh hearer session and lands as pending, author sees delivered only. daphne :8005 up, health ok (database/redis/channels).
+files: scripts/smoke_api.sh, backend/apps/stories/tests/test_api.py, PROGRESS.md

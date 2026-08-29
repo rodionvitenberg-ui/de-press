@@ -135,7 +135,9 @@ def test_publish_voice_http(client, tmp_path, settings):
     body = res.json()
     assert body["audio_url"]
     assert body["duration_ms"] == 1500
-    assert body["body"]
+    # STT pipeline rolled back: offline voice publish has no transcript,
+    # body is an optional caption and stays empty here.
+    assert body["body"] == ""
 
 
 @pytest.mark.django_db

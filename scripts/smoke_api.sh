@@ -85,11 +85,15 @@ else
 fi
 
 echo "== moderated free-text (pending) =="
-curl -sf -c "$COOKIE2" -b "$COOKIE2" \
+# one cloud per story per hearer — send free-text from a fresh hearer session
+COOKIE3="$(mktemp)"
+curl -sf -c "$COOKIE3" -b "$COOKIE3" "$BASE/api/v1/me" >/dev/null
+curl -sf -c "$COOKIE3" -b "$COOKIE3" \
   -H 'Content-Type: application/json' \
   -d '{"body":"smoke free-text cloud for moderation"}' \
   "$BASE/api/v1/stories/$SID/clouds"
 echo
+rm -f "$COOKIE3"
 
 echo "== author clouds (delivered only) =="
 curl -sf -c "$COOKIE_JAR" -b "$COOKIE_JAR" "$BASE/api/v1/stories/$SID/clouds" | head -c 400
