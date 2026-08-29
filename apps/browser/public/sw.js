@@ -46,6 +46,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
+          if (!res.ok) return res;
           const copy = res.clone();
           caches.open(SHELL).then((c) => c.put("/index.html", copy));
           return res;
