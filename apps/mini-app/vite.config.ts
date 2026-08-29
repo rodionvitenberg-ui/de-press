@@ -6,7 +6,10 @@ import { fileURLToPath, URL } from "node:url";
 // Единый origin: app.depress.co (dev: http://localhost:5174).
 const API_UPSTREAM = process.env.API_UPSTREAM ?? "http://127.0.0.1:8005";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Прод: mini-app раздаётся nginx-ом по пути /tg/ (deploy/nginx-de-press.conf).
+  // В dev base не меняем — дев-сервер остаётся на /.
+  base: command === "build" ? "/tg/" : "/",
   plugins: [react()],
   resolve: {
     alias: {
@@ -33,4 +36,4 @@ export default defineConfig({
         "frame-ancestors 'self' https://web.telegram.org https://telegram.org https://*.telegram.org;",
     },
   },
-});
+}));

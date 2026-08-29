@@ -1,0 +1,18 @@
+[Unit]
+Description=de-press ASGI (daphne)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=depress
+Group=depress
+WorkingDirectory=/opt/de-press/backend
+EnvironmentFile=/etc/depress/depress.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.production
+ExecStart=/opt/de-press/backend/.venv/bin/daphne -b 127.0.0.1 -p 8000 config.asgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

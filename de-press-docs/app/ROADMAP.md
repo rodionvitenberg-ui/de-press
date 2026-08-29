@@ -61,8 +61,8 @@
 | **P1** | **Own Mobile**: ТГ-таб-бар layout → PWA / нативная обёртка / store (отдельный host) |
 | **P1** | **Own Desktop**: обёртка UI Core (Tauri / Electron — решение позже) |
 | **P1 ✅** | **PWA bridge on browser host** — installable standalone + phone/tablet chrome; native store still later. Prod-build verified (manifest+icons 200, sw.js served, install row in More, offline shell per sw.js); live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md) |
-| **P1** | Публичные страницы (помощь, гайды) — через интерфейс приложения / лендинг |
-| **P1** | Pilot ops: staging, закрытая когорта, feedback loop |
+| 🗄 → лендинг | **Публичные страницы (помощь, гайды)** — перенесено в лендинг-репо (гайды срезаны 2026-08-30; в приложении /help — только гейт) |
+| **P1** | Pilot ops: staging, закрытая когорта, feedback loop; deploy-комплект: [`DEPLOY.md`](./DEPLOY.md) |
 | **P1** | Onboarding Helpers; этичные ops-метрики; media/S3; secrets/backup |
 | **P2** | Geo-help v2; pre-mod / AI-assist для репортов |
 | **last** | **AI-помощник** — самая последняя очередь |
