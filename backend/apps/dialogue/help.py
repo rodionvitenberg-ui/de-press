@@ -20,6 +20,7 @@ from apps.dialogue.models import (
     HelpRequestStatus,
     Message,
 )
+from apps.dialogue.presence import mark_matched, pick_helper_for_match
 from apps.dialogue.services import RULES_TEXT
 from apps.identity.models import Account
 from apps.identity.services import Actor
@@ -132,6 +133,24 @@ def create_help_request(actor: Actor, *, note: str = "") -> HelpRequest:
         if existing is not None:
             return existing
         raise HelpError("Could not create help request") from exc
+
+    helper = pick_helper_for_match(actor)
+    if helper is not None:
+        try:
+            dialogue = accept_help_request(
+                Actor(kind="account", account=helper), req.id
+            )
+        except HelpError:
+            helper = None
+        else:
+            mark_matched(helper)
+            notify(
+                Actor(kind="account", account=helper),
+                NotificationKind.HELP_ACCEPTED,
+                {"request_id": str(req.id), "dialogue_id": str(dialogue.id)},
+            )
+            req.refresh_from_db()
+            return req
 
     _notify_helpers(req, actor)
     return req

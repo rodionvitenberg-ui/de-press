@@ -61,6 +61,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_helper = models.BooleanField(default=False, db_index=True)
     # Shift flag: Help Request / dialogue-review notify+inbox only when on duty.
     is_on_duty = models.BooleanField(default=False, db_index=True)
+    # Heartbeat for instant match. Online = helper_seen_at within 45s (see presence.py).
+    helper_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    helper_last_matched_at = models.DateTimeField(null=True, blank=True)
     helper_org = models.CharField(max_length=120, blank=True, default="")
     date_joined = models.DateTimeField(default=timezone.now)
     # Soft-notify preferences (P1: email/web).

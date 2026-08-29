@@ -15,6 +15,7 @@ import type {
   HealthResponse,
   Hearer,
   HelperInvite,
+  HelpPresence,
   HelpRequest,
   InboxOpenResponse,
   IntentOption,
@@ -468,6 +469,11 @@ export const api = {
     request<HelpRequest>(`/api/v1/help/requests/${id}/cancel`, {
       method: "POST",
     }),
+
+  helpPresence: () => request<HelpPresence>("/api/v1/help/presence"),
+
+  helperHeartbeat: () =>
+    request<{ ok: boolean }>("/api/v1/help/heartbeat", { method: "POST" }),
 
   dialogueReviewInbox: () =>
     request<DialogueRequest[]>("/api/v1/moderation/dialogue-requests"),

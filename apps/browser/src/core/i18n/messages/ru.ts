@@ -544,6 +544,10 @@ export const ru: Messages = {
     waitCancel: "Отменить запрос",
     waitOpenChat: "Открыть чат",
     waitToAi: "Поговорить с ИИ",
+    waitMatchedTitle: "Рядом есть человек",
+    waitPresenceOnline: "Сейчас кто-то у экрана.",
+    waitPresenceDuty: "Сейчас кто-то на смене, но не у экрана.",
+    waitPresenceEmpty: "Сейчас никого у экрана.",
     requestTitle: "Кто-то просит человека рядом",
     requestPlaque:
       "Волонтёрский разговор. Ты не терапевт и не экстренная служба.",

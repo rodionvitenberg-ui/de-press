@@ -6,6 +6,7 @@ import { api, ApiError } from "@/core/api/client";
 import type { Dialogue } from "@/core/api/types";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
+import { useHelperHeartbeat } from "@/features/helper/useHelperHeartbeat";
 import { ListRow } from "@/components/tg/ListRow";
 import { ChatMenu, type ChatMenuState } from "./ChatMenu";
 import { useDialogueActions } from "./useDialogueActions";
@@ -42,6 +43,8 @@ export function ChatList() {
     queryKey: ["me"],
     queryFn: () => api.me(),
   });
+
+  useHelperHeartbeat(Boolean(meQuery.data?.is_helper));
 
   const dialoguesQuery = useQuery({
     queryKey: ["dialogues"],

@@ -541,6 +541,10 @@ export const en: Messages = {
     waitCancel: "Cancel request",
     waitOpenChat: "Open chat",
     waitToAi: "Talk to AI",
+    waitMatchedTitle: "Someone is nearby",
+    waitPresenceOnline: "Someone is at the screen right now.",
+    waitPresenceDuty: "Someone is on duty, but not at the screen.",
+    waitPresenceEmpty: "Nobody is at the screen right now.",
     requestTitle: "Someone is asking for a person nearby",
     requestPlaque:
       "A volunteer conversation. You are not a therapist and not an emergency service.",

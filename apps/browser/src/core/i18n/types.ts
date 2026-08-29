@@ -488,6 +488,10 @@ export type Messages = {
     waitCancel: string;
     waitOpenChat: string;
     waitToAi: string;
+    waitMatchedTitle: string;
+    waitPresenceOnline: string;
+    waitPresenceDuty: string;
+    waitPresenceEmpty: string;
     requestTitle: string;
     requestPlaque: string;
     requestAccept: string;

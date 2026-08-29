@@ -160,6 +160,9 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `help.request` | Запрос помощи | API + UI | HelpPane / ChatList | live (API+UI) |
 | `helper.helpInbox` | Inbox запросов Helper | `GET /api/v1/help/requests` | ChatList grey rows | live |
 | `helper.duty` | Дежурство Helperа | `POST /api/v1/me/helper-duty` + `GET /me` `is_on_duty` | /helper тумблер + UserMenu | live |
+| `helper.heartbeat` | Онлайн Helperа | `POST /api/v1/help/heartbeat` каждые 20с | /chat и /helper, пауза в Anti-Panic | live |
+| `help.presence` | Есть ли смена / экран | `GET /api/v1/help/presence` булевы, без счётчиков | HelpWaitPane | live |
+| `help.instantMatch` | Мгновенный матч дежурному онлайн | create HelpRequest → Dialogue | wait «открыть чат» | live |
 | `shell.theme` | Тема | нет | UserMenu | local |
 | `shell.locale` | Язык | нет | UserMenu | local |
 | `shell.navOrder` | Порядок rail | нет | localStorage | local |

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/core/api/client";
 import { useI18n } from "@/core/i18n/context";
+import { useHelperHeartbeat } from "./useHelperHeartbeat";
 import styles from "./HelperQueue.module.css";
 
 type Tab = "clouds" | "summary";
@@ -19,6 +20,7 @@ export function HelperQueue() {
   const canHelper = Boolean(meQuery.data?.is_helper || meQuery.data?.is_staff);
   const isHelper = Boolean(meQuery.data?.is_helper);
   const onDuty = Boolean(meQuery.data?.is_on_duty);
+  useHelperHeartbeat(isHelper);
 
   const duty = useMutation({
     mutationFn: (next: boolean) => api.setHelperDuty(next),

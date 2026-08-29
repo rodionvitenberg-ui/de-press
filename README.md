@@ -262,6 +262,7 @@ Shell: **icon rail 72px** · **resizable list** · **main** (см. `TG_SHELL_SPE
 | Media prefs | `GET/POST /api/v1/me/voice-retention` |
 | Notify | `/api/v1/me/notifications*`, WS `/ws/notifications/` |
 | Helper duty | `POST /api/v1/me/helper-duty` `{on}`; `GET /me` `is_on_duty` |
+| Help presence | `GET /api/v1/help/presence`; `POST /api/v1/help/heartbeat` |
 | Docs | `http://127.0.0.1:8005/api/docs` |
 
 Клиент app: `apps/web/src/core/api/client.ts`.

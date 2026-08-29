@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/core/api/client";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
@@ -16,12 +16,14 @@ export function HelpPane() {
   const { t } = useI18n();
   const { enter } = useAntiPanic();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [note, setNote] = useState("");
 
   const createRequest = useMutation({
     mutationFn: (text: string) => api.createHelpRequest(text),
     onSuccess: (req) => {
       sessionStorage.setItem(HELP_REQUEST_ID_KEY, req.id);
+      queryClient.setQueryData(["help-mine"], req);
       navigate("/help/wait");
     },
     onError: () => {

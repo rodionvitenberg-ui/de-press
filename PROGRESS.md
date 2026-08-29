@@ -59,3 +59,11 @@ notes: Helper duty toggle. Default off. Notify+inbox Help Request and dialogue-r
 files: identity is_on_duty, help.py, services.py review notify, HelperQueue, UserMenu, ChatList poll gate
 api: POST /api/v1/me/helper-duty
 api: GET /api/v1/me + is_on_duty
+
+## 2026-08-29  agent=A  id=A6
+status: done
+branch: feat/agent-a-helper-ops
+notes: Instant match when an on-duty Helper has pinged within 45s (least-recent). Else A5 queue. Presence booleans only, no counts/names. Heartbeat from /chat and /helper, paused in Anti-Panic. Wait copy: at screen / on duty / nobody. No 30s promise.
+files: dialogue/presence.py, help.py create, HelpWaitPane, ChatList/HelperQueue heartbeat
+api: GET /api/v1/help/presence
+api: POST /api/v1/help/heartbeat

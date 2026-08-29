@@ -14,6 +14,11 @@ export interface Me {
   helper_badge?: string;
 }
 
+export interface HelpPresence {
+  someone_on_duty: boolean;
+  someone_online: boolean;
+}
+
 export interface HelperInvite {
   token: string;
   org: string;
