@@ -268,3 +268,12 @@ export interface AiSupportResponse {
   labeled_ai: boolean;
   disclaimer: string;
 }
+
+export interface HelpRequest {
+  id: string;
+  note: string;
+  status: "pending" | "accepted" | "cancelled" | string;
+  dialogue_id: string | null;
+  created_at: string;
+}
+

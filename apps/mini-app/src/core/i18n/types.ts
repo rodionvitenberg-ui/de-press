@@ -282,6 +282,8 @@ export type Messages = {
     send: string;
     sending: string;
     error: string;
+    wipe: string;
+    wipeConfirm: string;
   };
   antiPanic: {
     menuTitle: string;
@@ -367,6 +369,23 @@ export type Messages = {
       items: string[];
     }[];
     linksIntro: string;
+    humanTitle: string;
+    humanLead: string;
+    humanCta: string;
+    humanNoteLabel: string;
+    humanNotePlaceholder: string;
+    aiTitle: string;
+    aiLead: string;
+    aiCta: string;
+    waitTitle: string;
+    waitBody: string;
+    waitCancel: string;
+    waitOpenChat: string;
+    waitToAi: string;
+    requestTitle: string;
+    requestPlaque: string;
+    requestAccept: string;
+    requestSkip: string;
   };
   safety: {
     title: string;
