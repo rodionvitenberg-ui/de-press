@@ -63,3 +63,9 @@ files: backend/apps/dialogue/speech.py, backend/api/v1/dialogue.py (append), bac
 api: POST /api/v1/messages/{id}/tts → audio/mpeg | 503 {"detail":"TTS offline: no key on server"}
 
 
+
+## 2026-08-29 08:50  agent=B  id=B4
+status: done
+branch: feat/agent-b-companion-hosts
+notes: ADR 0019 (de-press-docs/app/adr/0019-own-mobile-vs-mini-app-desktop-tauri.md): Mini App != own mobile (stays Telegram addon); own mobile = PWA-first with explicit missing-pieces backlog (Web Push/VAPD, optional TWA store chrome, background sync) — no code; own desktop shell chosen = Tauri reusing browser build, deferred per ADR 0016 resource constraints; native/ reserved for agent B, deliberately empty (no native code shipped). Verified facts before writing: browser PWA live (manifest.webmanifest + sw.js registered in prod), native/ does not exist, previous ADR number 0018. Started+done in one commit (doc-only microtask).
+files: de-press-docs/app/adr/0019-own-mobile-vs-mini-app-desktop-tauri.md (new), PROGRESS.md
