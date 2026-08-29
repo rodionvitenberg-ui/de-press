@@ -85,7 +85,8 @@
 }
 
 .accept,
-.decline {
+.decline,
+.skip {
   min-height: 2rem;
   padding: 0.3rem 0.7rem;
   border-radius: var(--radius-pill);
@@ -104,12 +105,14 @@
 }
 
 .accept:hover:not(:disabled),
-.decline:hover:not(:disabled) {
+.decline:hover:not(:disabled),
+.skip:hover:not(:disabled) {
   background: var(--bg-hover);
 }
 
 .accept:disabled,
-.decline:disabled {
+.decline:disabled,
+.skip:disabled {
   opacity: 0.5;
   cursor: default;
 }

@@ -84,6 +84,8 @@ function normalizeUuid(raw: string): string | null {
  *   notifications | notify | inbox → /notifications
  *   patterns | mood          → /patterns
  *   help | safety | crisis   → /help
+ *   help_wait | wait         → /help/wait
+ *   help_ai                  → /help/ai
  *   helper | helpers         → /helper
  *   panic | antipanic | anti_panic | meh → /help + Anti-Panic
  */
@@ -134,6 +136,13 @@ export function resolveStartParam(param: string): StartTarget | null {
     case "safety":
     case "crisis":
       return { path: "/help", param: raw };
+    case "help_wait":
+    case "help-wait":
+    case "wait":
+      return { path: "/help/wait", param: raw };
+    case "help_ai":
+    case "help-ai":
+      return { path: "/help/ai", param: raw };
     case "helper":
     case "helpers":
       return { path: "/helper", param: raw };

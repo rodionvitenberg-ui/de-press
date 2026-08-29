@@ -161,3 +161,50 @@ def get_stt() -> SpeechToText:
 
 def get_translator() -> Translator:
     return AITranslator()
+
+
+class TextToSpeech(Protocol):
+    def synthesize(self, text: str, *, lang: str) -> bytes: ...
+
+
+class OpenAICompatibleTTS:
+    """OpenAI-style /audio/speech endpoint on a compatible base URL."""
+
+    def __init__(self, *, api_key: str, base_url: str, model: str):
+        self._api_key = api_key
+        self._base_url = base_url.rstrip("/")
+        self._model = model
+
+    def synthesize(self, text: str, *, lang: str) -> bytes:
+        import httpx
+
+        url = f"{self._base_url}/audio/speech"
+        headers = {"Authorization": f"Bearer {self._api_key}"}
+        payload = {
+            "model": self._model,
+            "input": text[:4096],
+            "voice": "alloy",
+            "response_format": "mp3",
+        }
+        with httpx.Client(timeout=120.0) as client:
+            resp = client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            return resp.content
+
+
+def get_tts() -> TextToSpeech | None:
+    """No TTS key → None: caller must answer with an honest offline marker.
+
+    Never fake audio. Mirrors get_stt(): dedicated TTS_BASE_URL first,
+    then the OpenAI-ish default.
+    """
+    key = getattr(settings, "TTS_API_KEY", "") or getattr(settings, "AI_API_KEY", "") or ""
+    if not str(key).strip():
+        return None
+    base = getattr(settings, "TTS_BASE_URL", "") or "https://api.openai.com/v1"
+    model = getattr(settings, "TTS_MODEL", "") or "gpt-4o-mini-tts"
+    return OpenAICompatibleTTS(
+        api_key=str(key).strip(),
+        base_url=str(base),
+        model=str(model),
+    )

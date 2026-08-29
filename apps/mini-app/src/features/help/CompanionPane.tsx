@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { api, ApiError, type AiStreamHandlers } from "@/core/api/client";
+import { api, type AiStreamHandlers } from "@/core/api/client";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
-import { useToast } from "@/core/toast";
 import {
   addCompanionMessage,
   listCompanionMessages,
@@ -24,7 +23,6 @@ const HISTORY_SENT_LIMIT = 12;
 export function CompanionPane() {
   const { t } = useI18n();
   const { enter } = useAntiPanic();
-  const toast = useToast();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [input, setInput] = useState("");
@@ -103,46 +101,33 @@ export function CompanionPane() {
         setTurns((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
-          if (last?.role === "assistant") {
-            next[next.length - 1] = { ...last, content: acc, crisis };
+          if (last?.role === "assistant" && !last.content) {
+            next[next.length - 1] = { role: "assistant", content: acc, crisis };
           }
           return next;
         });
       }
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t.companion.error);
+    } catch {
+      setError(t.companion.error);
     } finally {
-      // Drop the placeholder bubble if nothing ever arrived.
       setTurns((prev) =>
         prev.filter(
-          (turn, i) =>
-            !(
-              i === prev.length - 1 &&
-              turn.role === "assistant" &&
-              !turn.content
-            ),
+          (turn) => !(turn.role === "assistant" && !turn.content),
         ),
       );
       setStreaming(false);
     }
   }
 
-  async function onWipe() {
-    const ok = await toast.confirm({
-      message: t.companion.wipeConfirm,
-      confirmLabel: t.chat.confirmYes,
-      cancelLabel: t.chat.confirmNo,
-      danger: true,
-    });
-    if (!ok) return;
-    try {
-      await wipeAllMemory();
-      setTurns([]);
-      setDisclaimer("");
-      setError(null);
-    } catch {
-      setError(t.companion.error);
-    }
+  function onWipe() {
+    if (!window.confirm(t.companion.wipeConfirm)) return;
+    wipeAllMemory()
+      .then(() => {
+        setTurns([]);
+        setDisclaimer("");
+        setError(null);
+      })
+      .catch(() => setError(t.companion.error));
   }
 
   return (
@@ -150,11 +135,7 @@ export function CompanionPane() {
       <header className={styles.head}>
         <div className={styles.headRow}>
           <h1 className={styles.title}>{t.companion.title}</h1>
-          <button
-            type="button"
-            className={styles.wipe}
-            onClick={() => void onWipe()}
-          >
+          <button type="button" className={styles.wipe} onClick={onWipe}>
             {t.companion.wipe}
           </button>
         </div>
@@ -167,7 +148,9 @@ export function CompanionPane() {
           </button>
           , 112 / 103.
         </p>
-        {offline ? <p className={styles.offline}>{t.companion.offline}</p> : null}
+        {offline ? (
+          <p className={styles.offline}>{t.companion.offline}</p>
+        ) : null}
       </header>
 
       <div className={styles.thread} aria-live="polite">

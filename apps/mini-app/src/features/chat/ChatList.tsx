@@ -4,6 +4,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "@/core/api/client";
 import type { Dialogue } from "@/core/api/types";
+import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
 import { ListRow } from "@/components/tg/ListRow";
 import styles from "./ChatList.module.css";
@@ -27,8 +28,14 @@ export function ChatList() {
   const { id: activeId } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const { active: panic } = useAntiPanic();
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const meQuery = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.me(),
+  });
 
   const dialoguesQuery = useQuery({
     queryKey: ["dialogues"],
@@ -38,6 +45,15 @@ export function ChatList() {
   const requestsQuery = useQuery({
     queryKey: ["dialogue-requests"],
     queryFn: () => api.dialogueInbox(),
+  });
+
+  const isHelper = Boolean(meQuery.data?.is_helper);
+
+  const helpQuery = useQuery({
+    queryKey: ["help-requests"],
+    queryFn: () => api.helpInbox(),
+    enabled: isHelper && !panic,
+    refetchInterval: panic ? false : 20_000,
   });
 
   const accept = useMutation({
@@ -56,6 +72,22 @@ export function ChatList() {
     },
   });
 
+  const acceptHelp = useMutation({
+    mutationFn: (requestId: string) => api.acceptHelpRequest(requestId),
+    onSuccess: async (dialogue) => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogues"] });
+      await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+      navigate(`/chat/${dialogue.id}`);
+    },
+  });
+
+  const skipHelp = useMutation({
+    mutationFn: (requestId: string) => api.skipHelpRequest(requestId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+    },
+  });
+
   const dialogues = dialoguesQuery.data ?? [];
   const requests = useMemo(
     () =>
@@ -63,6 +95,10 @@ export function ChatList() {
         (r) => r.status === "pending" || r.status === "approved" || !r.status,
       ),
     [requestsQuery.data],
+  );
+  const helpRequests = useMemo(
+    () => (helpQuery.data ?? []).filter((r) => !r.status || r.status === "pending"),
+    [helpQuery.data],
   );
 
   const useVirtual = dialogues.length >= VIRTUAL_THRESHOLD;
@@ -74,12 +110,21 @@ export function ChatList() {
     overscan: 8,
   });
 
-  const loading = dialoguesQuery.isLoading || requestsQuery.isLoading;
+  const loading =
+    dialoguesQuery.isLoading ||
+    requestsQuery.isLoading ||
+    (isHelper && helpQuery.isLoading);
   const error =
-    dialoguesQuery.isError || requestsQuery.isError
+    dialoguesQuery.isError ||
+    requestsQuery.isError ||
+    (isHelper && helpQuery.isError)
       ? dialoguesQuery.error instanceof ApiError
         ? dialoguesQuery.error.message
-        : t.common.error
+        : requestsQuery.error instanceof ApiError
+          ? requestsQuery.error.message
+          : helpQuery.error instanceof ApiError
+            ? helpQuery.error.message
+            : t.common.error
       : null;
 
   function renderDialogue(
@@ -122,9 +167,51 @@ export function ChatList() {
         {loading ? <p className={styles.empty}>{t.me.loading}</p> : null}
         {error ? <p className={styles.empty}>{error}</p> : null}
 
-        {!loading && requests.length === 0 && dialogues.length === 0 ? (
+        {!loading &&
+        requests.length === 0 &&
+        helpRequests.length === 0 &&
+        dialogues.length === 0 ? (
           <p className={styles.empty}>{t.me.dialoguesEmpty}</p>
         ) : null}
+
+        {helpRequests.map((r) => (
+          <div key={`help-${r.id}`} className={styles.requestBlock}>
+            <ListRow
+              asButton
+              muted
+              title={t.help.requestTitle}
+              subtitle={r.note?.trim() ? r.note : "—"}
+              time={timeAgo(r.created_at)}
+              avatarText="?"
+            />
+            <p className={styles.safety}>{t.help.requestPlaque}</p>
+            {acceptHelp.isError ? (
+              <p className={styles.empty}>
+                {acceptHelp.error instanceof ApiError
+                  ? acceptHelp.error.message
+                  : t.common.error}
+              </p>
+            ) : null}
+            <div className={styles.requestActions}>
+              <button
+                type="button"
+                className={styles.accept}
+                disabled={acceptHelp.isPending || skipHelp.isPending}
+                onClick={() => acceptHelp.mutate(r.id)}
+              >
+                {t.help.requestAccept}
+              </button>
+              <button
+                type="button"
+                className={styles.skip}
+                disabled={acceptHelp.isPending || skipHelp.isPending}
+                onClick={() => skipHelp.mutate(r.id)}
+              >
+                {t.help.requestSkip}
+              </button>
+            </div>
+          </div>
+        ))}
 
         {requests.map((r) => (
           <div key={r.id} className={styles.requestBlock}>

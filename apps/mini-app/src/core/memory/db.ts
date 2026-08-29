@@ -4,9 +4,10 @@
  */
 
 const DB_NAME = "depress_zk";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "mood_entries";
 const META = "meta";
+const COMPANION_STORE = "companion_messages";
 
 export interface MoodEntry {
   id: string;
@@ -14,6 +15,14 @@ export interface MoodEntry {
   level: number;
   note: string;
   tags: string[];
+}
+
+export interface CompanionMessage {
+  id: string;
+  at: string;
+  role: "user" | "assistant";
+  content: string;
+  crisis?: boolean;
 }
 
 export interface MemoryMeta {
@@ -34,9 +43,16 @@ function openDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(META)) {
         db.createObjectStore(META, { keyPath: "key" });
       }
+      if (!db.objectStoreNames.contains(COMPANION_STORE)) {
+        const companion = db.createObjectStore(COMPANION_STORE, {
+          keyPath: "id",
+        });
+        companion.createIndex("at", "at", { unique: false });
+      }
     };
   });
 }
+
 
 function uuid(): string {
   return crypto.randomUUID();
@@ -101,12 +117,52 @@ export async function listMoodEntries(limit = 90): Promise<MoodEntry[]> {
   });
 }
 
+export async function addCompanionMessage(
+  role: "user" | "assistant",
+  content: string,
+  crisis?: boolean,
+): Promise<CompanionMessage> {
+  const message: CompanionMessage = {
+    id: uuid(),
+    at: new Date().toISOString(),
+    role,
+    content,
+    ...(crisis ? { crisis: true } : {}),
+  };
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(COMPANION_STORE, "readwrite");
+    tx.objectStore(COMPANION_STORE).put(message);
+    tx.oncomplete = () => resolve(message);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/** Chronological transcript (oldest first), capped to the last `limit`. */
+export async function listCompanionMessages(
+  limit = 200,
+): Promise<CompanionMessage[]> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(COMPANION_STORE, "readonly");
+    const req = tx.objectStore(COMPANION_STORE).getAll();
+    req.onsuccess = () => {
+      const rows = (req.result as CompanionMessage[]).sort((a, b) =>
+        a.at < b.at ? -1 : 1,
+      );
+      resolve(rows.slice(-limit));
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
 export async function wipeAllMemory(): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction([STORE, META], "readwrite");
+    const tx = db.transaction([STORE, META, COMPANION_STORE], "readwrite");
     tx.objectStore(STORE).clear();
     tx.objectStore(META).clear();
+    tx.objectStore(COMPANION_STORE).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });

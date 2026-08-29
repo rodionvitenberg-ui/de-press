@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -16,6 +17,8 @@ class ChatMessage:
 
 class AIGateway(Protocol):
     def complete(self, messages: list[ChatMessage]) -> str: ...
+
+    def stream(self, messages: list[ChatMessage]) -> Iterator[str]: ...
 
 
 class OfflineGateway:
@@ -35,6 +38,10 @@ class OfflineGateway:
             + "\n\n[офлайн-режим: API-ключ не настроен; ответ шаблонный]"
         )
 
+    def stream(self, messages: list[ChatMessage]) -> Iterator[str]:
+        # Nothing to stream offline — deliver as a single piece.
+        yield self.complete(messages)
+
 
 class OpenAICompatibleGateway:
     def __init__(self, *, api_key: str, base_url: str, model: str):
@@ -53,6 +60,20 @@ class OpenAICompatibleGateway:
         )
         choice = resp.choices[0].message.content
         return (choice or "").strip() or "…"
+
+    def stream(self, messages: list[ChatMessage]) -> Iterator[str]:
+        payload = [{"role": m.role, "content": m.content} for m in messages]
+        chunks = self._client.chat.completions.create(
+            model=self._model,
+            messages=payload,
+            temperature=0.6,
+            max_tokens=500,
+            stream=True,
+        )
+        for chunk in chunks:
+            delta = chunk.choices[0].delta.content if chunk.choices else None
+            if delta:
+                yield delta
 
 
 def get_gateway() -> AIGateway:

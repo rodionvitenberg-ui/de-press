@@ -291,6 +291,8 @@ export const en: Messages = {
     send: "Send",
     sending: "…",
     error: "Couldn’t reply",
+    wipe: "Erase AI dialogs and local memory",
+    wipeConfirm: "Erase AI dialogs and all local records on this device?",
   },
   antiPanic: {
     menuTitle: "What do you need right now?",
@@ -365,6 +367,9 @@ export const en: Messages = {
     voiceRetentionKeep: "Keep",
     dayToday: "Today",
     dayYesterday: "Yesterday",
+    transcribe: "Transcribe",
+    ttsListen: "Play translated voice",
+    ttsOffline: "Voice-over unavailable — no key on the server",
   },
   guides: {
     title: "Support guides",
@@ -413,6 +418,27 @@ export const en: Messages = {
       },
     ],
     linksIntro: "",
+    humanTitle: "Talk to a person",
+    humanLead:
+      "A Helper volunteer. Not a doctor and not an emergency service. You may need to wait.",
+    humanCta: "Ask for a person nearby",
+    humanNoteLabel: "You can briefly write what’s going on (optional)",
+    humanNotePlaceholder: "Right now I…",
+    aiTitle: "Talk to AI",
+    aiLead:
+      "A quiet assistant. This is AI, not a live person. No diagnoses and no “just smile”.",
+    aiCta: "Open",
+    waitTitle: "Looking for a person nearby",
+    waitBody:
+      "This is not 112 and not an ambulance. If you are at risk — emergency services 112 / 103. You can wait, open AI, or cancel the request.",
+    waitCancel: "Cancel request",
+    waitOpenChat: "Open chat",
+    waitToAi: "Talk to AI",
+    requestTitle: "Someone is asking for a person nearby",
+    requestPlaque:
+      "A volunteer conversation. You are not a therapist and not an emergency service.",
+    requestAccept: "Accept",
+    requestSkip: "Skip",
   },
   safety: {
     title: "Safety",

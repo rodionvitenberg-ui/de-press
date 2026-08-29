@@ -9,6 +9,8 @@ import { NotificationsPane } from "@/features/notifications/NotificationsPane";
 import { HelperQueue } from "@/features/helper/HelperQueue";
 import { PatternsPane } from "@/features/patterns/PatternsPane";
 import { HelpPane } from "@/features/help/HelpPane";
+import { HelpWaitPane } from "@/features/help/HelpWaitPane";
+import { CompanionPane } from "@/features/help/CompanionPane";
 import { StartParamNavigator } from "@/core/host/StartParamNavigator";
 import { TelegramBackButton } from "@/core/host/TelegramBackButton";
 import { useI18n } from "@/core/i18n/context";
@@ -48,6 +50,8 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsPane />} />
         <Route path="/patterns" element={<PatternsPane />} />
         <Route path="/help" element={<HelpPane />} />
+        <Route path="/help/wait" element={<HelpWaitPane />} />
+        <Route path="/help/ai" element={<CompanionPane />} />
         <Route path="/helper" element={<HelperQueue />} />
 
         <Route path="*" element={<EmptyPane text={t.shell.notFound} />} />
