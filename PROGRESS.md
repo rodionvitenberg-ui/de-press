@@ -35,3 +35,12 @@ files: backend/apps/dialogue/**, backend/apps/notifications/models.py, backend/a
 api: GET /api/v1/moderation/dialogue-requests
 api: POST /api/v1/moderation/dialogue-requests/{id}/approve
 api: POST /api/v1/moderation/dialogue-requests/{id}/reject
+
+## 2026-08-29  agent=A  id=A3
+status: done
+branch: feat/agent-a-helper-ops
+notes: One-time Helper invite. Staff/Helper POST /api/v1/helper-invites; candidate POST …/{token}/accept with pledge. No open self-signup. Invite list UI left for A4.
+files: backend/apps/identity/**, api/v1/helper_invite.py, HelperJoin.tsx, UserMenu.tsx
+api: POST /api/v1/helper-invites
+api: GET /api/v1/helper-invites/{token}
+api: POST /api/v1/helper-invites/{token}/accept

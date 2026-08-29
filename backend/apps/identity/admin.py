@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from apps.identity.models import Account, AnonymousSession
+from apps.identity.models import Account, AnonymousSession, HelperInvite
 
 
 @admin.register(Account)
@@ -46,6 +46,14 @@ class AccountAdmin(DjangoUserAdmin):
         ),
     )
     filter_horizontal = ("groups", "user_permissions")
+
+
+@admin.register(HelperInvite)
+class HelperInviteAdmin(admin.ModelAdmin):
+    list_display = ("token", "org", "created_by", "expires_at", "used_at", "used_by")
+    search_fields = ("token", "org")
+    raw_id_fields = ("created_by", "used_by")
+    readonly_fields = ("id", "token", "created_at", "used_at")
 
 
 @admin.register(AnonymousSession)

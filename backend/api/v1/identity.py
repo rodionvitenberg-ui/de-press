@@ -36,6 +36,7 @@ class MeOut(Schema):
     pseudonym: str
     is_authenticated: bool
     is_helper: bool = False
+    is_staff: bool = False
     helper_org: str = ""
     helper_badge: str = ""
 
@@ -49,6 +50,7 @@ def _me_from_account(account) -> MeOut:
         pseudonym=account.display_pseudonym,
         is_authenticated=True,
         is_helper=bool(account.is_helper),
+        is_staff=bool(account.is_staff or account.is_superuser),
         helper_org=account.helper_org or "",
         helper_badge=account.helper_badge_label if account.is_helper else "",
     )
@@ -152,6 +154,7 @@ def me(request):
         pseudonym=actor.display_pseudonym,
         is_authenticated=False,
         is_helper=False,
+        is_staff=False,
         helper_org="",
         helper_badge="",
     )

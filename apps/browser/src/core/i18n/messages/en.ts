@@ -217,6 +217,22 @@ export const en: Messages = {
       "Check whether it is safe for the author to accept. You are not a clinician or emergency services.",
     reviewApprove: "Approved",
     reviewReject: "Decline",
+    inviteTitle: "Invite a Helper",
+    inviteLead:
+      "One-time link. A Helper is not a clinician or emergency services.",
+    inviteOrg: "Organisation (optional)",
+    inviteCreate: "Create link",
+    inviteCopy: "Link",
+    inviteNeedRole: "Only Helpers and staff can invite.",
+    joinTitle: "Become a Helper",
+    joinLead:
+      "This is a volunteer role. Not therapy, not 112. You can leave at any time.",
+    joinPledge:
+      "I will not diagnose, replace emergency care, or push unsolicited advice.",
+    joinAccept: "Accept and become a Helper",
+    joinNeedAccount: "You need an account. Sign in from the profile menu.",
+    joinMissingToken: "No invite token.",
+    joinDone: "Done. You are a Helper.",
   },
   notify: {
     title: "Email notifications",

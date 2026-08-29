@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/core/api/client";
 import type { VoiceRetention } from "@/core/api/types";
@@ -309,6 +310,16 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
             </fieldset>
 
             {error ? <p className={styles.error}>{error}</p> : null}
+
+            {isAccount && (me?.is_helper || me?.is_staff) ? (
+              <Link
+                to="/helper/invite"
+                className={styles.ghostBtn}
+                onClick={() => onClose()}
+              >
+                {t.helper.inviteTitle}
+              </Link>
+            ) : null}
 
             {isAccount ? (
               <button

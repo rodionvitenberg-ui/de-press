@@ -14,6 +14,7 @@ import type {
   FeedResponse,
   HealthResponse,
   Hearer,
+  HelperInvite,
   HelpRequest,
   InboxOpenResponse,
   IntentOption,
@@ -481,6 +482,24 @@ export const api = {
     request<DialogueRequest>(
       `/api/v1/moderation/dialogue-requests/${id}/reject`,
       { method: "POST" },
+    ),
+
+  createHelperInvite: (org = "", ttlHours = 168) =>
+    request<HelperInvite>("/api/v1/helper-invites", {
+      method: "POST",
+      body: JSON.stringify({ org, ttl_hours: ttlHours }),
+    }),
+
+  getHelperInvite: (token: string) =>
+    request<HelperInvite>(`/api/v1/helper-invites/${token}`),
+
+  acceptHelperInvite: (token: string, pledge: boolean) =>
+    request<{ ok: boolean; is_helper: boolean; helper_org: string; message: string }>(
+      `/api/v1/helper-invites/${token}/accept`,
+      {
+        method: "POST",
+        body: JSON.stringify({ pledge }),
+      },
     ),
 
   myDialogues: () => request<Dialogue[]>("/api/v1/me/dialogues"),

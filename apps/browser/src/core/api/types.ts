@@ -8,8 +8,16 @@ export interface Me {
   pseudonym: string;
   is_authenticated: boolean;
   is_helper?: boolean;
+  is_staff?: boolean;
   helper_org?: string;
   helper_badge?: string;
+}
+
+export interface HelperInvite {
+  token: string;
+  org: string;
+  expires_at: string;
+  used: boolean;
 }
 
 export interface ReceivedCloud {

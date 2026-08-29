@@ -218,6 +218,22 @@ export const ru: Messages = {
       "Проверь, безопасно ли автору принять этот запрос. Ты не терапевт и не 112.",
     reviewApprove: "Проверено",
     reviewReject: "Отклонить",
+    inviteTitle: "Пригласить Helperа",
+    inviteLead:
+      "Одноразовая ссылка. Helper — не врач и не экстренная служба.",
+    inviteOrg: "Организация (необязательно)",
+    inviteCreate: "Создать ссылку",
+    inviteCopy: "Ссылка",
+    inviteNeedRole: "Приглашать могут только Helpers и staff.",
+    joinTitle: "Стать Helperом",
+    joinLead:
+      "Это волонтёрская роль. Не терапия, не 112. Можно уйти в любой момент.",
+    joinPledge:
+      "Обещаю не ставить диагнозы, не подменять экстренную помощь и не давить советами.",
+    joinAccept: "Принять и стать Helperом",
+    joinNeedAccount: "Нужен аккаунт. Войди через меню профиля.",
+    joinMissingToken: "Нет токена приглашения.",
+    joinDone: "Готово. Ты Helper.",
   },
   notify: {
     title: "Уведомления на почту",

@@ -213,6 +213,19 @@ export type Messages = {
     reviewPlaque: string;
     reviewApprove: string;
     reviewReject: string;
+    inviteTitle: string;
+    inviteLead: string;
+    inviteOrg: string;
+    inviteCreate: string;
+    inviteCopy: string;
+    inviteNeedRole: string;
+    joinTitle: string;
+    joinLead: string;
+    joinPledge: string;
+    joinAccept: string;
+    joinNeedAccount: string;
+    joinMissingToken: string;
+    joinDone: string;
   };
   notify: {
     title: string;

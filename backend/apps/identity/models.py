@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
@@ -112,6 +113,37 @@ class Account(AbstractBaseUser, PermissionsMixin):
             return ""
         org = (self.helper_org or "").strip()
         return f"Helper · {org}" if org else "Helper"
+
+
+class HelperInvite(models.Model):
+    """One-time invite so a trusted person can become a Helper (ADR-0010)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    org = models.CharField(max_length=120, blank=True, default="")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="helper_invites_created",
+    )
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    used_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="helper_invites_accepted",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Helper invite"
+        verbose_name_plural = "Helper invites"
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"helper-invite:{self.token[:8]}"
 
 
 class AnonymousSession(models.Model):
