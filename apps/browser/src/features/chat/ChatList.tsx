@@ -62,14 +62,16 @@ export function ChatList() {
   const helpQuery = useQuery({
     queryKey: ["help-requests"],
     queryFn: () => api.helpInbox(),
-    enabled: Boolean(meQuery.data?.is_helper) && !panic,
+    enabled:
+      Boolean(meQuery.data?.is_helper && meQuery.data?.is_on_duty) && !panic,
     refetchInterval: panic ? false : 20_000,
   });
 
   const reviewQuery = useQuery({
     queryKey: ["dialogue-review"],
     queryFn: () => api.dialogueReviewInbox(),
-    enabled: Boolean(meQuery.data?.is_helper) && !panic,
+    enabled:
+      Boolean(meQuery.data?.is_helper && meQuery.data?.is_on_duty) && !panic,
     refetchInterval: panic ? false : 20_000,
   });
 

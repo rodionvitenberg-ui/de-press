@@ -238,6 +238,12 @@ export const ru: Messages = {
     tabSummary: "Сводка",
     unusedInvites: "Твои инвайты",
     inviteUsed: "использован",
+    dutyOn: "На смене",
+    dutyOff: "Не на смене",
+    dutyLead:
+      "Пока ты не на смене, новые просьбы о человеке и запросы диалога не приходят. Ты не терапевт и не 112.",
+    dutyToggleOn: "Заступить",
+    dutyToggleOff: "Уйти со смены",
   },
   notify: {
     title: "Уведомления на почту",

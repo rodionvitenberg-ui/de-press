@@ -51,3 +51,11 @@ branch: feat/agent-a-helper-ops
 notes: /helper tabs Облачка + Сводка (dashboard metrics, recent reports including help-chat, own invites). Help/dialogue queues stay in /chat.
 files: HelperQueue.tsx, HelperQueue.module.css, helper_invite list GET
 api: GET /api/v1/helper-invites
+
+## 2026-08-29  agent=A  id=A5
+status: done
+branch: feat/agent-a-helper-ops
+notes: Helper duty toggle. Default off. Notify+inbox Help Request and dialogue-review only when is_helper && is_on_duty && is_active. Accept/skip still allowed for is_helper. Seed helper@de-press.local on duty. New invitees stay off duty. Presence/instant match left for A6. Isolated in .worktrees/agent-a.
+files: identity is_on_duty, help.py, services.py review notify, HelperQueue, UserMenu, ChatList poll gate
+api: POST /api/v1/me/helper-duty
+api: GET /api/v1/me + is_on_duty

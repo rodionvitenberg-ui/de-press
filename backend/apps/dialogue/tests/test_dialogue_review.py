@@ -21,7 +21,7 @@ from apps.stories.services import publish_story
 @pytest.mark.django_db
 def test_create_request_awaits_helper_not_author():
     helper_acc = Account.objects.create_user(
-        email="revh@ex.com", password="password123", is_helper=True
+        email="revh@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     author_acc = Account.objects.create_user(
@@ -63,7 +63,7 @@ def test_create_request_awaits_helper_not_author():
 @pytest.mark.django_db
 def test_helper_reject_hides_from_author():
     helper_acc = Account.objects.create_user(
-        email="rejh@ex.com", password="password123", is_helper=True
+        email="rejh@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     author = Actor(
@@ -95,3 +95,34 @@ def test_non_helper_cannot_approve():
     req = create_request(peer, story.id, intent="listen")
     with pytest.raises(DialogueError):
         approve_dialogue_request(author, req.id)
+
+
+@pytest.mark.django_db
+def test_off_duty_helper_skipped_for_review_notify_and_inbox():
+    off = Account.objects.create_user(
+        email="off-rev@ex.com", password="password123", is_helper=True
+    )
+    on = Account.objects.create_user(
+        email="on-rev@ex.com",
+        password="password123",
+        is_helper=True,
+        is_on_duty=True,
+    )
+    author = Actor(
+        kind="account",
+        account=Account.objects.create_user(
+            email="rev-author@ex.com", password="password123"
+        ),
+    )
+    story = publish_story(author, "нужно ухо")
+    peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
+    req = create_request(peer, story.id, intent="listen")
+
+    assert not Notification.objects.filter(
+        kind=NotificationKind.DIALOGUE_REQUEST_REVIEW, recipient_account=off
+    ).exists()
+    assert Notification.objects.filter(
+        kind=NotificationKind.DIALOGUE_REQUEST_REVIEW, recipient_account=on
+    ).exists()
+    assert list_review_inbox(Actor(kind="account", account=off)) == []
+    assert list_review_inbox(Actor(kind="account", account=on))[0].id == req.id

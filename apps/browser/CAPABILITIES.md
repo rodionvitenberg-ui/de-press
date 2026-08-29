@@ -159,6 +159,7 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `help.ai` | Компаньон-чат | `POST /api/v1/ai/support` | `/help/ai` CompanionPane | live |
 | `help.request` | Запрос помощи | API + UI | HelpPane / ChatList | live (API+UI) |
 | `helper.helpInbox` | Inbox запросов Helper | `GET /api/v1/help/requests` | ChatList grey rows | live |
+| `helper.duty` | Дежурство Helperа | `POST /api/v1/me/helper-duty` + `GET /me` `is_on_duty` | /helper тумблер + UserMenu | live |
 | `shell.theme` | Тема | нет | UserMenu | local |
 | `shell.locale` | Язык | нет | UserMenu | local |
 | `shell.navOrder` | Порядок rail | нет | localStorage | local |

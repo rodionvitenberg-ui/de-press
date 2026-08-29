@@ -334,7 +334,7 @@ def _notify_helpers_dialogue_review(req: DialogueRequest, requester: Actor) -> N
         "request_id": str(req.id),
         "intent": req.intent,
     }
-    for acc in Account.objects.filter(is_helper=True, is_active=True):
+    for acc in Account.objects.on_duty_helpers():
         if requester.account_id is not None and acc.id == requester.account_id:
             continue
         notify(
@@ -346,7 +346,10 @@ def _notify_helpers_dialogue_review(req: DialogueRequest, requester: Actor) -> N
 
 def list_review_inbox(actor: Actor) -> list[DialogueRequest]:
     """Dialogue requests waiting for Helper review."""
-    if not _is_helper(actor):
+    acc = actor.account
+    if not (
+        acc is not None and acc.is_helper and acc.is_on_duty and acc.is_active
+    ):
         return []
     return list(
         DialogueRequest.objects.filter(status=DialogueRequestStatus.AWAITING_HELPER)

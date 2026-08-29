@@ -17,6 +17,18 @@ export function HelperQueue() {
   });
 
   const canHelper = Boolean(meQuery.data?.is_helper || meQuery.data?.is_staff);
+  const isHelper = Boolean(meQuery.data?.is_helper);
+  const onDuty = Boolean(meQuery.data?.is_on_duty);
+
+  const duty = useMutation({
+    mutationFn: (next: boolean) => api.setHelperDuty(next),
+    onSuccess: async (me) => {
+      queryClient.setQueryData(["me"], me);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+  });
 
   const queueQuery = useQuery({
     queryKey: ["moderation-queue"],
@@ -80,6 +92,25 @@ export function HelperQueue() {
     <div className={styles.pane}>
       <header className={styles.head}>
         <h1 className={styles.title}>{t.helper.title}</h1>
+        {isHelper ? (
+          <div className={onDuty ? styles.dutyOn : styles.duty}>
+            <div>
+              <p className={styles.dutyStatus}>
+                {onDuty ? t.helper.dutyOn : t.helper.dutyOff}
+              </p>
+              <p className={styles.dutyLead}>{t.helper.dutyLead}</p>
+            </div>
+            <button
+              type="button"
+              className={styles.dutyBtn}
+              disabled={duty.isPending}
+              aria-pressed={onDuty}
+              onClick={() => duty.mutate(!onDuty)}
+            >
+              {onDuty ? t.helper.dutyToggleOff : t.helper.dutyToggleOn}
+            </button>
+          </div>
+        ) : null}
         <p className={styles.lead}>
           {tab === "clouds" ? t.helper.lead : t.helper.dashboardLead}
         </p>

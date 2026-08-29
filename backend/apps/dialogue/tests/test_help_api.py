@@ -15,6 +15,7 @@ def helper(db):
         email="help-api-h@ex.com",
         password="password123",
         is_helper=True,
+        is_on_duty=True,
     )
 
 
@@ -24,6 +25,7 @@ def helper2(db):
         email="help-api-h2@ex.com",
         password="password123",
         is_helper=True,
+        is_on_duty=True,
     )
 
 
@@ -136,3 +138,36 @@ def test_helper_skip_hides_from_inbox(helper_client):
     inbox = helper_client.get("/api/v1/help/requests")
     assert inbox.status_code == 200
     assert req_id not in [r["id"] for r in inbox.json()]
+
+
+@pytest.mark.django_db
+def test_off_duty_helper_inbox_empty_until_toggle():
+    helper = Account.objects.create_user(
+        email="duty-api@ex.com", password="password123", is_helper=True
+    )
+    client = Client()
+    client.force_login(helper)
+    anon = Client()
+    created = anon.post(
+        "/api/v1/help/requests",
+        data={"note": "дежурство"},
+        content_type="application/json",
+    )
+    assert created.status_code == 200
+    req_id = created.json()["id"]
+
+    off_inbox = client.get("/api/v1/help/requests")
+    assert off_inbox.status_code == 200
+    assert off_inbox.json() == []
+
+    toggled = client.post(
+        "/api/v1/me/helper-duty",
+        data={"on": True},
+        content_type="application/json",
+    )
+    assert toggled.status_code == 200
+    assert toggled.json()["is_on_duty"] is True
+
+    on_inbox = client.get("/api/v1/help/requests")
+    assert on_inbox.status_code == 200
+    assert req_id in [r["id"] for r in on_inbox.json()]

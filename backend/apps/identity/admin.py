@@ -11,17 +11,18 @@ class AccountAdmin(DjangoUserAdmin):
         "email",
         "default_pseudonym",
         "is_helper",
+        "is_on_duty",
         "helper_org",
         "is_staff",
         "is_active",
         "date_joined",
     )
-    list_filter = ("is_helper", "is_staff", "is_active")
+    list_filter = ("is_helper", "is_on_duty", "is_staff", "is_active")
     search_fields = ("email", "default_pseudonym", "helper_org")
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Profile", {"fields": ("default_pseudonym",)}),
-        ("Helper", {"fields": ("is_helper", "helper_org")}),
+        ("Helper", {"fields": ("is_helper", "is_on_duty", "helper_org")}),
         (
             "Permissions",
             {

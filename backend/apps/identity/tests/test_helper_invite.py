@@ -115,6 +115,8 @@ def test_http_create_and_accept():
     assert accepted.status_code == 200
     cand.refresh_from_db()
     assert cand.is_helper is True
+    assert cand.is_on_duty is False
     me = joiner.get("/api/v1/me").json()
     assert me["is_helper"] is True
     assert me["is_staff"] is False
+    assert me["is_on_duty"] is False

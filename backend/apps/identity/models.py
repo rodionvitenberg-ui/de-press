@@ -30,6 +30,9 @@ class AccountManager(BaseUserManager):
         account.save(using=self._db)
         return account
 
+    def on_duty_helpers(self):
+        return self.filter(is_helper=True, is_on_duty=True, is_active=True)
+
     def create_superuser(
         self,
         email: str,
@@ -56,6 +59,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     # Helper: verified volunteer / partner-org listener (ADR-0010). Not a clinician by default.
     is_helper = models.BooleanField(default=False, db_index=True)
+    # Shift flag: Help Request / dialogue-review notify+inbox only when on duty.
+    is_on_duty = models.BooleanField(default=False, db_index=True)
     helper_org = models.CharField(max_length=120, blank=True, default="")
     date_joined = models.DateTimeField(default=timezone.now)
     # Soft-notify preferences (P1: email/web).

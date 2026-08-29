@@ -43,6 +43,11 @@ def _is_helper(actor: Actor) -> bool:
     return bool(actor.account is not None and actor.account.is_helper)
 
 
+def _is_on_duty_helper(actor: Actor) -> bool:
+    acc = actor.account
+    return bool(acc is not None and acc.is_helper and acc.is_on_duty and acc.is_active)
+
+
 def _requester_actor(req: HelpRequest) -> Actor:
     if req.from_account_id:
         return Actor(kind="account", account=req.from_account)
@@ -73,7 +78,7 @@ def _pending_for_actor(actor: Actor) -> HelpRequest | None:
 
 def _notify_helpers(req: HelpRequest, requester: Actor) -> None:
     payload = {"request_id": str(req.id)}
-    helpers = Account.objects.filter(is_helper=True, is_active=True)
+    helpers = Account.objects.on_duty_helpers()
     for helper in helpers:
         if requester.account_id is not None and helper.id == requester.account_id:
             continue
@@ -134,7 +139,7 @@ def create_help_request(actor: Actor, *, note: str = "") -> HelpRequest:
 
 def list_help_inbox(actor: Actor) -> list[HelpRequest]:
     """Pending help requests visible to this Helper (excludes skips and own)."""
-    if not _is_helper(actor):
+    if not _is_on_duty_helper(actor):
         return []
 
     skipped_ids = HelpRequestSkip.objects.filter(helper=actor.account).values_list(

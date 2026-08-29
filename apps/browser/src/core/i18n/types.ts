@@ -230,6 +230,11 @@ export type Messages = {
     tabSummary: string;
     unusedInvites: string;
     inviteUsed: string;
+    dutyOn: string;
+    dutyOff: string;
+    dutyLead: string;
+    dutyToggleOn: string;
+    dutyToggleOff: string;
   };
   notify: {
     title: string;

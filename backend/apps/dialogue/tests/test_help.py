@@ -30,7 +30,7 @@ def test_help_request_one_pending_per_account():
 @pytest.mark.django_db
 def test_dialogue_help_allows_null_story():
     helper = Account.objects.create_user(
-        email="h@ex.com", password="password123", is_helper=True
+        email="h@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     sess = AnonymousSession.objects.create(pseudonym="гость")
     d = Dialogue.objects.create(
@@ -46,7 +46,7 @@ def test_dialogue_help_allows_null_story():
 @pytest.mark.django_db
 def test_anon_create_helper_accept_creates_dialogue_without_story():
     helper_acc = Account.objects.create_user(
-        email="helper@ex.com", password="password123", is_helper=True
+        email="helper@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     sess = AnonymousSession.objects.create(pseudonym="гость")
@@ -75,8 +75,8 @@ def test_anon_create_helper_accept_creates_dialogue_without_story():
 
 @pytest.mark.django_db
 def test_second_helper_loses_the_race():
-    h1 = Account.objects.create_user(email="h1@ex.com", password="password123", is_helper=True)
-    h2 = Account.objects.create_user(email="h2@ex.com", password="password123", is_helper=True)
+    h1 = Account.objects.create_user(email="h1@ex.com", password="password123", is_helper=True, is_on_duty=True)
+    h2 = Account.objects.create_user(email="h2@ex.com", password="password123", is_helper=True, is_on_duty=True)
     sess = AnonymousSession.objects.create()
     req = create_help_request(Actor(kind="anonymous", session=sess))
     accept_help_request(Actor(kind="account", account=h1), req.id)
@@ -86,8 +86,8 @@ def test_second_helper_loses_the_race():
 
 @pytest.mark.django_db
 def test_skip_hides_only_for_that_helper():
-    h1 = Account.objects.create_user(email="s1@ex.com", password="password123", is_helper=True)
-    h2 = Account.objects.create_user(email="s2@ex.com", password="password123", is_helper=True)
+    h1 = Account.objects.create_user(email="s1@ex.com", password="password123", is_helper=True, is_on_duty=True)
+    h2 = Account.objects.create_user(email="s2@ex.com", password="password123", is_helper=True, is_on_duty=True)
     sess = AnonymousSession.objects.create()
     req = create_help_request(Actor(kind="anonymous", session=sess))
     skip_help_request(Actor(kind="account", account=h1), req.id)
@@ -109,7 +109,7 @@ def test_create_is_idempotent_pending():
 
 @pytest.mark.django_db
 def test_cancel_by_requester():
-    helper = Account.objects.create_user(email="c@ex.com", password="password123", is_helper=True)
+    helper = Account.objects.create_user(email="c@ex.com", password="password123", is_helper=True, is_on_duty=True)
     sess = AnonymousSession.objects.create()
     visitor = Actor(kind="anonymous", session=sess)
     req = create_help_request(visitor)
@@ -130,7 +130,7 @@ def test_non_helper_cannot_accept():
 
 @pytest.mark.django_db
 def test_helper_cannot_accept_own_request():
-    helper = Account.objects.create_user(email="self@ex.com", password="password123", is_helper=True)
+    helper = Account.objects.create_user(email="self@ex.com", password="password123", is_helper=True, is_on_duty=True)
     actor = Actor(kind="account", account=helper)
     req = create_help_request(actor)
     assert list_help_inbox(actor) == []
@@ -152,7 +152,7 @@ def test_my_help_request_returns_pending():
 @pytest.mark.django_db
 def test_my_help_request_returns_accepted_within_24h():
     helper_acc = Account.objects.create_user(
-        email="mh@ex.com", password="password123", is_helper=True
+        email="mh@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     sess = AnonymousSession.objects.create()
@@ -180,7 +180,7 @@ def test_create_rate_limit_after_five_in_window():
 @pytest.mark.django_db
 def test_accept_blocked_between_raises():
     helper_acc = Account.objects.create_user(
-        email="blk-h@ex.com", password="password123", is_helper=True
+        email="blk-h@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     sess = AnonymousSession.objects.create()
@@ -195,7 +195,7 @@ def test_accept_blocked_between_raises():
 def test_help_dialogue_both_participants_can_send_message():
     """Story-less Help chat: send_message must not join story under FOR UPDATE."""
     helper_acc = Account.objects.create_user(
-        email="send-h@ex.com", password="password123", is_helper=True
+        email="send-h@ex.com", password="password123", is_helper=True, is_on_duty=True
     )
     helper = Actor(kind="account", account=helper_acc)
     sess = AnonymousSession.objects.create(pseudonym="гость")
@@ -229,3 +229,27 @@ def test_existing_story_dialogue_still_requires_story_in_request_flow():
     d = accept_request(Actor(kind="account", account=author), req.id)
     assert d.story_id == story.id
     assert d.source == "request"
+
+
+@pytest.mark.django_db
+def test_off_duty_helper_is_not_notified_and_has_empty_inbox():
+    off = Account.objects.create_user(
+        email="off@ex.com", password="password123", is_helper=True
+    )
+    on = Account.objects.create_user(
+        email="on@ex.com",
+        password="password123",
+        is_helper=True,
+        is_on_duty=True,
+    )
+    sess = AnonymousSession.objects.create()
+    req = create_help_request(Actor(kind="anonymous", session=sess))
+
+    assert not Notification.objects.filter(
+        kind=NotificationKind.HELP_REQUESTED, recipient_account=off
+    ).exists()
+    assert Notification.objects.filter(
+        kind=NotificationKind.HELP_REQUESTED, recipient_account=on
+    ).exists()
+    assert list_help_inbox(Actor(kind="account", account=off)) == []
+    assert list_help_inbox(Actor(kind="account", account=on))[0].id == req.id

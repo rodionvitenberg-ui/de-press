@@ -237,6 +237,12 @@ export const en: Messages = {
     tabSummary: "Overview",
     unusedInvites: "Your invites",
     inviteUsed: "used",
+    dutyOn: "On duty",
+    dutyOff: "Off duty",
+    dutyLead:
+      "While you are off duty, new human-help requests and dialogue reviews will not reach you. You are not a clinician or emergency services.",
+    dutyToggleOn: "Go on duty",
+    dutyToggleOff: "Leave duty",
   },
   notify: {
     title: "Email notifications",

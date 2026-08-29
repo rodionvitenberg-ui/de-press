@@ -50,6 +50,10 @@ class AuthError(IdentityError):
     """Login/register failure."""
 
 
+class DutyError(IdentityError):
+    """Helper duty toggle failure."""
+
+
 def resolve_actor(request: HttpRequest) -> Actor:
     """Resolve Account (if logged in) or AnonymousSession from the request."""
     user = getattr(request, "user", None)
@@ -151,3 +155,15 @@ def login_account(
 
 def logout_account(request: HttpRequest) -> None:
     logout(request)
+
+
+def set_helper_duty(actor: Actor, on: bool) -> Account:
+    """Toggle Helper shift. Off-duty helpers do not get help/review inbox."""
+    if actor.account is None:
+        raise DutyError("Need an account")
+    if not actor.account.is_helper:
+        raise DutyError("Only a Helper can go on duty")
+    account = actor.account
+    account.is_on_duty = bool(on)
+    account.save(update_fields=["is_on_duty"])
+    return account

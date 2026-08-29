@@ -15,6 +15,7 @@ def helper_actor() -> Actor:
         email=f"rev-{uuid4().hex[:10]}@ex.com",
         password="password123",
         is_helper=True,
+        is_on_duty=True,
     )
     return Actor(kind="account", account=acc)
 

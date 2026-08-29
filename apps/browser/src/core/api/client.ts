@@ -504,6 +504,12 @@ export const api = {
       },
     ),
 
+  setHelperDuty: (on: boolean) =>
+    request<Me>("/api/v1/me/helper-duty", {
+      method: "POST",
+      body: JSON.stringify({ on }),
+    }),
+
   myDialogues: () => request<Dialogue[]>("/api/v1/me/dialogues"),
 
   getDialogue: (dialogueId: string) =>

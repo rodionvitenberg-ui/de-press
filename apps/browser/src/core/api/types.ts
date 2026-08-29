@@ -9,6 +9,7 @@ export interface Me {
   is_authenticated: boolean;
   is_helper?: boolean;
   is_staff?: boolean;
+  is_on_duty?: boolean;
   helper_org?: string;
   helper_badge?: string;
 }

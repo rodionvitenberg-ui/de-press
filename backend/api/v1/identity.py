@@ -6,10 +6,12 @@ from ninja.errors import HttpError
 from api.deps import get_optional_actor
 from apps.identity.services import (
     AuthError,
+    DutyError,
     login_account,
     logout_account,
     register,
     resolve_actor,
+    set_helper_duty,
 )
 from apps.identity.telegram import login_or_register_telegram
 from apps.notifications.softnotify import SoftNotifyError, open_inbox
@@ -37,6 +39,7 @@ class MeOut(Schema):
     is_authenticated: bool
     is_helper: bool = False
     is_staff: bool = False
+    is_on_duty: bool = False
     helper_org: str = ""
     helper_badge: str = ""
 
@@ -51,6 +54,7 @@ def _me_from_account(account) -> MeOut:
         is_authenticated=True,
         is_helper=bool(account.is_helper),
         is_staff=bool(account.is_staff or account.is_superuser),
+        is_on_duty=bool(account.is_helper and account.is_on_duty),
         helper_org=account.helper_org or "",
         helper_badge=account.helper_badge_label if account.is_helper else "",
     )
@@ -155,6 +159,21 @@ def me(request):
         is_authenticated=False,
         is_helper=False,
         is_staff=False,
+        is_on_duty=False,
         helper_org="",
         helper_badge="",
     )
+
+
+class HelperDutyIn(Schema):
+    on: bool
+
+
+@router.post("/me/helper-duty", response=MeOut)
+def helper_duty(request, payload: HelperDutyIn):
+    actor = resolve_actor(request)
+    try:
+        account = set_helper_duty(actor, payload.on)
+    except DutyError as exc:
+        raise HttpError(403, str(exc)) from exc
+    return _me_from_account(account)
