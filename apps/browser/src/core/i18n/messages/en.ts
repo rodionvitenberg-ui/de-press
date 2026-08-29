@@ -233,6 +233,10 @@ export const en: Messages = {
     joinNeedAccount: "You need an account. Sign in from the profile menu.",
     joinMissingToken: "No invite token.",
     joinDone: "Done. You are a Helper.",
+    tabClouds: "Clouds",
+    tabSummary: "Overview",
+    unusedInvites: "Your invites",
+    inviteUsed: "used",
   },
   notify: {
     title: "Email notifications",

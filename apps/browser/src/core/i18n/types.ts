@@ -226,6 +226,10 @@ export type Messages = {
     joinNeedAccount: string;
     joinMissingToken: string;
     joinDone: string;
+    tabClouds: string;
+    tabSummary: string;
+    unusedInvites: string;
+    inviteUsed: string;
   };
   notify: {
     title: string;

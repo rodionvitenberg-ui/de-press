@@ -148,7 +148,7 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `helper.dialogueReview` | Проверка Dialogue Request | `GET/POST /api/v1/moderation/dialogue-requests*` | ChatList grey rows | live |
 | `helper.invite` | Инвайт Helperа | `POST /api/v1/helper-invites` | UserMenu + `/helper/invite` | live |
 | `helper.join` | Принять инвайт | `POST /api/v1/helper-invites/{token}/accept` | `/helper/join?token=` | live |
-| `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | client | wired |
+| `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | /helper вкладка Сводка | live |
 | `moderation.blocks` | Общий блок | `POST /api/v1/blocks` | нет (блок через чат) | api |
 | `ai.support` | DeepSeek | `POST /api/v1/ai/support` | client + CompanionPane live; Anti-Panic не зовёт | live |
 | `panic.overlay` | Anti-Panic | нет | overlay, рвёт WS | local |

@@ -96,6 +96,9 @@ def test_http_create_and_accept():
     )
     assert created.status_code == 200
     token = created.json()["token"]
+    listed = inviter.get("/api/v1/helper-invites")
+    assert listed.status_code == 200
+    assert any(row["token"] == token for row in listed.json())
 
     cand = Account.objects.create_user(email="http-c@ex.com", password="password123")
     joiner = Client()

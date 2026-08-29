@@ -46,6 +46,16 @@ def create_helper_invite(
     )
 
 
+def list_my_invites(actor: Actor, *, limit: int = 20) -> list[HelperInvite]:
+    if not _can_invite(actor):
+        raise InviteError("Only a Helper or staff can create invites")
+    return list(
+        HelperInvite.objects.filter(created_by=actor.account).order_by("-created_at")[
+            :limit
+        ]
+    )
+
+
 def get_helper_invite(token: str) -> HelperInvite:
     raw = (token or "").strip()
     if not raw:

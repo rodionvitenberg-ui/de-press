@@ -8,6 +8,7 @@ from apps.identity.invites import (
     accept_helper_invite,
     create_helper_invite,
     get_helper_invite,
+    list_my_invites,
 )
 from apps.identity.services import require_actor
 
@@ -58,6 +59,16 @@ def post_invite(request, payload: CreateInviteIn):
         code = 403 if "Helper" in msg or "staff" in msg else 400
         raise HttpError(code, msg) from exc
     return _invite_out(inv)
+
+
+@router.get("/helper-invites", response=list[InviteOut])
+def list_invites(request):
+    actor = require_actor(request)
+    try:
+        rows = list_my_invites(actor)
+    except InviteError as exc:
+        raise HttpError(403, str(exc)) from exc
+    return [_invite_out(inv) for inv in rows]
 
 
 @router.get("/helper-invites/{token}", response=InviteOut)

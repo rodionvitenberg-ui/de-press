@@ -234,6 +234,10 @@ export const ru: Messages = {
     joinNeedAccount: "Нужен аккаунт. Войди через меню профиля.",
     joinMissingToken: "Нет токена приглашения.",
     joinDone: "Готово. Ты Helper.",
+    tabClouds: "Облачка",
+    tabSummary: "Сводка",
+    unusedInvites: "Твои инвайты",
+    inviteUsed: "использован",
   },
   notify: {
     title: "Уведомления на почту",

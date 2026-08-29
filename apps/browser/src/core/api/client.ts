@@ -490,6 +490,8 @@ export const api = {
       body: JSON.stringify({ org, ttl_hours: ttlHours }),
     }),
 
+  listHelperInvites: () => request<HelperInvite[]>("/api/v1/helper-invites"),
+
   getHelperInvite: (token: string) =>
     request<HelperInvite>(`/api/v1/helper-invites/${token}`),
 

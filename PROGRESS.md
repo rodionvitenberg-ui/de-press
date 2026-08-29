@@ -44,3 +44,10 @@ files: backend/apps/identity/**, api/v1/helper_invite.py, HelperJoin.tsx, UserMe
 api: POST /api/v1/helper-invites
 api: GET /api/v1/helper-invites/{token}
 api: POST /api/v1/helper-invites/{token}/accept
+
+## 2026-08-29  agent=A  id=A4
+status: done
+branch: feat/agent-a-helper-ops
+notes: /helper tabs Облачка + Сводка (dashboard metrics, recent reports including help-chat, own invites). Help/dialogue queues stay in /chat.
+files: HelperQueue.tsx, HelperQueue.module.css, helper_invite list GET
+api: GET /api/v1/helper-invites
