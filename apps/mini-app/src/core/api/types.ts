@@ -8,8 +8,24 @@ export interface Me {
   pseudonym: string;
   is_authenticated: boolean;
   is_helper?: boolean;
+  is_staff?: boolean;
+  is_on_duty?: boolean;
   helper_org?: string;
   helper_badge?: string;
+}
+
+/** Presence booleans only — no counts, no names (A6). */
+export interface HelpPresence {
+  someone_on_duty: boolean;
+  someone_online: boolean;
+}
+
+/** One-time Helper invite (A3). */
+export interface HelperInvite {
+  token: string;
+  org: string;
+  expires_at: string;
+  used: boolean;
 }
 
 export interface Story {
@@ -188,6 +204,7 @@ export interface ModerationActionResponse {
 
 export type NotificationKind =
   | "dialogue_request"
+  | "dialogue_request_review"
   | "support_cloud"
   | "cloud_approved"
   | "dialogue_opened"
@@ -276,4 +293,3 @@ export interface HelpRequest {
   dialogue_id: string | null;
   created_at: string;
 }
-

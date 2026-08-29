@@ -8,6 +8,7 @@ import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
 import { ListRow } from "@/components/tg/ListRow";
 import styles from "./ChatList.module.css";
+import { useHelperHeartbeat } from "@/features/helper/useHelperHeartbeat";
 
 const ROW_ESTIMATE = 72;
 const VIRTUAL_THRESHOLD = 24;
@@ -48,13 +49,24 @@ export function ChatList() {
   });
 
   const isHelper = Boolean(meQuery.data?.is_helper);
+  const isOnDuty = Boolean(meQuery.data?.is_on_duty);
 
   const helpQuery = useQuery({
     queryKey: ["help-requests"],
     queryFn: () => api.helpInbox(),
-    enabled: isHelper && !panic,
+    enabled: isHelper && isOnDuty && !panic,
     refetchInterval: panic ? false : 20_000,
   });
+
+  // A2: dialogue requests needing a Helper safety check while on duty.
+  const reviewQuery = useQuery({
+    queryKey: ["dialogue-review"],
+    queryFn: () => api.dialogueReviewInbox(),
+    enabled: isHelper && isOnDuty && !panic,
+    refetchInterval: panic ? false : 20_000,
+  });
+
+  useHelperHeartbeat(isHelper);
 
   const accept = useMutation({
     mutationFn: (requestId: string) => api.acceptDialogueRequest(requestId),
@@ -88,6 +100,20 @@ export function ChatList() {
     },
   });
 
+  const approveReview = useMutation({
+    mutationFn: (requestId: string) => api.approveDialogueReview(requestId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+  });
+
+  const rejectReview = useMutation({
+    mutationFn: (requestId: string) => api.rejectDialogueReview(requestId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+  });
+
   const dialogues = dialoguesQuery.data ?? [];
   const requests = useMemo(
     () =>
@@ -99,6 +125,13 @@ export function ChatList() {
   const helpRequests = useMemo(
     () => (helpQuery.data ?? []).filter((r) => !r.status || r.status === "pending"),
     [helpQuery.data],
+  );
+  const reviewRequests = useMemo(
+    () =>
+      (reviewQuery.data ?? []).filter(
+        (r) => !r.status || r.status === "awaiting_helper",
+      ),
+    [reviewQuery.data],
   );
 
   const useVirtual = dialogues.length >= VIRTUAL_THRESHOLD;
@@ -170,6 +203,7 @@ export function ChatList() {
         {!loading &&
         requests.length === 0 &&
         helpRequests.length === 0 &&
+        reviewRequests.length === 0 &&
         dialogues.length === 0 ? (
           <p className={styles.empty}>{t.me.dialoguesEmpty}</p>
         ) : null}
@@ -208,6 +242,47 @@ export function ChatList() {
                 onClick={() => skipHelp.mutate(r.id)}
               >
                 {t.help.requestSkip}
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {reviewRequests.map((r) => (
+          <div key={`review-${r.id}`} className={styles.requestBlock}>
+            <ListRow
+              asButton
+              muted
+              title={t.helper.reviewTitle}
+              subtitle={`${r.intent}${r.note ? ` · ${r.note}` : ""}`}
+              time={timeAgo(r.created_at)}
+              avatarText="?"
+            />
+            <p className={styles.safety}>{t.helper.reviewPlaque}</p>
+            {approveReview.isError || rejectReview.isError ? (
+              <p className={styles.empty}>
+                {approveReview.error instanceof ApiError
+                  ? approveReview.error.message
+                  : rejectReview.error instanceof ApiError
+                    ? rejectReview.error.message
+                    : t.common.error}
+              </p>
+            ) : null}
+            <div className={styles.requestActions}>
+              <button
+                type="button"
+                className={styles.accept}
+                disabled={approveReview.isPending || rejectReview.isPending}
+                onClick={() => approveReview.mutate(r.id)}
+              >
+                {t.helper.reviewApprove}
+              </button>
+              <button
+                type="button"
+                className={styles.decline}
+                disabled={approveReview.isPending || rejectReview.isPending}
+                onClick={() => rejectReview.mutate(r.id)}
+              >
+                {t.helper.reviewReject}
               </button>
             </div>
           </div>

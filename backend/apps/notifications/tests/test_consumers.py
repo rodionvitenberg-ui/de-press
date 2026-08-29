@@ -53,15 +53,21 @@ async def test_websocket_receives_live_notification(settings):
     assert snapshot["type"] == "snapshot"
     assert snapshot["unread_count"] == 0
 
+    # "message" is inbox-hidden (chat unread lives on the dialogue list);
+    # use a kind that counts toward the inbox unread badge.
     await database_sync_to_async(notify)(
         actor,
-        "message",
-        {"dialogue_id": "00000000-0000-0000-0000-000000000002"},
+        "dialogue_request",
+        {
+            "story_id": "00000000-0000-0000-0000-000000000001",
+            "request_id": "00000000-0000-0000-0000-000000000002",
+            "intent": "talk",
+        },
     )
 
     event = await communicator.receive_json_from(timeout=5)
     assert event["type"] == "notification.new"
-    assert event["notification"]["kind"] == "message"
+    assert event["notification"]["kind"] == "dialogue_request"
 
     count_event = await communicator.receive_json_from(timeout=5)
     assert count_event["type"] == "unread_count"

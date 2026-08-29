@@ -37,6 +37,8 @@ import type {
   SendCircleOptions,
   VoiceRetentionSettings,
   HelpRequest,
+  HelpPresence,
+  HelperInvite,
 } from "./types";
 
 export type {
@@ -75,6 +77,8 @@ export type {
   VoiceRetention,
   VoiceRetentionSettings,
   HelpRequest,
+  HelpPresence,
+  HelperInvite,
 } from "./types";
 
 /** Same-origin relative base (Vite proxies /api, /media, /ws → Django). */
@@ -590,4 +594,55 @@ export const api = {
     }
     return await res.blob();
   },
+
+  /** Presence booleans: someone on duty / online (A6). */
+  helpPresence: () => request<HelpPresence>("/api/v1/help/presence"),
+
+  /** Helper duty heartbeat while the app is open (A5). */
+  helperHeartbeat: () =>
+    request<{ ok: boolean }>("/api/v1/help/heartbeat", { method: "POST" }),
+
+  /** A2: pending dialogue requests for Helper moderation. */
+  dialogueReviewInbox: () =>
+    request<DialogueRequest[]>("/api/v1/moderation/dialogue-requests"),
+
+  approveDialogueReview: (id: string) =>
+    request<DialogueRequest>(
+      `/api/v1/moderation/dialogue-requests/${id}/approve`,
+      { method: "POST" },
+    ),
+
+  rejectDialogueReview: (id: string) =>
+    request<DialogueRequest>(
+      `/api/v1/moderation/dialogue-requests/${id}/reject`,
+      { method: "POST" },
+    ),
+
+  /** A3: one-time Helper invite links (staff/helpers only). */
+  createHelperInvite: (org = "", ttlHours = 168) =>
+    request<HelperInvite>("/api/v1/helper-invites", {
+      method: "POST",
+      body: JSON.stringify({ org, ttl_hours: ttlHours }),
+    }),
+
+  listHelperInvites: () => request<HelperInvite[]>("/api/v1/helper-invites"),
+
+  getHelperInvite: (token: string) =>
+    request<HelperInvite>(`/api/v1/helper-invites/${token}`),
+
+  acceptHelperInvite: (token: string, pledge: boolean) =>
+    request<{ ok: boolean; is_helper: boolean; helper_org: string; message: string }>(
+      `/api/v1/helper-invites/${token}/accept`,
+      {
+        method: "POST",
+        body: JSON.stringify({ pledge }),
+      },
+    ),
+
+  /** A5: Helper duty toggle. */
+  setHelperDuty: (on: boolean) =>
+    request<Me>("/api/v1/me/helper-duty", {
+      method: "POST",
+      body: JSON.stringify({ on }),
+    }),
 };

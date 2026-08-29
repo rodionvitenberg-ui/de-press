@@ -115,3 +115,83 @@
   color: var(--text-muted);
   font-size: 0.95rem;
 }
+
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.tab,
+.tabOn {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.tabOn {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.metrics {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.sub {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.duty,
+.dutyOn {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.dutyOn {
+  border-color: var(--accent-hope);
+}
+
+.dutyStatus {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dutyLead {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.dutyBtn {
+  flex-shrink: 0;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--accent-hope-soft);
+  color: var(--accent-hope);
+  font-size: 0.88rem;
+}

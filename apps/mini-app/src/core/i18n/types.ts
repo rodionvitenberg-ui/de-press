@@ -181,6 +181,32 @@ export type Messages = {
     reasonSpam: string;
     reasonSelfHarm: string;
     reasonOther: string;
+    reviewTitle: string;
+    reviewPlaque: string;
+    reviewApprove: string;
+    reviewReject: string;
+    inviteTitle: string;
+    inviteLead: string;
+    inviteOrg: string;
+    inviteCreate: string;
+    inviteCopy: string;
+    inviteNeedRole: string;
+    joinTitle: string;
+    joinLead: string;
+    joinPledge: string;
+    joinAccept: string;
+    joinNeedAccount: string;
+    joinMissingToken: string;
+    joinDone: string;
+    tabClouds: string;
+    tabSummary: string;
+    unusedInvites: string;
+    inviteUsed: string;
+    dutyOn: string;
+    dutyOff: string;
+    dutyLead: string;
+    dutyToggleOn: string;
+    dutyToggleOff: string;
   };
   notify: {
     title: string;
@@ -385,6 +411,10 @@ export type Messages = {
     waitCancel: string;
     waitOpenChat: string;
     waitToAi: string;
+    waitMatchedTitle: string;
+    waitPresenceOnline: string;
+    waitPresenceDuty: string;
+    waitPresenceEmpty: string;
     requestTitle: string;
     requestPlaque: string;
     requestAccept: string;
@@ -421,6 +451,7 @@ export type Messages = {
       dialogue_opened: string;
       outreach_intro: string;
       message: string;
+      dialogue_request_review: string;
     };
   };
   inbox: {

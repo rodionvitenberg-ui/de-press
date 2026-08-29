@@ -7,6 +7,7 @@ import { ChatLayout } from "@/features/chat/ChatLayout";
 import { DialoguePage } from "@/features/chat/DialoguePage";
 import { NotificationsPane } from "@/features/notifications/NotificationsPane";
 import { HelperQueue } from "@/features/helper/HelperQueue";
+import { HelperJoin, HelperInviteCreate } from "@/features/helper/HelperJoin";
 import { PatternsPane } from "@/features/patterns/PatternsPane";
 import { HelpPane } from "@/features/help/HelpPane";
 import { HelpWaitPane } from "@/features/help/HelpWaitPane";
@@ -53,6 +54,8 @@ function AppRoutes() {
         <Route path="/help/wait" element={<HelpWaitPane />} />
         <Route path="/help/ai" element={<CompanionPane />} />
         <Route path="/helper" element={<HelperQueue />} />
+        <Route path="/helper/join" element={<HelperJoin />} />
+        <Route path="/helper/invite" element={<HelperInviteCreate />} />
 
         <Route path="*" element={<EmptyPane text={t.shell.notFound} />} />
       </Route>

@@ -186,6 +186,37 @@ export const ru: Messages = {
     reasonSpam: "Спам",
     reasonSelfHarm: "Риск самоповреждения",
     reasonOther: "Другое",
+    reviewTitle: "Запрос диалога на проверке",
+    reviewPlaque:
+      "Проверь, безопасно ли автору принять этот запрос. Ты не терапевт и не 112.",
+    reviewApprove: "Проверено",
+    reviewReject: "Отклонить",
+    inviteTitle: "Пригласить Helperа",
+    inviteLead:
+      "Одноразовая ссылка. Helper — не врач и не экстренная служба.",
+    inviteOrg: "Организация (необязательно)",
+    inviteCreate: "Создать ссылку",
+    inviteCopy: "Ссылка",
+    inviteNeedRole: "Приглашать могут только Helpers и staff.",
+    joinTitle: "Стать Helperом",
+    joinLead:
+      "Это волонтёрская роль. Не терапия, не 112. Можно уйти в любой момент.",
+    joinPledge:
+      "Обещаю не ставить диагнозы, не подменять экстренную помощь и не давить советами.",
+    joinAccept: "Принять и стать Helperом",
+    joinNeedAccount: "Нужен аккаунт. Войди через меню профиля.",
+    joinMissingToken: "Нет токена приглашения.",
+    joinDone: "Готово. Ты Helper.",
+    tabClouds: "Облачка",
+    tabSummary: "Сводка",
+    unusedInvites: "Твои инвайты",
+    inviteUsed: "использован",
+    dutyOn: "На смене",
+    dutyOff: "Не на смене",
+    dutyLead:
+      "Пока ты не на смене, новые просьбы о человеке и запросы диалога не приходят. Ты не терапевт и не 112.",
+    dutyToggleOn: "Заступить",
+    dutyToggleOff: "Уйти со смены",
   },
   notify: {
     title: "Уведомления на почту",
@@ -437,6 +468,10 @@ export const ru: Messages = {
     waitCancel: "Отменить запрос",
     waitOpenChat: "Открыть чат",
     waitToAi: "Поговорить с ИИ",
+    waitMatchedTitle: "Рядом есть человек",
+    waitPresenceOnline: "Сейчас кто-то у экрана.",
+    waitPresenceDuty: "Сейчас кто-то на смене, но не у экрана.",
+    waitPresenceEmpty: "Сейчас никого у экрана.",
     requestTitle: "Кто-то просит человека рядом",
     requestPlaque:
       "Волонтёрский разговор. Ты не терапевт и не экстренная служба.",
@@ -488,6 +523,7 @@ export const ru: Messages = {
       dialogue_opened: "Автор открыл диалог",
       outreach_intro: "Автор написал тебе (outreach)",
       message: "Новое сообщение в диалоге",
+      dialogue_request_review: "Запрос диалога ждёт проверки",
     },
   },
   common: {

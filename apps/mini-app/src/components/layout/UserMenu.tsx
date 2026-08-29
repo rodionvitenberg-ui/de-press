@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { api, ApiError } from "@/core/api/client";
 import type { VoiceRetention } from "@/core/api/types";
 import { useHost } from "@/core/host/HostContext";
@@ -124,6 +125,19 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
     },
   });
 
+  const duty = useMutation({
+    mutationFn: (next: boolean) => api.setHelperDuty(next),
+    onSuccess: async (nextMe) => {
+      queryClient.setQueryData(["me"], nextMe);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+    onError: (err) => {
+      setError(err instanceof ApiError ? err.message : t.common.error);
+    },
+  });
+
   const saveTelegramNotify = useMutation({
     mutationFn: (payload: {
       optIn: boolean;
@@ -166,6 +180,7 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
     login.isPending ||
     register.isPending ||
     logout.isPending ||
+    duty.isPending ||
     saveTelegramNotify.isPending ||
     testTelegramDigest.isPending;
 
@@ -340,6 +355,28 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
             ) : null}
 
             {error ? <p className={styles.error}>{error}</p> : null}
+
+            {isAccount && me?.is_helper ? (
+              <button
+                type="button"
+                className={styles.ghostBtn}
+                disabled={busy}
+                aria-pressed={Boolean(me.is_on_duty)}
+                onClick={() => duty.mutate(!me.is_on_duty)}
+              >
+                {me.is_on_duty ? t.helper.dutyToggleOff : t.helper.dutyToggleOn}
+              </button>
+            ) : null}
+
+            {isAccount && (me?.is_helper || me?.is_staff) ? (
+              <Link
+                to="/helper/invite"
+                className={styles.ghostBtn}
+                onClick={() => onClose()}
+              >
+                {t.helper.inviteTitle}
+              </Link>
+            ) : null}
 
             {isAccount ? (
               <button

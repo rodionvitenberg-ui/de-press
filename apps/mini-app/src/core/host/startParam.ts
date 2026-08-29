@@ -87,6 +87,7 @@ function normalizeUuid(raw: string): string | null {
  *   help_wait | wait         → /help/wait
  *   help_ai                  → /help/ai
  *   helper | helpers         → /helper
+ *   helper_join_<uuid>       → /helper/join?token=<uuid>
  *   panic | antipanic | anti_panic | meh → /help + Anti-Panic
  */
 export function resolveStartParam(param: string): StartTarget | null {
@@ -106,6 +107,13 @@ export function resolveStartParam(param: string): StartTarget | null {
   if (chatMatch) {
     const id = normalizeUuid(chatMatch[1]);
     if (id) return { path: `/chat/${id}`, param: raw };
+  }
+
+  // A3: one-time Helper invite deep link.
+  const helperJoinMatch = key.match(/^helper_join[-_](.+)$/);
+  if (helperJoinMatch) {
+    const id = normalizeUuid(helperJoinMatch[1]);
+    if (id) return { path: `/helper/join?token=${id}`, param: raw };
   }
 
   switch (key) {
