@@ -29,6 +29,16 @@ const HelperQueue = lazy(() =>
     default: m.HelperQueue,
   })),
 );
+const HelperJoin = lazy(() =>
+  import("@/features/helper/HelperJoin").then((m) => ({
+    default: m.HelperJoin,
+  })),
+);
+const HelperInviteCreate = lazy(() =>
+  import("@/features/helper/HelperJoin").then((m) => ({
+    default: m.HelperInviteCreate,
+  })),
+);
 const PatternsPane = lazy(() =>
   import("@/features/patterns/PatternsPane").then((m) => ({
     default: m.PatternsPane,
@@ -109,6 +119,8 @@ function AppRoutes() {
           <Route path="/help/wait" element={<HelpWaitPane />} />
           <Route path="/help/ai" element={<CompanionPane />} />
           <Route path="/helper" element={<HelperQueue />} />
+          <Route path="/helper/join" element={<HelperJoin />} />
+          <Route path="/helper/invite" element={<HelperInviteCreate />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/more" element={<MorePane />} />
           <Route path="*" element={<EmptyPane text={t.shell.notFound} />} />

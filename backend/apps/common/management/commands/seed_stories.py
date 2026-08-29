@@ -25,6 +25,7 @@ class Command(BaseCommand):
             defaults={
                 "default_pseudonym": "helper",
                 "is_helper": True,
+                "is_on_duty": True,
                 "helper_org": "pilot",
             },
         )
@@ -32,14 +33,19 @@ class Command(BaseCommand):
             helper.set_password("helperhelper12")
             helper.save()
             self.stdout.write(self.style.SUCCESS("Created helper@de-press.local"))
-        elif not helper.is_helper:
-            helper.is_helper = True
-            helper.helper_org = "pilot"
-            helper.default_pseudonym = "helper"
-            helper.save(
-                update_fields=["is_helper", "helper_org", "default_pseudonym"]
-            )
-            self.stdout.write(self.style.SUCCESS("Updated helper@de-press.local flags"))
+        else:
+            dirty: list[str] = []
+            if not helper.is_helper:
+                helper.is_helper = True
+                helper.helper_org = "pilot"
+                helper.default_pseudonym = "helper"
+                dirty.extend(["is_helper", "helper_org", "default_pseudonym"])
+            if not helper.is_on_duty:
+                helper.is_on_duty = True
+                dirty.append("is_on_duty")
+            if dirty:
+                helper.save(update_fields=dirty)
+                self.stdout.write(self.style.SUCCESS("Updated helper@de-press.local flags"))
 
         if Story.objects.exists():
             self.stdout.write("Stories already exist; skip seed.")

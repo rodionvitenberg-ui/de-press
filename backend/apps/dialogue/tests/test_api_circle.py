@@ -4,7 +4,8 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 
-from apps.dialogue.services import accept_request, create_request
+from apps.dialogue.services import accept_request
+from apps.dialogue.tests.helpers import create_reviewed_request
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
 from apps.stories.services import publish_story
@@ -17,7 +18,9 @@ def test_post_circle_endpoint(tmp_path, settings):
     author = Actor(kind="account", account=acc)
     story = publish_story(author, "api circle")
     peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
-    d = accept_request(author, create_request(peer, story.id, intent="listen").id)
+    d = accept_request(
+        author, create_reviewed_request(peer, story, intent="listen").id
+    )
     client = Client()
     client.force_login(acc)
     res = client.post(

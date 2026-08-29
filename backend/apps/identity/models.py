@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
@@ -28,6 +29,9 @@ class AccountManager(BaseUserManager):
         account.set_password(password)
         account.save(using=self._db)
         return account
+
+    def on_duty_helpers(self):
+        return self.filter(is_helper=True, is_on_duty=True, is_active=True)
 
     def create_superuser(
         self,
@@ -55,6 +59,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     # Helper: verified volunteer / partner-org listener (ADR-0010). Not a clinician by default.
     is_helper = models.BooleanField(default=False, db_index=True)
+    # Shift flag: Help Request / dialogue-review notify+inbox only when on duty.
+    is_on_duty = models.BooleanField(default=False, db_index=True)
+    # Heartbeat for instant match. Online = helper_seen_at within 45s (see presence.py).
+    helper_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    helper_last_matched_at = models.DateTimeField(null=True, blank=True)
     helper_org = models.CharField(max_length=120, blank=True, default="")
     date_joined = models.DateTimeField(default=timezone.now)
     # Soft-notify preferences (P1: email/web).
@@ -112,6 +121,37 @@ class Account(AbstractBaseUser, PermissionsMixin):
             return ""
         org = (self.helper_org or "").strip()
         return f"Helper · {org}" if org else "Helper"
+
+
+class HelperInvite(models.Model):
+    """One-time invite so a trusted person can become a Helper (ADR-0010)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    org = models.CharField(max_length=120, blank=True, default="")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="helper_invites_created",
+    )
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    used_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="helper_invites_accepted",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Helper invite"
+        verbose_name_plural = "Helper invites"
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"helper-invite:{self.token[:8]}"
 
 
 class AnonymousSession(models.Model):

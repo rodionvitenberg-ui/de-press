@@ -126,7 +126,7 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `chat.voiceRetention` | Хранить голос | `GET/POST /api/v1/me/voice-retention` | UserMenu | live |
 | `chat.deleteMessage.me` | Удалить у себя | `DELETE /api/v1/messages/{id}?scope=me` | MessageMenu | live |
 | `chat.deleteMessage.everyone` | Удалить у всех | `DELETE …?scope=everyone` | MessageMenu; пир может стереть чужое | live |
-| `chat.reportMessage` | Репорт сообщения | `POST /api/v1/messages/{id}/report` | MessageMenu | live |
+| `chat.reportMessage` | Репорт сообщения | `POST /api/v1/messages/{id}/report` | MessageMenu; help-чат без Story | live |
 | `chat.reportStory` | Репорт истории | `POST /api/v1/stories/{id}/report` | StoryPage ⋯ | live |
 | `chat.typing` | Печатает | WS | три точки | live |
 
@@ -145,7 +145,10 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `notify.testEmail` | Тест дайджеста | `POST …/notify-settings/test` | client | wired |
 | `notify.testTelegram` | Тест TG | `POST …/test-telegram` | нет в client | api |
 | `helper.queue` | Очередь облачков | `GET /api/v1/moderation/clouds` + approve/reject | HelperQueue | live |
-| `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | client | wired |
+| `helper.dialogueReview` | Проверка Dialogue Request | `GET/POST /api/v1/moderation/dialogue-requests*` | ChatList grey rows | live |
+| `helper.invite` | Инвайт Helperа | `POST /api/v1/helper-invites` | UserMenu + `/helper/invite` | live |
+| `helper.join` | Принять инвайт | `POST /api/v1/helper-invites/{token}/accept` | `/helper/join?token=` | live |
+| `helper.dashboard` | Ops-метрики | `GET /api/v1/moderation/dashboard` | /helper вкладка Сводка | live |
 | `moderation.blocks` | Общий блок | `POST /api/v1/blocks` | нет (блок через чат) | api |
 | `ai.support` | DeepSeek | `POST /api/v1/ai/support` | client + CompanionPane live; Anti-Panic не зовёт | live |
 | `panic.overlay` | Anti-Panic | нет | overlay, рвёт WS | local |
@@ -156,6 +159,10 @@ Anti-Panic с таб-бара открывается так же, как с ре
 | `help.ai` | Компаньон-чат | `POST /api/v1/ai/support` | `/help/ai` CompanionPane | live |
 | `help.request` | Запрос помощи | API + UI | HelpPane / ChatList | live (API+UI) |
 | `helper.helpInbox` | Inbox запросов Helper | `GET /api/v1/help/requests` | ChatList grey rows | live |
+| `helper.duty` | Дежурство Helperа | `POST /api/v1/me/helper-duty` + `GET /me` `is_on_duty` | /helper тумблер + UserMenu | live |
+| `helper.heartbeat` | Онлайн Helperа | `POST /api/v1/help/heartbeat` каждые 20с | /chat и /helper, пауза в Anti-Panic | live |
+| `help.presence` | Есть ли смена / экран | `GET /api/v1/help/presence` булевы, без счётчиков | HelpWaitPane | live |
+| `help.instantMatch` | Мгновенный матч дежурному онлайн | create HelpRequest → Dialogue | wait «открыть чат» | live |
 | `shell.theme` | Тема | нет | UserMenu | local |
 | `shell.locale` | Язык | нет | UserMenu | local |
 | `shell.navOrder` | Порядок rail | нет | localStorage | local |

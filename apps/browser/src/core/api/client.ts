@@ -14,6 +14,8 @@ import type {
   FeedResponse,
   HealthResponse,
   Hearer,
+  HelperInvite,
+  HelpPresence,
   HelpRequest,
   InboxOpenResponse,
   IntentOption,
@@ -158,6 +160,94 @@ async function postStoryVoice(
     throw new ApiError(detail, res.status);
   }
   return (await res.json()) as Story;
+}
+
+/** SSE handler callbacks for aiSupportStream (events: meta → delta* → done). */
+export type AiStreamHandlers = {
+  onMeta?: (meta: {
+    offline: boolean;
+    crisis: boolean;
+    labeled_ai: boolean;
+  }) => void;
+  onDelta?: (text: string) => void;
+  onDone?: (done: { crisis: boolean; disclaimer: string }) => void;
+  onError?: (detail: string) => void;
+};
+
+function handleSseFrame(frame: string, handlers: AiStreamHandlers): void {
+  let event = "message";
+  const dataLines: string[] = [];
+  for (const line of frame.split("\n")) {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+  }
+  if (!dataLines.length) return;
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(dataLines.join("\n")) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+  if (event === "meta") {
+    handlers.onMeta?.(data as unknown as {
+      offline: boolean;
+      crisis: boolean;
+      labeled_ai: boolean;
+    });
+  } else if (event === "delta") {
+    handlers.onDelta?.(typeof data.text === "string" ? data.text : "");
+  } else if (event === "done") {
+    handlers.onDone?.(data as unknown as {
+      crisis: boolean;
+      disclaimer: string;
+    });
+  } else if (event === "error") {
+    handlers.onError?.(
+      typeof data.detail === "string" ? data.detail : "stream error",
+    );
+  }
+}
+
+async function aiSupportStreamRequest(
+  messages: { role: string; content: string }[],
+  surface: string,
+  handlers: AiStreamHandlers,
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/v1/ai/support/stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ messages, surface }),
+  });
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = (await res.json()) as { detail?: string };
+      if (data.detail) detail = data.detail;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(detail, res.status);
+  }
+  if (!res.body) {
+    throw new ApiError("Streaming not supported", res.status);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let sep = buffer.indexOf("\n\n");
+    while (sep !== -1) {
+      handleSseFrame(buffer.slice(0, sep), handlers);
+      buffer = buffer.slice(sep + 2);
+      sep = buffer.indexOf("\n\n");
+    }
+  }
 }
 
 export const api = {
@@ -380,6 +470,52 @@ export const api = {
       method: "POST",
     }),
 
+  helpPresence: () => request<HelpPresence>("/api/v1/help/presence"),
+
+  helperHeartbeat: () =>
+    request<{ ok: boolean }>("/api/v1/help/heartbeat", { method: "POST" }),
+
+  dialogueReviewInbox: () =>
+    request<DialogueRequest[]>("/api/v1/moderation/dialogue-requests"),
+
+  approveDialogueReview: (id: string) =>
+    request<DialogueRequest>(
+      `/api/v1/moderation/dialogue-requests/${id}/approve`,
+      { method: "POST" },
+    ),
+
+  rejectDialogueReview: (id: string) =>
+    request<DialogueRequest>(
+      `/api/v1/moderation/dialogue-requests/${id}/reject`,
+      { method: "POST" },
+    ),
+
+  createHelperInvite: (org = "", ttlHours = 168) =>
+    request<HelperInvite>("/api/v1/helper-invites", {
+      method: "POST",
+      body: JSON.stringify({ org, ttl_hours: ttlHours }),
+    }),
+
+  listHelperInvites: () => request<HelperInvite[]>("/api/v1/helper-invites"),
+
+  getHelperInvite: (token: string) =>
+    request<HelperInvite>(`/api/v1/helper-invites/${token}`),
+
+  acceptHelperInvite: (token: string, pledge: boolean) =>
+    request<{ ok: boolean; is_helper: boolean; helper_org: string; message: string }>(
+      `/api/v1/helper-invites/${token}/accept`,
+      {
+        method: "POST",
+        body: JSON.stringify({ pledge }),
+      },
+    ),
+
+  setHelperDuty: (on: boolean) =>
+    request<Me>("/api/v1/me/helper-duty", {
+      method: "POST",
+      body: JSON.stringify({ on }),
+    }),
+
   myDialogues: () => request<Dialogue[]>("/api/v1/me/dialogues"),
 
   getDialogue: (dialogueId: string) =>
@@ -591,6 +727,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ messages, surface }),
     }),
+
+  aiSupportStream: (
+    messages: { role: string; content: string }[],
+    surface: "companion" | "anti_panic" = "companion",
+    handlers: AiStreamHandlers = {},
+  ) => aiSupportStreamRequest(messages, surface, handlers),
 
   quietPhrases: (lang: "ru" | "en" = "ru") =>
     request<QuietPhrase[]>(`/api/v1/quiet-phrases?lang=${lang}`),

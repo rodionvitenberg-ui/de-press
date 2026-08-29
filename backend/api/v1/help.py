@@ -17,7 +17,8 @@ from apps.dialogue.help import (
     my_help_request,
     skip_help_request,
 )
-from apps.identity.services import require_actor
+from apps.dialogue.presence import presence_for, touch_helper
+from apps.identity.services import require_actor, resolve_actor
 
 router = Router(tags=["help"])
 
@@ -56,6 +57,35 @@ def _raise_help(exc: HelpError) -> None:
 def _require_helper(actor) -> None:
     if actor.account is None or not actor.account.is_helper:
         raise HttpError(403, "Only a Helper can access help inbox")
+
+
+class PresenceOut(Schema):
+    someone_on_duty: bool
+    someone_online: bool
+
+
+class HeartbeatOut(Schema):
+    ok: bool
+
+
+@router.get("/help/presence", response=PresenceOut)
+def get_help_presence(request):
+    actor = resolve_actor(request)
+    flags = presence_for(actor)
+    return PresenceOut(
+        someone_on_duty=flags["someone_on_duty"],
+        someone_online=flags["someone_online"],
+    )
+
+
+@router.post("/help/heartbeat", response=HeartbeatOut)
+def post_help_heartbeat(request):
+    actor = require_actor(request)
+    try:
+        touch_helper(actor)
+    except PermissionError as exc:
+        raise HttpError(403, str(exc)) from exc
+    return HeartbeatOut(ok=True)
 
 
 @router.post("/help/requests", response=HelpOut)

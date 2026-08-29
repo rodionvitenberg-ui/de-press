@@ -20,6 +20,7 @@ from apps.dialogue.models import (
     HelpRequestStatus,
     Message,
 )
+from apps.dialogue.presence import mark_matched, pick_helper_for_match
 from apps.dialogue.services import RULES_TEXT
 from apps.identity.models import Account
 from apps.identity.services import Actor
@@ -41,6 +42,11 @@ class HelpError(Exception):
 
 def _is_helper(actor: Actor) -> bool:
     return bool(actor.account is not None and actor.account.is_helper)
+
+
+def _is_on_duty_helper(actor: Actor) -> bool:
+    acc = actor.account
+    return bool(acc is not None and acc.is_helper and acc.is_on_duty and acc.is_active)
 
 
 def _requester_actor(req: HelpRequest) -> Actor:
@@ -73,7 +79,7 @@ def _pending_for_actor(actor: Actor) -> HelpRequest | None:
 
 def _notify_helpers(req: HelpRequest, requester: Actor) -> None:
     payload = {"request_id": str(req.id)}
-    helpers = Account.objects.filter(is_helper=True, is_active=True)
+    helpers = Account.objects.on_duty_helpers()
     for helper in helpers:
         if requester.account_id is not None and helper.id == requester.account_id:
             continue
@@ -128,13 +134,31 @@ def create_help_request(actor: Actor, *, note: str = "") -> HelpRequest:
             return existing
         raise HelpError("Could not create help request") from exc
 
+    helper = pick_helper_for_match(actor)
+    if helper is not None:
+        try:
+            dialogue = accept_help_request(
+                Actor(kind="account", account=helper), req.id
+            )
+        except HelpError:
+            helper = None
+        else:
+            mark_matched(helper)
+            notify(
+                Actor(kind="account", account=helper),
+                NotificationKind.HELP_ACCEPTED,
+                {"request_id": str(req.id), "dialogue_id": str(dialogue.id)},
+            )
+            req.refresh_from_db()
+            return req
+
     _notify_helpers(req, actor)
     return req
 
 
 def list_help_inbox(actor: Actor) -> list[HelpRequest]:
     """Pending help requests visible to this Helper (excludes skips and own)."""
-    if not _is_helper(actor):
+    if not _is_on_duty_helper(actor):
         return []
 
     skipped_ids = HelpRequestSkip.objects.filter(helper=actor.account).values_list(

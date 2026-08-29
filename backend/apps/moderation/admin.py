@@ -31,10 +31,17 @@ class ReportAdmin(admin.ModelAdmin):
 
     @admin.display(description="Open reports on story")
     def open_count_hint(self, obj: Report) -> int:
-        return Report.objects.filter(
-            story_id=obj.story_id,
-            status=ReportStatus.OPEN,
-        ).count()
+        if obj.story_id:
+            return Report.objects.filter(
+                story_id=obj.story_id,
+                status=ReportStatus.OPEN,
+            ).count()
+        if obj.message_id:
+            return Report.objects.filter(
+                message_id=obj.message_id,
+                status=ReportStatus.OPEN,
+            ).count()
+        return 0
 
     @admin.action(description="Mark as reviewing")
     def mark_reviewing(self, request, queryset):
@@ -57,14 +64,15 @@ class ReportAdmin(admin.ModelAdmin):
                 status=ReportStatus.RESOLVED_HIDDEN,
                 hide_story=True,
             )
-            story_ids.add(report.story_id)
-            # Close sibling open reports on same story
-            Report.objects.filter(
-                story_id=report.story_id,
-                status=ReportStatus.OPEN,
-            ).exclude(pk=report.pk).update(status=ReportStatus.RESOLVED_HIDDEN)
+            if report.story_id:
+                story_ids.add(report.story_id)
+                Report.objects.filter(
+                    story_id=report.story_id,
+                    status=ReportStatus.OPEN,
+                ).exclude(pk=report.pk).update(status=ReportStatus.RESOLVED_HIDDEN)
         for sid in story_ids:
-            moderate_story(sid, StoryStatus.HIDDEN)
+            if sid:
+                moderate_story(sid, StoryStatus.HIDDEN)
         self.message_user(
             request,
             f"Hidden {len(story_ids)} stor(ies) and resolved reports.",

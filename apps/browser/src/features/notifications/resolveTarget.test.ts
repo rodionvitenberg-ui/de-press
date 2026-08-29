@@ -9,6 +9,9 @@ function note(kind: AppNotification["kind"], payload: Record<string, string> = {
 describe("resolveTarget", () => {
   it("sends dialogue requests to the chat list, not the feed", () => {
     expect(resolveTarget(note("dialogue_request", { story_id: "s1" }))).toBe("/chat");
+    expect(resolveTarget(note("dialogue_request_review", { request_id: "r2" }))).toBe(
+      "/chat",
+    );
     expect(resolveTarget(note("dialogue_deleted"))).toBe("/chat");
   });
 

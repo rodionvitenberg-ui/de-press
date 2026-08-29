@@ -5,6 +5,13 @@ from uuid import UUID
 from ninja import Router, Schema
 from ninja.errors import HttpError
 
+from api.v1.dialogue import RequestOut, _req_out
+from apps.dialogue.services import (
+    DialogueError,
+    approve_dialogue_request,
+    list_review_inbox,
+    reject_dialogue_request,
+)
 from apps.identity.services import require_actor
 from apps.moderation.blocks import (
     BlockError,
@@ -127,6 +134,8 @@ def report_message(request, message_id: UUID, payload: ReportIn):
             reason=payload.reason,
             details=payload.details,
         )
+    except StoryNotFound as exc:
+        raise HttpError(404, str(exc)) from exc
     except ReportError as exc:
         raise HttpError(400, str(exc)) from exc
     return ReportOut(
@@ -159,6 +168,43 @@ def create_block(request, payload: BlockIn):
         created=result.created,
         message="Человек скрыт из твоей ленты." if result.created else "Уже в списке.",
     )
+
+
+def _require_helper(actor) -> None:
+    acc = actor.account
+    if acc is None or not (acc.is_helper or acc.is_staff or acc.is_superuser):
+        raise HttpError(403, "Нужна роль Helper или staff")
+
+
+@router.get("/moderation/dialogue-requests", response=list[RequestOut])
+def helper_dialogue_review_inbox(request):
+    actor = require_actor(request)
+    _require_helper(actor)
+    return [_req_out(r) for r in list_review_inbox(actor)]
+
+
+@router.post("/moderation/dialogue-requests/{request_id}/approve", response=RequestOut)
+def helper_approve_dialogue_request(request, request_id: UUID):
+    actor = require_actor(request)
+    try:
+        req = approve_dialogue_request(actor, request_id)
+    except DialogueError as exc:
+        msg = str(exc)
+        code = 403 if "Helper" in msg else 400
+        raise HttpError(code, msg) from exc
+    return _req_out(req)
+
+
+@router.post("/moderation/dialogue-requests/{request_id}/reject", response=RequestOut)
+def helper_reject_dialogue_request(request, request_id: UUID):
+    actor = require_actor(request)
+    try:
+        req = reject_dialogue_request(actor, request_id)
+    except DialogueError as exc:
+        msg = str(exc)
+        code = 403 if "Helper" in msg else 400
+        raise HttpError(code, msg) from exc
+    return _req_out(req)
 
 
 @router.post("/dialogues/{dialogue_id}/block-peer", response=BlockOut)

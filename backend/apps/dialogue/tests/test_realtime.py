@@ -8,7 +8,8 @@ from django.contrib.sessions.backends.db import SessionStore
 
 from apps.dialogue.models import DialogueStatus
 from apps.dialogue.realtime import dialogue_group, serialize_message
-from apps.dialogue.services import accept_request, create_request, send_message
+from apps.dialogue.services import accept_request, send_message
+from apps.dialogue.tests.helpers import create_reviewed_request
 from apps.identity.models import AnonymousSession
 from apps.identity.services import Actor
 from apps.stories.services import publish_story
@@ -32,7 +33,7 @@ def test_broadcast_after_http_send(settings):
     story = publish_story(author_actor, "broadcast monologue", topic="anxiety")
     peer_sess = AnonymousSession.objects.create()
     peer = Actor(kind="anonymous", session=peer_sess)
-    req = create_request(peer, story.id, intent="share")
+    req = create_reviewed_request(peer, story, intent="share")
     dialogue = accept_request(author_actor, req.id)
     msg = send_message(author_actor, dialogue.id, "HTTP then WS fanout")
     payload = serialize_message(msg, viewer=author_actor)
@@ -52,7 +53,7 @@ def test_serialize_circle_includes_video_and_ephemeral(tmp_path, settings):
     story = publish_story(author_actor, "serialize circle")
     peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
     dialogue = accept_request(
-        author_actor, create_request(peer, story.id, intent="listen").id
+        author_actor, create_reviewed_request(peer, story, intent="listen").id
     )
     msg = send_circle_message(
         author_actor,
@@ -123,7 +124,7 @@ def _open_dialogue(author):
     story = publish_story(author_actor, "WS monologue", topic="loneliness")
     peer_sess = AnonymousSession.objects.create(pseudonym="peer")
     peer = Actor(kind="anonymous", session=peer_sess)
-    req = create_request(peer, story.id, intent="listen")
+    req = create_reviewed_request(peer, story, intent="listen")
     dialogue = accept_request(author_actor, req.id)
     assert dialogue.status == DialogueStatus.OPEN
     return dialogue

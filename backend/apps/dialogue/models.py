@@ -17,6 +17,7 @@ class DialogueIntent(models.TextChoices):
 
 
 class DialogueRequestStatus(models.TextChoices):
+    AWAITING_HELPER = "awaiting_helper", "Awaiting helper review"
     PENDING = "pending", "Pending"
     ACCEPTED = "accepted", "Accepted"
     DECLINED = "declined", "Declined"
@@ -62,7 +63,7 @@ class DialogueRequest(models.Model):
     status = models.CharField(
         max_length=16,
         choices=DialogueRequestStatus.choices,
-        default=DialogueRequestStatus.PENDING,
+        default=DialogueRequestStatus.AWAITING_HELPER,
         db_index=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -75,12 +76,18 @@ class DialogueRequest(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["story", "from_account"],
-                condition=models.Q(from_account__isnull=False, status="pending"),
+                condition=models.Q(
+                    from_account__isnull=False,
+                    status__in=["pending", "awaiting_helper"],
+                ),
                 name="unique_pending_request_account",
             ),
             models.UniqueConstraint(
                 fields=["story", "from_session"],
-                condition=models.Q(from_session__isnull=False, status="pending"),
+                condition=models.Q(
+                    from_session__isnull=False,
+                    status__in=["pending", "awaiting_helper"],
+                ),
                 name="unique_pending_request_session",
             ),
         ]

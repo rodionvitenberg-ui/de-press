@@ -8,8 +8,22 @@ export interface Me {
   pseudonym: string;
   is_authenticated: boolean;
   is_helper?: boolean;
+  is_staff?: boolean;
+  is_on_duty?: boolean;
   helper_org?: string;
   helper_badge?: string;
+}
+
+export interface HelpPresence {
+  someone_on_duty: boolean;
+  someone_online: boolean;
+}
+
+export interface HelperInvite {
+  token: string;
+  org: string;
+  expires_at: string;
+  used: boolean;
 }
 
 export interface ReceivedCloud {
@@ -241,7 +255,8 @@ export type NotificationKind =
   | "dialogue_deleted"
   | "silent_empathy"
   | "help_requested"
-  | "help_accepted";
+  | "help_accepted"
+  | "dialogue_request_review";
 
 export interface AppNotification {
   id: string;

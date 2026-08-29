@@ -5,6 +5,7 @@ export function resolveTarget(n: AppNotification): string | null {
   const p = n.payload ?? {};
   switch (n.kind) {
     case "dialogue_request":
+    case "dialogue_request_review":
       return "/chat";
     case "dialogue_deleted":
       return "/chat";

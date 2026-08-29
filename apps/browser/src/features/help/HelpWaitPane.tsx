@@ -31,6 +31,12 @@ export function HelpWaitPane() {
     refetchInterval: panic ? false : 4000,
   });
 
+  const presenceQuery = useQuery({
+    queryKey: ["help-presence"],
+    queryFn: () => api.helpPresence(),
+    refetchInterval: panic ? false : 4000,
+  });
+
   const cancel = useMutation({
     mutationFn: (id: string) => api.cancelHelpRequest(id),
     onSuccess: async () => {
@@ -41,12 +47,24 @@ export function HelpWaitPane() {
 
   const req = mineQuery.data;
   const loading = mineQuery.isPending && req === undefined;
+  const matched = req?.status === "accepted" && Boolean(req.dialogue_id);
+  const presence = presenceQuery.data;
+  const presenceLine = matched || !presence
+    ? null
+    : presence.someone_online
+      ? t.help.waitPresenceOnline
+      : presence.someone_on_duty
+        ? t.help.waitPresenceDuty
+        : t.help.waitPresenceEmpty;
 
   return (
     <div className={styles.pane}>
       <header className={styles.head}>
-        <h1 className={styles.title}>{t.help.waitTitle}</h1>
+        <h1 className={styles.title}>
+          {matched ? t.help.waitMatchedTitle : t.help.waitTitle}
+        </h1>
         <p className={styles.intro}>{t.help.waitBody}</p>
+        {presenceLine ? <p className={styles.intro}>{presenceLine}</p> : null}
       </header>
 
       <section className={styles.card}>

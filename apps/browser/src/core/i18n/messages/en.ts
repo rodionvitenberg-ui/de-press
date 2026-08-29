@@ -212,6 +212,37 @@ export const en: Messages = {
     reasonSpam: "Spam",
     reasonSelfHarm: "Self-harm concern",
     reasonOther: "Other",
+    reviewTitle: "Dialogue request to review",
+    reviewPlaque:
+      "Check whether it is safe for the author to accept. You are not a clinician or emergency services.",
+    reviewApprove: "Approved",
+    reviewReject: "Decline",
+    inviteTitle: "Invite a Helper",
+    inviteLead:
+      "One-time link. A Helper is not a clinician or emergency services.",
+    inviteOrg: "Organisation (optional)",
+    inviteCreate: "Create link",
+    inviteCopy: "Link",
+    inviteNeedRole: "Only Helpers and staff can invite.",
+    joinTitle: "Become a Helper",
+    joinLead:
+      "This is a volunteer role. Not therapy, not 112. You can leave at any time.",
+    joinPledge:
+      "I will not diagnose, replace emergency care, or push unsolicited advice.",
+    joinAccept: "Accept and become a Helper",
+    joinNeedAccount: "You need an account. Sign in from the profile menu.",
+    joinMissingToken: "No invite token.",
+    joinDone: "Done. You are a Helper.",
+    tabClouds: "Clouds",
+    tabSummary: "Overview",
+    unusedInvites: "Your invites",
+    inviteUsed: "used",
+    dutyOn: "On duty",
+    dutyOff: "Off duty",
+    dutyLead:
+      "While you are off duty, new human-help requests and dialogue reviews will not reach you. You are not a clinician or emergency services.",
+    dutyToggleOn: "Go on duty",
+    dutyToggleOff: "Leave duty",
   },
   notify: {
     title: "Email notifications",
@@ -318,6 +349,8 @@ export const en: Messages = {
     send: "Send",
     sending: "…",
     error: "Couldn’t reply",
+    wipe: "Erase AI dialogs and local memory",
+    wipeConfirm: "Erase AI dialogs and all local records on this device?",
   },
   antiPanic: {
     menuTitle: "What do you need right now?",
@@ -508,6 +541,10 @@ export const en: Messages = {
     waitCancel: "Cancel request",
     waitOpenChat: "Open chat",
     waitToAi: "Talk to AI",
+    waitMatchedTitle: "Someone is nearby",
+    waitPresenceOnline: "Someone is at the screen right now.",
+    waitPresenceDuty: "Someone is on duty, but not at the screen.",
+    waitPresenceEmpty: "Nobody is at the screen right now.",
     requestTitle: "Someone is asking for a person nearby",
     requestPlaque:
       "A volunteer conversation. You are not a therapist and not an emergency service.",
@@ -562,6 +599,7 @@ export const en: Messages = {
       silent_empathy: "Someone sent you support rays",
       help_requested: "Someone is asking for a person nearby",
       help_accepted: "A Helper accepted your request",
+      dialogue_request_review: "A dialogue request is waiting for review",
     },
   },
   common: {

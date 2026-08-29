@@ -10,6 +10,7 @@ from api.v1 import (
     empathy,
     health,
     help as help_api,
+    helper_invite,
     i18n,
     identity,
     moderation,
@@ -35,6 +36,7 @@ api.add_router("/v1", support.router)
 api.add_router("/v1", moderation.router)
 api.add_router("/v1", dialogue.router)
 api.add_router("/v1", help_api.router)
+api.add_router("/v1", helper_invite.router)
 api.add_router("/v1", notifications.router)
 api.add_router("/v1", profile.router)
 api.add_router("/v1", ai.router)

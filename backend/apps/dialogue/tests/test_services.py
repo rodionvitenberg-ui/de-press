@@ -41,7 +41,9 @@ def test_dialogue_request_accept_message():
     peer_sess = AnonymousSession.objects.create(pseudonym="слушатель")
     peer = Actor(kind="anonymous", session=peer_sess)
 
-    req = create_request(peer, story.id, intent="listen", note="я рядом")
+    from apps.dialogue.tests.helpers import create_reviewed_request
+
+    req = create_reviewed_request(peer, story, intent="listen", note="я рядом")
     assert req.status == DialogueRequestStatus.PENDING
 
     dialogue = accept_request(author, req.id)
@@ -187,7 +189,9 @@ def test_voice_message_and_translate(tmp_path, settings):
     story = publish_story(author, "Нужно услышать.")
     peer_sess = AnonymousSession.objects.create(pseudonym="слушатель")
     peer = Actor(kind="anonymous", session=peer_sess)
-    req = create_request(peer, story.id, intent="listen")
+    from apps.dialogue.tests.helpers import create_reviewed_request
+
+    req = create_reviewed_request(peer, story, intent="listen")
     dialogue = accept_request(author, req.id)
 
     audio = SimpleUploadedFile(
@@ -221,7 +225,11 @@ def _open_pair(email: str):
     story = publish_story(author, "Монолог для кружочка.")
     peer_sess = AnonymousSession.objects.create(pseudonym="p")
     peer = Actor(kind="anonymous", session=peer_sess)
-    dialogue = accept_request(author, create_request(peer, story.id, intent="listen").id)
+    from apps.dialogue.tests.helpers import create_reviewed_request
+
+    dialogue = accept_request(
+        author, create_reviewed_request(peer, story, intent="listen").id
+    )
     return author, peer, dialogue
 
 
@@ -425,10 +433,13 @@ def test_reply_edit_delete_hide_pin_forward():
     # d2 is a different pair; forward needs author in target. Use outreach-like: just
     # send in d1 and create second dialogue for author+peer via another story.
     from apps.stories.services import publish_story
-    from apps.dialogue.services import accept_request, create_request
+    from apps.dialogue.services import accept_request
+    from apps.dialogue.tests.helpers import create_reviewed_request
 
     story2 = publish_story(author, "Вторая мысль.")
-    d2 = accept_request(author, create_request(peer, story2.id, intent="listen").id)
+    d2 = accept_request(
+        author, create_reviewed_request(peer, story2, intent="listen").id
+    )
 
     original = send_message(author, d1.id, "Привет, это оригинал.")
     reply = send_message(peer, d1.id, "Ответ тебе.", reply_to_id=original.id)
