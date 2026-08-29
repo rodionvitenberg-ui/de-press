@@ -367,6 +367,9 @@ export const en: Messages = {
     voiceRetentionKeep: "Keep",
     dayToday: "Today",
     dayYesterday: "Yesterday",
+    transcribe: "Transcribe",
+    ttsListen: "Play translated voice",
+    ttsOffline: "Voice-over unavailable — no key on the server",
   },
   guides: {
     title: "Support guides",

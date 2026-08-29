@@ -569,4 +569,25 @@ export const api = {
     surface: "companion" | "anti_panic" = "companion",
     handlers: AiStreamHandlers = {},
   ) => aiSupportStreamRequest(messages, surface, handlers),
+
+  /** STT→translate→TTS pipeline; returns mp3 bytes. 503 = offline marker. */
+  messageTts: async (messageId: string, lang: string): Promise<Blob> => {
+    const res = await fetch(`${API_URL}/api/v1/messages/${messageId}/tts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ lang }),
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const data = (await res.json()) as { detail?: string };
+        if (data.detail) detail = data.detail;
+      } catch {
+        /* ignore */
+      }
+      throw new ApiError(detail, res.status);
+    }
+    return await res.blob();
+  },
 };

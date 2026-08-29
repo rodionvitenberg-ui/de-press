@@ -370,6 +370,9 @@ export const ru: Messages = {
     voiceRetentionKeep: "Хранить",
     dayToday: "Сегодня",
     dayYesterday: "Вчера",
+    transcribe: "Расшифровать",
+    ttsListen: "Прослушать перевод",
+    ttsOffline: "Озвучение недоступно — нет ключа на сервере",
   },
   guides: {
     title: "Гайды поддержки",
