@@ -1,0 +1,39 @@
+.menu {
+  position: fixed;
+  z-index: 60;
+  min-width: 14rem;
+  padding: 0.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-elev-2);
+}
+
+.item {
+  display: block;
+  width: 100%;
+  text-align: start;
+  border: none;
+  background: none;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.danger {
+  color: var(--accent-panic);
+}
+
+.sep {
+  height: 1px;
+  margin: 0.25rem 0.4rem;
+  background: var(--border-subtle);
+  border: none;
+}

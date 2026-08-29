@@ -1,13 +1,18 @@
-/* Красная зона — просмотр мысли (карточка, не чат) */
+/* Open story — chat chrome for the monologue thread; guest footer stays actions. */
+
+.cloudPick {
+  box-shadow: 0 0 0 1.5px var(--accent-hope);
+}
+
+.pickable {
+  cursor: pointer;
+}
 
 .page {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 1rem;
   min-height: 0;
   height: 100%;
-  overflow-y: auto;
   flex: 1;
   background-color: var(--bg-chat);
   background-image: var(--chat-wallpaper);
@@ -15,47 +20,16 @@
   background-position: var(--chat-wallpaper-pos);
 }
 
-.card {
-  background: var(--bg-surface);
-  border-radius: 1.15rem;
-  padding: 1.25rem;
-  box-shadow: var(--shadow-elev-1);
-}
-
-.head {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  background: var(--bg-elevated);
-  color: var(--accent-hope);
-}
-
-.head small {
-  display: block;
-  color: var(--text-muted);
-}
-
-.text {
-  white-space: pre-wrap;
-  line-height: 1.7;
-  color: var(--text-primary);
-}
-
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: auto;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  padding: 0.65rem 0.75rem 0.75rem;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .action {
@@ -190,4 +164,21 @@
 
 .empty {
   color: var(--text-muted);
+}
+
+.hearerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.hearerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
 }

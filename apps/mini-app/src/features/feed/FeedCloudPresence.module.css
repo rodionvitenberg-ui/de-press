@@ -1,0 +1,118 @@
+.slot {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0.2rem 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.motion {
+  display: flex;
+  opacity: 0;
+  transform: scale(0.86);
+}
+
+.in .motion {
+  animation: fadeIn 1.5s ease forwards;
+}
+
+.play .motion,
+.wiggle .motion {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.out .motion {
+  animation: fadeOut 1.5s ease forwards;
+}
+
+.nudge {
+  display: flex;
+  transform-origin: center;
+}
+
+.nudge > span {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0.12rem;
+  box-sizing: border-box;
+}
+
+.wiggle .nudge {
+  animation: wiggle 0.42s ease;
+}
+
+.slot :global(span),
+.slot :global(button) {
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-14deg) scale(1.08);
+  }
+  40% {
+    transform: rotate(12deg) scale(1.04);
+  }
+  60% {
+    transform: rotate(-9deg);
+  }
+  80% {
+    transform: rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .in .motion,
+  .out .motion,
+  .wiggle .nudge {
+    animation: none;
+  }
+
+  .in .motion,
+  .play .motion,
+  .wiggle .motion {
+    opacity: 1;
+    transform: none;
+  }
+
+  .out .motion {
+    opacity: 0;
+  }
+}

@@ -30,6 +30,7 @@ import type {
   ReportResponse,
   SendCloudResponse,
   Story,
+  StoryThread,
   SupportCloud,
   Topic,
   UnreadCountResponse,
@@ -70,6 +71,7 @@ export type {
   SendCloudResponse,
   SendCircleOptions,
   Story,
+  StoryThread,
   SupportCloud,
   Topic,
   UnreadCountResponse,
@@ -122,6 +124,45 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 
   return (await res.json()) as T;
+}
+
+async function postStoryVoice(
+  path: string,
+  blob: Blob,
+  opts?: {
+    body?: string;
+    topic?: string;
+    pseudonym?: string;
+    durationMs?: number;
+    sourceLang?: string;
+    filename?: string;
+  },
+): Promise<Story> {
+  const form = new FormData();
+  form.append("audio", blob, opts?.filename || "note.webm");
+  if (opts?.body) form.append("body", opts.body);
+  if (opts?.topic) form.append("topic", opts.topic);
+  if (opts?.pseudonym) form.append("pseudonym", opts.pseudonym);
+  if (opts?.durationMs != null) {
+    form.append("duration_ms", String(Math.round(opts.durationMs)));
+  }
+  form.append("source_lang", opts?.sourceLang || "ru");
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    body: form,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = (await res.json()) as { detail?: string };
+      if (data.detail) detail = data.detail;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(detail, res.status);
+  }
+  return (await res.json()) as Story;
 }
 
 /** SSE handler callbacks for aiSupportStream (events: meta → delta* → done). */
@@ -256,6 +297,47 @@ export const api = {
   },
 
   getStory: (id: string) => request<Story>(`/api/v1/stories/${id}`),
+
+  storyThread: (id: string) =>
+    request<StoryThread>(`/api/v1/stories/${id}/thread`),
+
+  editStory: (id: string, body: string) =>
+    request<Story>(`/api/v1/stories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ body }),
+    }),
+
+  hideStory: (id: string) =>
+    request<Story>(`/api/v1/stories/${id}/hide`, { method: "POST" }),
+
+  unhideStory: (id: string) =>
+    request<Story>(`/api/v1/stories/${id}/unhide`, { method: "POST" }),
+
+  deleteStory: (id: string) =>
+    request<Story>(`/api/v1/stories/${id}`, { method: "DELETE" }),
+
+  addComment: (postId: string, body: string) =>
+    request<Story>(`/api/v1/stories/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    }),
+
+  commentStoryVoice: (
+    postId: string,
+    blob: Blob,
+    opts?: {
+      body?: string;
+      durationMs?: number;
+      sourceLang?: string;
+      filename?: string;
+    },
+  ) =>
+    postStoryVoice(`/api/v1/stories/${postId}/comments/voice`, blob, opts),
+
+  markCloudsRead: (storyId: string) =>
+    request<{ ok: boolean }>(`/api/v1/stories/${storyId}/clouds/mark-read`, {
+      method: "POST",
+    }),
 
   publishStory: (body: string, opts?: { pseudonym?: string; topic?: string }) =>
     request<Story>("/api/v1/stories", {

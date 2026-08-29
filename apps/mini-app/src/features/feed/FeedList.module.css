@@ -12,6 +12,10 @@
   flex-shrink: 0;
 }
 
+:global(html[data-layout="phone"]) .list {
+  border-right: none;
+}
+
 .searchWrap {
   flex-shrink: 0;
   padding: 0.5rem 0.65rem 0.35rem;
@@ -44,6 +48,12 @@
   outline: none;
   color: var(--text-primary);
   font-size: 0.9rem;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .searchInput::placeholder {

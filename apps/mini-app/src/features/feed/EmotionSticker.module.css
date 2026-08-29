@@ -1,0 +1,192 @@
+.sticker {
+  position: relative;
+  width: 5.1rem;
+  border: none;
+  border-radius: 1.2rem;
+  background:
+    radial-gradient(120% 90% at 28% 16%, rgba(255, 255, 255, 0.16), transparent 46%),
+    linear-gradient(180deg, var(--accent-hope-mid), var(--accent-hope-soft));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  padding: 0.45rem 0.3rem 0.4rem;
+  color: var(--accent-hope);
+  transition-property: transform, filter, opacity;
+  transition-duration: var(--duration-ui);
+}
+
+.sticker:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.sticker:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.sticker:disabled {
+  opacity: 0.55;
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+
+.stickerSent {
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--border-soft);
+}
+
+.stickerCompact {
+  width: 3.6rem;
+  padding: 0.3rem 0.2rem 0.25rem;
+  border-radius: 0.9rem;
+}
+
+.stickerCompact .stage {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.stickerCompact .caption {
+  font-size: 0.62rem;
+}
+
+.sticker.stickerMini {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0.12rem;
+  border-radius: 0.55rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.stickerMini .stage {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.stickerMini:hover:not(:disabled) {
+  filter: none;
+  transform: none;
+}
+
+.stage {
+  width: 2.85rem;
+  height: 2.85rem;
+  display: block;
+}
+
+.art {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.body,
+.head,
+.heartShape {
+  fill: var(--accent-hope);
+}
+
+.shine {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.ground {
+  fill: var(--accent-hope);
+  opacity: 0.28;
+}
+
+.caption {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.here .figure {
+  transform-origin: 32px 50px;
+  animation: breathe 3.6s ease-in-out infinite;
+}
+
+.hear .heart {
+  transform-origin: 32px 46px;
+  animation: beat 2.8s ease-in-out infinite;
+}
+
+.together .left,
+.together .right {
+  animation: gather 4s ease-in-out infinite;
+}
+
+.together .right {
+  animation-name: gatherIn;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  22% {
+    transform: scale(1.08);
+  }
+  40% {
+    transform: scale(1);
+  }
+  56% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gather {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes gatherIn {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .here .figure,
+  .hear .heart,
+  .together .left,
+  .together .right {
+    animation: none;
+  }
+}

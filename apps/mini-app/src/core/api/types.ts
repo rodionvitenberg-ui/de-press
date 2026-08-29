@@ -28,6 +28,12 @@ export interface HelperInvite {
   used: boolean;
 }
 
+export interface ReceivedCloud {
+  id: string;
+  phrase_key: string;
+  body: string;
+}
+
 export interface Story {
   id: string;
   body: string;
@@ -35,6 +41,15 @@ export interface Story {
   pseudonym: string;
   published_at: string | null;
   status: string;
+  is_mine?: boolean;
+  author_key?: string;
+  parent_id?: string | null;
+  my_phrase_key?: string;
+  cloud_unread?: number;
+  cloud_gesture?: string;
+  received_clouds?: ReceivedCloud[];
+  audio_url?: string | null;
+  duration_ms?: number | null;
 }
 
 export interface AuthorStory extends Story {
@@ -50,6 +65,10 @@ export interface Topic {
 export interface FeedResponse {
   items: Story[];
   next_cursor: string | null;
+}
+
+export interface StoryThread {
+  items: Story[];
 }
 
 export interface EmpathyResponse {

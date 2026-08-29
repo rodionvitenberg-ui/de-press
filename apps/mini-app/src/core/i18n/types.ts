@@ -75,11 +75,23 @@ export type Messages = {
     loadMoreLoading: string;
     composeOpen: string;
     composeClose: string;
+    mine: string;
+    sendRays: string;
+    requestChat: string;
+    hide: string;
+    unhide: string;
+    delete: string;
+    deleteConfirm: string;
+    voice: string;
   };
   story: {
     back: string;
     loading: string;
     notFound: string;
+    edit: string;
+    save: string;
+    addNext: string;
+    addPlaceholder: string;
     eyebrow: string;
     supportTitle: string;
     supportLead: string;
@@ -94,6 +106,11 @@ export type Messages = {
     freePlaceholder: string;
     freeSubmit: string;
     sentPhrase: string;
+    pickOne: string;
+    alreadySent: string;
+    gestureHere: string;
+    gestureHear: string;
+    gestureTogether: string;
   };
   empathy: {
     hearYou: string;
@@ -379,6 +396,18 @@ export type Messages = {
     transcribe: string;
     ttsListen: string;
     ttsOffline: string;
+    confirmYes: string;
+    confirmNo: string;
+    copied: string;
+    menuCopy: string;
+    menuEdit: string;
+    menuDeleteMsg: string;
+    playerPause: string;
+    playerPlay: string;
+    playerSeek: string;
+    playerMute: string;
+    playerUnmute: string;
+    playerVolume: string;
   };
   guides: {
     title: string;

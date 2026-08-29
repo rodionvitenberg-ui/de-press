@@ -6,6 +6,7 @@ import { App } from "./App";
 import { HostProvider } from "@/core/host/HostContext";
 import { ThemeProvider } from "@/core/theme";
 import { LocaleProvider } from "@/core/i18n/context";
+import { ToastProvider } from "@/core/toast";
 import "./styles/tokens.css";
 import "./styles/base.css";
 
@@ -28,9 +29,11 @@ createRoot(root).render(
       <LocaleProvider>
         <QueryClientProvider client={queryClient}>
           <HostProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <ToastProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </ToastProvider>
           </HostProvider>
         </QueryClientProvider>
       </LocaleProvider>

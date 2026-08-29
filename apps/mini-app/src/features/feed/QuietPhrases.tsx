@@ -1,83 +1,81 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "@/core/api/client";
 import { useI18n } from "@/core/i18n/context";
+import { isHandwrittenLocale } from "@/core/i18n";
+import { EmotionSticker, isGestureKey, type GestureKey } from "./EmotionSticker";
 import styles from "./QuietPhrases.module.css";
 
 interface QuietPhrasesProps {
   storyId: string;
+  sentKey?: string;
+  onSent?: (key: string) => void;
 }
 
-/**
- * Quiet Phrases = one-tap private Support Cloud (not public comments).
- * Silent Empathy is separate («лучи»).
- */
-export function QuietPhrases({ storyId }: QuietPhrasesProps) {
+export function QuietPhrases({ storyId, sentKey, onSent }: QuietPhrasesProps) {
   const { locale, t } = useI18n();
-  const [sentKeys, setSentKeys] = useState<Set<string>>(() => new Set());
+  const [sent, setSent] = useState(Boolean(sentKey));
   const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSent(Boolean(sentKey));
+    setStatus(null);
+  }, [storyId, sentKey]);
 
   const phrasesQuery = useQuery({
     queryKey: ["quiet-phrases", locale],
-    queryFn: () => api.quietPhrases(locale),
+    queryFn: () =>
+      api.quietPhrases(isHandwrittenLocale(locale) ? locale : "en"),
   });
+
+  const already = Boolean(sentKey) || sent;
 
   const send = useMutation({
     mutationFn: (key: string) => api.sendQuietPhrase(storyId, key),
     onSuccess: (res, key) => {
-      setSentKeys((prev) => new Set(prev).add(key));
-      setStatus(res.message || t.support.sentPhrase);
+      setSent(true);
+      onSent?.(key);
+      setStatus(
+        res.created === false ? t.support.alreadySent : res.message || t.support.sentPhrase,
+      );
     },
     onError: (err) => {
-      setStatus(err instanceof ApiError ? err.message : t.common.error);
+      const msg = err instanceof ApiError ? err.message : t.common.error;
+      setStatus(msg);
+      if (msg.includes("одно")) setSent(true);
     },
   });
 
-  const phrases = phrasesQuery.data ?? [];
+  const phrases = (phrasesQuery.data ?? []).filter((p): p is typeof p & { key: GestureKey } =>
+    isGestureKey(p.key),
+  );
 
   return (
     <section className={styles.wrap} aria-labelledby="quiet-phrases-title">
       <h2 id="quiet-phrases-title" className={styles.title}>
-        {t.support.title}
+        {t.support.pickOne}
       </h2>
       <p className={styles.lead}>{t.support.lead}</p>
 
-      {phrasesQuery.isError ? (
-        <p className={styles.hint}>
-          {phrasesQuery.error instanceof ApiError
-            ? phrasesQuery.error.message
-            : t.common.error}
-        </p>
-      ) : null}
-
-      {phrases.length > 0 ? (
-        <ul className={styles.list}>
-          {phrases.map((p) => {
-            const sent = sentKeys.has(p.key);
-            const busy = send.isPending && send.variables === p.key;
-            return (
-              <li key={p.key}>
-                <button
-                  type="button"
-                  className={sent ? styles.chipSent : styles.chip}
-                  disabled={busy || sent}
-                  onClick={() => {
-                    setStatus(null);
-                    send.mutate(p.key);
-                  }}
-                  aria-label={
-                    sent ? `${t.support.sentPhrase}: ${p.text}` : p.text
-                  }
-                >
-                  {p.text}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : phrasesQuery.isLoading ? (
+      {phrasesQuery.isLoading ? (
         <p className={styles.hint}>{t.common.loading}</p>
       ) : null}
+
+      <ul className={styles.gestures}>
+        {phrases.map((p) => (
+          <li key={p.key}>
+            <EmotionSticker
+              gesture={p.key}
+              label={p.text}
+              caption={captionFor(p.key, t.support)}
+              asButton
+              disabled={already || send.isPending}
+              sent={already}
+              onClick={() => send.mutate(p.key)}
+            />
+          </li>
+        ))}
+      </ul>
 
       {status ? (
         <p className={styles.hint} role="status" aria-live="polite">
@@ -86,4 +84,13 @@ export function QuietPhrases({ storyId }: QuietPhrasesProps) {
       ) : null}
     </section>
   );
+}
+
+function captionFor(
+  key: GestureKey,
+  support: { gestureHere: string; gestureHear: string; gestureTogether: string },
+): string {
+  if (key === "i_am_here") return support.gestureHere;
+  if (key === "i_hear") return support.gestureHear;
+  return support.gestureTogether;
 }

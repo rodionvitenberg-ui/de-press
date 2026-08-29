@@ -19,6 +19,12 @@ export {
 
 const catalogs: Record<Locale, Messages> = { ru, en };
 
+export function isHandwrittenLocale(
+  value: string | null | undefined,
+): value is "ru" | "en" {
+  return value === "ru" || value === "en";
+}
+
 export function isLocale(value: string | null | undefined): value is Locale {
   return value === "ru" || value === "en";
 }

@@ -72,6 +72,13 @@
   min-width: 0;
 }
 
+.meta {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
 .time {
   flex-shrink: 0;
   font-size: 0.75rem;
@@ -103,4 +110,41 @@
   background: var(--accent-hope-soft);
   color: var(--accent-hope);
   border: 1px solid var(--border-soft);
+}
+
+.more {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.row:hover .more,
+.row:focus-within .more {
+  opacity: 1;
+}
+
+.more:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-hope);
+  outline-offset: 2px;
+}
+
+@media (hover: none) {
+  .more {
+    opacity: 1;
+  }
+}
+
+.pinMark {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1;
 }
