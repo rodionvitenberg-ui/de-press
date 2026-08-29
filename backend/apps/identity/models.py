@@ -59,7 +59,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     # Helper: verified volunteer / partner-org listener (ADR-0010). Not a clinician by default.
     is_helper = models.BooleanField(default=False, db_index=True)
-    # Shift flag: Help Request / dialogue-review notify+inbox only when on duty.
+    # Shift flag: Help Request notify+inbox only when on duty.
     is_on_duty = models.BooleanField(default=False, db_index=True)
     # Heartbeat for instant match. Online = helper_seen_at within 45s (see presence.py).
     helper_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)

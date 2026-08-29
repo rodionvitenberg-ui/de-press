@@ -300,12 +300,6 @@ def create_request(
     if DialogueRequest.objects.filter(open_q).exists():
         raise DialogueError("Запрос уже отправлен")
 
-    review = Account.objects.on_duty_helpers().exists()
-    status = (
-        DialogueRequestStatus.AWAITING_HELPER
-        if review
-        else DialogueRequestStatus.PENDING
-    )
     try:
         req = DialogueRequest.objects.create(
             story=story,
@@ -313,15 +307,12 @@ def create_request(
             from_session=None if actor.account is not None else actor.session,
             intent=intent,
             note=note_s,
-            status=status,
+            status=DialogueRequestStatus.PENDING,
         )
     except IntegrityError as exc:
         raise DialogueError("Запрос уже отправлен") from exc
 
-    if review:
-        _notify_helpers_dialogue_review(req, actor)
-    else:
-        _notify_author_dialogue_request(req)
+    _notify_author_dialogue_request(req)
     return req
 
 
@@ -335,24 +326,8 @@ def _is_helper(actor: Actor) -> bool:
     )
 
 
-def _notify_helpers_dialogue_review(req: DialogueRequest, requester: Actor) -> None:
-    payload = {
-        "story_id": str(req.story_id),
-        "request_id": str(req.id),
-        "intent": req.intent,
-    }
-    for acc in Account.objects.on_duty_helpers():
-        if requester.account_id is not None and acc.id == requester.account_id:
-            continue
-        notify(
-            Actor(kind="account", account=acc),
-            NotificationKind.DIALOGUE_REQUEST_REVIEW,
-            payload,
-        )
-
-
 def list_review_inbox(actor: Actor) -> list[DialogueRequest]:
-    """Dialogue requests waiting for Helper review."""
+    """Legacy Helper review inbox. New requests skip this gate."""
     acc = actor.account
     if not (
         acc is not None and acc.is_helper and acc.is_on_duty and acc.is_active
@@ -421,7 +396,7 @@ def reject_dialogue_request(actor: Actor, request_id: UUID) -> DialogueRequest:
 
 
 def list_inbox(actor: Actor) -> list[DialogueRequest]:
-    """Pending (helper-approved) requests on stories authored by actor."""
+    """Pending requests on stories authored by actor."""
     q = Q(status=DialogueRequestStatus.PENDING)
     if actor.account:
         q &= Q(story__author_account=actor.account)

@@ -63,7 +63,7 @@ class DialogueRequest(models.Model):
     status = models.CharField(
         max_length=16,
         choices=DialogueRequestStatus.choices,
-        default=DialogueRequestStatus.AWAITING_HELPER,
+        default=DialogueRequestStatus.PENDING,
         db_index=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)

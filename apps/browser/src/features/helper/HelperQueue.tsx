@@ -28,7 +28,6 @@ export function HelperQueue() {
       queryClient.setQueryData(["me"], me);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
-      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
     },
   });
 

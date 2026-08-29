@@ -70,14 +70,6 @@ export function ChatList() {
     refetchInterval: panic ? false : 20_000,
   });
 
-  const reviewQuery = useQuery({
-    queryKey: ["dialogue-review"],
-    queryFn: () => api.dialogueReviewInbox(),
-    enabled:
-      Boolean(meQuery.data?.is_helper && meQuery.data?.is_on_duty) && !panic,
-    refetchInterval: panic ? false : 20_000,
-  });
-
   const accept = useMutation({
     mutationFn: (requestId: string) => api.acceptDialogueRequest(requestId),
     onSuccess: async (dialogue) => {
@@ -107,21 +99,6 @@ export function ChatList() {
     mutationFn: (requestId: string) => api.skipHelpRequest(requestId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
-    },
-  });
-
-  const approveReview = useMutation({
-    mutationFn: (requestId: string) => api.approveDialogueReview(requestId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
-      await queryClient.invalidateQueries({ queryKey: ["dialogue-requests"] });
-    },
-  });
-
-  const rejectReview = useMutation({
-    mutationFn: (requestId: string) => api.rejectDialogueReview(requestId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
     },
   });
 
@@ -164,17 +141,6 @@ export function ChatList() {
       }),
     [helpQuery.data, needle],
   );
-  const reviewRequests = useMemo(
-    () =>
-      (reviewQuery.data ?? []).filter((r) => {
-        if (r.status && r.status !== "awaiting_helper") return false;
-        if (!needle) return true;
-        const hay = [r.intent, r.note, r.status].filter(Boolean).join(" ").toLowerCase();
-        return hay.includes(needle);
-      }),
-    [reviewQuery.data, needle],
-  );
-
   const useVirtual = dialogues.length >= VIRTUAL_THRESHOLD;
 
   const virtualizer = useVirtualizer({
@@ -187,8 +153,7 @@ export function ChatList() {
   const loading =
     dialoguesQuery.isLoading ||
     requestsQuery.isLoading ||
-    (Boolean(meQuery.data?.is_helper) &&
-      (helpQuery.isLoading || reviewQuery.isLoading));
+    (Boolean(meQuery.data?.is_helper) && helpQuery.isLoading);
   const error =
     dialoguesQuery.isError ||
     requestsQuery.isError ||
@@ -270,7 +235,6 @@ export function ChatList() {
         {!loading &&
         requests.length === 0 &&
         helpRequests.length === 0 &&
-        reviewRequests.length === 0 &&
         dialogues.length === 0 ? (
           <p className={styles.empty}>{t.me.dialoguesEmpty}</p>
         ) : null}
@@ -309,45 +273,6 @@ export function ChatList() {
                 onClick={() => skipHelp.mutate(r.id)}
               >
                 {t.help.requestSkip}
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {reviewRequests.map((r) => (
-          <div key={`review-${r.id}`} className={styles.requestBlock}>
-            <ListRow
-              asButton
-              muted
-              title={t.helper.reviewTitle}
-              subtitle={`${r.intent}${r.note ? ` · ${r.note}` : ""}`}
-              time={listTime(r.created_at)}
-              avatarText="?"
-            />
-            <p className={styles.safety}>{t.helper.reviewPlaque}</p>
-            {approveReview.isError ? (
-              <p className={styles.empty}>
-                {approveReview.error instanceof ApiError
-                  ? approveReview.error.message
-                  : t.common.error}
-              </p>
-            ) : null}
-            <div className={styles.requestActions}>
-              <button
-                type="button"
-                className={styles.accept}
-                disabled={approveReview.isPending || rejectReview.isPending}
-                onClick={() => approveReview.mutate(r.id)}
-              >
-                {t.helper.reviewApprove}
-              </button>
-              <button
-                type="button"
-                className={styles.decline}
-                disabled={approveReview.isPending || rejectReview.isPending}
-                onClick={() => rejectReview.mutate(r.id)}
-              >
-                {t.helper.reviewReject}
               </button>
             </div>
           </div>

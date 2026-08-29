@@ -475,21 +475,6 @@ export const api = {
   helperHeartbeat: () =>
     request<{ ok: boolean }>("/api/v1/help/heartbeat", { method: "POST" }),
 
-  dialogueReviewInbox: () =>
-    request<DialogueRequest[]>("/api/v1/moderation/dialogue-requests"),
-
-  approveDialogueReview: (id: string) =>
-    request<DialogueRequest>(
-      `/api/v1/moderation/dialogue-requests/${id}/approve`,
-      { method: "POST" },
-    ),
-
-  rejectDialogueReview: (id: string) =>
-    request<DialogueRequest>(
-      `/api/v1/moderation/dialogue-requests/${id}/reject`,
-      { method: "POST" },
-    ),
-
   createHelperInvite: (org = "", ttlHours = 168) =>
     request<HelperInvite>("/api/v1/helper-invites", {
       method: "POST",

@@ -25,6 +25,7 @@ local_settings.py
 # Node
 node_modules/
 apps/browser/dist/
+apps/mini-app/dist/
 _archive/legacy/next-frontend/.next/
 _archive/legacy/next-frontend/out/
 _archive/legacy/next-frontend/build/

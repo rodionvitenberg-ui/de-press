@@ -131,7 +131,6 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
       queryClient.setQueryData(["me"], nextMe);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
-      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
     },
     onError: (err) => {
       setError(err instanceof ApiError ? err.message : t.common.error);
