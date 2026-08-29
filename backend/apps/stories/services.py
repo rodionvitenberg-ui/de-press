@@ -162,25 +162,6 @@ def _voice_rate_limit(actor: Actor) -> None:
         raise StoryError(str(exc)) from exc
 
 
-def _transcribe_if_needed(story: Story, *, typed_body: str, source_lang: str) -> None:
-    if typed_body:
-        return
-    from pathlib import Path
-
-    from apps.dialogue.speech import get_stt
-
-    try:
-        transcript = get_stt().transcribe(
-            Path(story.audio.path),
-            language=(source_lang or "ru")[:8],
-        )
-    except Exception:
-        transcript = ""
-    if transcript:
-        story.body = transcript[:20_000]
-        story.save(update_fields=["body", "updated_at"])
-
-
 @transaction.atomic
 def publish_story_voice(
     actor: Actor,
@@ -247,7 +228,6 @@ def publish_story_voice(
     story.audio = uploaded_file
     story.duration_ms = duration_ms
     story.save(update_fields=["audio", "duration_ms"])
-    _transcribe_if_needed(story, typed_body=text, source_lang=source_lang)
 
     from apps.empathy.services import ensure_pulse
 
@@ -431,7 +411,6 @@ def add_comment_voice(
     comment.audio = uploaded_file
     comment.duration_ms = duration_ms
     comment.save(update_fields=["audio", "duration_ms"])
-    _transcribe_if_needed(comment, typed_body=text, source_lang=source_lang)
     post.last_activity_at = now
     post.save(update_fields=["last_activity_at", "updated_at"])
     _emit_comment(comment)

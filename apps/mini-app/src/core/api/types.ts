@@ -141,7 +141,6 @@ export interface ChatMessage {
   kind?: ChatMessageKind;
   body: string;
   display_text?: string;
-  transcript?: string;
   source_lang?: string;
   translations?: Record<string, string>;
   duration_ms?: number | null;

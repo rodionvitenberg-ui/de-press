@@ -208,10 +208,10 @@ def test_voice_message_and_translate(tmp_path, settings):
     )
     assert msg.kind == MessageKind.VOICE
     assert msg.audio
-    assert msg.transcript  # offline STT fills a marker
-    assert "офлайн" in msg.transcript or "offline" in msg.transcript.lower() or msg.transcript
+    assert msg.transcript == ""  # voice transcription is removed
+    assert msg.body == "[голосовое сообщение]"
 
-    with pytest.raises(DialogueError, match="недоступен"):
+    with pytest.raises(DialogueError, match="Нечего переводить"):
         translate_message(peer, msg.id, target_lang="en")
 
     text = send_message(peer, dialogue.id, "Я рядом.", source_lang="ru")

@@ -46,11 +46,11 @@
 | **Own Desktop / Own Mobile** | ⏳ | Отдельные hosts; Mini App их **не** заменяет |
 | **Circles** | ✅ | `POST /api/v1/dialogues/{id}/messages/circle` + purge video on close |
 | **Voice retention** | ✅ | `GET/POST /me/voice-retention`; per-sender purge on close |
-| **Нативный мультиязык** | ⏳ | STT → translate → TTS (не словари UI) |
+| **Нативный мультиязык (STT/TTS)** | 🗄 | снято: без ключей адекватно не реализовать; остался перевод текста («Перевод») |
 | **Pilot / prod ops** | ⏳ | staging, secrets, backup, CDN media |
 
 **Итог:** backend-MVP закрыт; кружочки и voice retention на сервере; browser UI Core дожат к v2.0.  
-Дальше: Mini App host + нативный мультиязык.
+Дальше: Mini App host.
 
 ---
 
@@ -71,7 +71,7 @@
 
 ### Диалог
 
-- Text + voice notes (STT/translate stubs без ключей).  
+- Text + voice notes; перевод текстовых сообщений (кнопка «Перевод»).  
 - WS + typing + reconnect + HTTP fallback.  
 - Circles: запись/превью + `POST …/messages/circle`; файлы удаляются при закрытии диалога.  
 - Soft badges, date chips (Сегодня/Вчера), same-author bubble stack.
@@ -121,7 +121,7 @@ de-press/
 | **UI Core (все hosts)** | Vite 6, React 19, TypeScript, React Router 7, TanStack Query + Virtual, CSS Modules, design tokens |
 | **Backend** | Django, Django Ninja, Channels 4, Daphne |
 | **DB / cache** | PostgreSQL (обязателен для dev/prod), Redis |
-| **AI / STT** | OpenAI-compatible + offline stubs |
+| **AI** | OpenAI-compatible + offline stubs |
 | **Стили** | **Строго без Tailwind** — CSS Modules + CSS variables |
 
 ---
@@ -217,11 +217,10 @@ Vite проксирует `/api`, `/ws` → `:8005`.
 export AI_API_KEY=...
 export AI_BASE_URL=https://api.deepseek.com
 export AI_MODEL=deepseek-chat
-export STT_API_KEY=...
 export PUBLIC_BASE_URL=http://127.0.0.1:5174   # magic-link soft-notify
 ```
 
-Без ключей AI/STT работают offline-stubs.
+Без ключа AI работает offline-stub (перевод текста — честный offline-marker).
 
 ### Legacy Next (не нужен для обычной разработки)
 
@@ -283,10 +282,9 @@ DEPRESS_USE_SQLITE=1 CHANNEL_LAYER=memory pytest -q
 
 ## Приоритеты дальше
 
-1. **Нативный мультиязык** (STT → translate → TTS).  
-2. **Telegram Mini App host** (этап) — auth, theme bridge, optional bot notify; не единственный mobile.  
-3. **Own mobile** (tab-bar + PWA/native) и **own desktop** (shell поверх core).  
-4. Pilot ops · production media.
+1. **Telegram Mini App host** (этап) — auth, theme bridge, optional bot notify; не единственный mobile.  
+2. **Own mobile** (tab-bar + PWA/native) и **own desktop** (shell поверх core).  
+3. Pilot ops · production media.
 
 Не делаем: публичные лайки/комменты, open matching, trauma map на сервере, AI как скрытый peer; **не** считаем Mini App заменой своему mobile/desktop.
 

@@ -1,13 +1,12 @@
-"""STT and translation adapters for dialogue voice notes.
+"""Translation adapter for dialogue messages and UI catalogs.
 
-Deep interface: transcribe_audio(path) / translate_text(text, target_lang).
-Offline adapters for tests and no-key dev; online uses OpenAI-compatible APIs.
+Deep interface: translate_text(text, target_lang).
+Offline adapter for tests and no-key dev; online uses OpenAI-compatible APIs.
 """
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Protocol
 
 from django.conf import settings
@@ -17,46 +16,8 @@ from apps.ai.gateway import ChatMessage, get_gateway
 logger = logging.getLogger(__name__)
 
 
-class SpeechToText(Protocol):
-    def transcribe(self, path: Path, *, language: str = "ru") -> str: ...
-
-
 class Translator(Protocol):
     def translate(self, text: str, *, target_lang: str, source_lang: str = "") -> str: ...
-
-
-class OfflineSTT:
-    """Deterministic fallback when no STT key / provider."""
-
-    def transcribe(self, path: Path, *, language: str = "ru") -> str:
-        if language.startswith("en"):
-            return "[offline transcript: voice note]"
-        return "[офлайн-транскрипт: голосовое сообщение]"
-
-
-class OpenAICompatibleSTT:
-    """Whisper-style /audio/transcriptions on an OpenAI-compatible base URL."""
-
-    def __init__(self, *, api_key: str, base_url: str, model: str):
-        self._api_key = api_key
-        self._base_url = base_url.rstrip("/")
-        self._model = model
-
-    def transcribe(self, path: Path, *, language: str = "ru") -> str:
-        import httpx
-
-        lang = language[:2] if language else "ru"
-        url = f"{self._base_url}/audio/transcriptions"
-        with path.open("rb") as fh:
-            files = {"file": (path.name, fh, "application/octet-stream")}
-            data = {"model": self._model, "language": lang}
-            headers = {"Authorization": f"Bearer {self._api_key}"}
-            with httpx.Client(timeout=120.0) as client:
-                resp = client.post(url, headers=headers, data=data, files=files)
-                resp.raise_for_status()
-                payload = resp.json()
-        text = payload.get("text") if isinstance(payload, dict) else None
-        return (text or "").strip() or OfflineSTT().transcribe(path, language=language)
 
 
 def is_stub_translation(text: str) -> bool:
@@ -145,66 +106,5 @@ class AITranslator:
         )
 
 
-def get_stt() -> SpeechToText:
-    key = getattr(settings, "STT_API_KEY", "") or getattr(settings, "AI_API_KEY", "") or ""
-    if not str(key).strip():
-        return OfflineSTT()
-    # Prefer dedicated STT base; fall back to OpenAI-ish default (not DeepSeek chat URL).
-    base = getattr(settings, "STT_BASE_URL", "") or "https://api.openai.com/v1"
-    model = getattr(settings, "STT_MODEL", "") or "whisper-1"
-    return OpenAICompatibleSTT(
-        api_key=str(key).strip(),
-        base_url=str(base),
-        model=str(model),
-    )
-
-
 def get_translator() -> Translator:
     return AITranslator()
-
-
-class TextToSpeech(Protocol):
-    def synthesize(self, text: str, *, lang: str) -> bytes: ...
-
-
-class OpenAICompatibleTTS:
-    """OpenAI-style /audio/speech endpoint on a compatible base URL."""
-
-    def __init__(self, *, api_key: str, base_url: str, model: str):
-        self._api_key = api_key
-        self._base_url = base_url.rstrip("/")
-        self._model = model
-
-    def synthesize(self, text: str, *, lang: str) -> bytes:
-        import httpx
-
-        url = f"{self._base_url}/audio/speech"
-        headers = {"Authorization": f"Bearer {self._api_key}"}
-        payload = {
-            "model": self._model,
-            "input": text[:4096],
-            "voice": "alloy",
-            "response_format": "mp3",
-        }
-        with httpx.Client(timeout=120.0) as client:
-            resp = client.post(url, headers=headers, json=payload)
-            resp.raise_for_status()
-            return resp.content
-
-
-def get_tts() -> TextToSpeech | None:
-    """No TTS key → None: caller must answer with an honest offline marker.
-
-    Never fake audio. Mirrors get_stt(): dedicated TTS_BASE_URL first,
-    then the OpenAI-ish default.
-    """
-    key = getattr(settings, "TTS_API_KEY", "") or getattr(settings, "AI_API_KEY", "") or ""
-    if not str(key).strip():
-        return None
-    base = getattr(settings, "TTS_BASE_URL", "") or "https://api.openai.com/v1"
-    model = getattr(settings, "TTS_MODEL", "") or "gpt-4o-mini-tts"
-    return OpenAICompatibleTTS(
-        api_key=str(key).strip(),
-        base_url=str(base),
-        model=str(model),
-    )

@@ -136,8 +136,6 @@ export function DialoguePage() {
   const [sending, setSending] = useState(false);
   const [useHttpFallback, setUseHttpFallback] = useState(false);
   const [shownLang, setShownLang] = useState<Record<string, string>>({});
-  const [ttsBusy, setTtsBusy] = useState<Record<string, boolean>>({});
-  const [ttsError, setTtsError] = useState<Record<string, boolean>>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [circleOpen, setCircleOpen] = useState(false);
@@ -396,39 +394,10 @@ export function DialoguePage() {
     }
   }
 
-  async function onTranscribe(messageId: string) {
-    try {
-      const m = await api.transcribeMessage(messageId);
-      upsertMessage(m);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t.common.error);
-    }
-  }
-
-  async function onSpeak(m: ChatMessage) {
-    if (ttsBusy[m.id]) return;
-    setTtsError((prev) => ({ ...prev, [m.id]: false }));
-    setTtsBusy((prev) => ({ ...prev, [m.id]: true }));
-    try {
-      // Target language = actor locale (UI locale); server falls back honestly.
-      const blob = await api.messageTts(m.id, locale.slice(0, 2));
-      const url = URL.createObjectURL(blob);
-      const player = new Audio(url);
-      player.onended = () => URL.revokeObjectURL(url);
-      await player.play();
-    } catch {
-      // 503 = no TTS key on server → honest offline marker on the bubble.
-      setTtsError((prev) => ({ ...prev, [m.id]: true }));
-    } finally {
-      setTtsBusy((prev) => ({ ...prev, [m.id]: false }));
-    }
-  }
-
   function messageText(m: ChatMessage): string {
     const lang = shownLang[m.id];
     if (lang && m.translations?.[lang]) return m.translations[lang];
     if (m.display_text) return m.display_text;
-    if (m.transcript) return m.transcript;
     return m.body;
   }
 
@@ -571,33 +540,6 @@ export function DialoguePage() {
                 {!isCircle ? (
                   <div className={styles.msgBody}>{messageText(m)}</div>
                 ) : null}
-                {isVoice ? (
-                  <div className={styles.voiceActions}>
-                    {!m.transcript ? (
-                      <button
-                        type="button"
-                        className={styles.msgAction}
-                        disabled={ttsBusy[m.id]}
-                        onClick={() => void onTranscribe(m.id)}
-                      >
-                        {t.chat.transcribe}
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className={styles.msgAction}
-                      disabled={ttsBusy[m.id]}
-                      onClick={() => void onSpeak(m)}
-                    >
-                      {t.chat.ttsListen}
-                    </button>
-                    {ttsError[m.id] ? (
-                      <span className={styles.ttsOffline}>
-                        {t.chat.ttsOffline}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
                 {showMeta ? (
                   <div className={styles.msgMeta}>
                     {time ? (
@@ -607,13 +549,15 @@ export function DialoguePage() {
                 ) : null}
                 {showMeta && !isCircle ? (
                   <div className={styles.msgActions}>
-                    <button
-                      type="button"
-                      className={styles.msgAction}
-                      onClick={() => void onTranslate(m.id)}
-                    >
-                      {t.chat.translate}
-                    </button>
+                    {!isVoice ? (
+                      <button
+                        type="button"
+                        className={styles.msgAction}
+                        onClick={() => void onTranslate(m.id)}
+                      >
+                        {t.chat.translate}
+                      </button>
+                    ) : null}
                     {!m.from_me ? (
                       <button
                         type="button"

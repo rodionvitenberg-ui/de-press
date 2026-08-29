@@ -34,7 +34,7 @@
 | **v0.11** | Moderated free-text + Helper + queue | ✅ |
 | **v0.12** | Design pass (clouds, author vs public) | ✅ |
 | **v0.13** | i18n ru/en + phrase texts | ✅ |
-| **v0.14** | Voice notes + STT + translate | ✅ |
+| **v0.14** | Voice notes + translate | ✅ |
 | **P1 notify (full)** | Notification + EmailDigest + WS + REST + настройки + `/inbox` + `PUBLIC_BASE_URL` | ✅ |
 
 ## P1 «Soft-notify» — закрыт ✅
@@ -56,7 +56,7 @@
 | **P0 ✅** | **UI Core / Browser host**: Vite + React SPA, токены/темы, 3-зонный ТГ-каркас, лента/чат, «МНЕ ХУЕВО» |
 | **P0 ✅** | **Кружочки**: `POST …/messages/circle` + ephemeral purge on close |
 | **P0 ✅** | **Голосовые с опцией удаления**: `/me/voice-retention` + per-sender purge on close |
-| **P1** | **Нативный динамический мультиязык**: STT → translate → TTS (контент, не словари UI) |
+| 🗄 снято | **Нативный динамический мультиязык** (STT → translate → TTS) — снято: без ключей адекватно не реализовать; остался перевод текста |
 | **P1** | **Telegram Mini App host (этап)**: Bot + Mini App, initData auth, theme bridge, optional bot soft-notify; диалоги остаются на de-press backend — **не** замена own mobile |
 | **P1** | **Own Mobile**: ТГ-таб-бар layout → PWA / нативная обёртка / store (отдельный host) |
 | **P1** | **Own Desktop**: обёртка UI Core (Tauri / Electron — решение позже) |
@@ -70,11 +70,11 @@
 ## Голос
 
 1. ✅ Voice note в Dialogue
-2. ✅ STT (Whisper-compatible или offline)
+2. 🗄 STT — снято (offline-заглушки не годятся, без ключей адекватно не реализовать)
 3. ✅ Translate (LLM gateway или offline marker)
 4. ✅ **Кружочки** (video circles) — self-destruct при закрытии чата
 5. ✅ **Голосовые с опцией удаления** (настраиваемо, per-sender)
-6. 🔜 **Нативный динамический перевод** (STT → translate → TTS) — обязателен для межъязыкового общения
+6. 🗄 **Нативный динамический перевод** (STT → translate → TTS) — снято; остался перевод текста
 7. Live voice rooms — v1.x после trust + mod
 
 ## Модель «облачков» (принята)

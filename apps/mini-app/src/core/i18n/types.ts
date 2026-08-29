@@ -393,9 +393,6 @@ export type Messages = {
     voiceRetentionKeep: string;
     dayToday: string;
     dayYesterday: string;
-    transcribe: string;
-    ttsListen: string;
-    ttsOffline: string;
     confirmYes: string;
     confirmNo: string;
     copied: string;

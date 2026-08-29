@@ -26,7 +26,6 @@ from apps.dialogue.services import (
     decline_request,
     dialogue_last_preview,
     dialogue_peer_label,
-    ensure_transcript,
     list_inbox,
     list_messages,
     list_my_dialogues,
@@ -379,16 +378,6 @@ def post_circle_message(
     return _message_out(m, actor=actor)
 
 
-@router.post("/messages/{message_id}/transcribe", response=MessageOut)
-def post_transcribe(request, message_id: UUID):
-    actor = require_actor(request)
-    try:
-        m = ensure_transcript(actor, message_id)
-    except DialogueError as exc:
-        raise HttpError(400, str(exc)) from exc
-    return _message_out(m, actor=actor)
-
-
 @router.patch("/messages/{message_id}", response=MessageOut)
 def patch_message(request, message_id: UUID, payload: MessageEditIn):
     actor = require_actor(request)
@@ -578,56 +567,3 @@ def post_outreach(request, story_id: UUID, payload: OutreachIn):
         dialogues=[_dialogue_out(d, actor) for d in result.dialogues],
         message=msg,
     )
-
-
-class TtsIn(Schema):
-    lang: str = ""
-
-
-@router.post("/messages/{message_id}/tts")
-def post_message_tts(request, message_id: UUID, payload: TtsIn):
-    """STT → translate → TTS for a voice note; returns audio/mpeg bytes.
-
-    Target language = the actor's UI locale (payload.lang). Without a TTS
-    key the endpoint answers 503 — the client shows an honest offline
-    marker instead of fake audio. If translation is unavailable (offline
-    translator), the original transcript is spoken as-is.
-    """
-    actor = require_actor(request)
-    try:
-        msg = ensure_transcript(actor, message_id)
-    except DialogueError as exc:
-        raise HttpError(400, str(exc)) from exc
-
-    text = (msg.transcript or msg.body or "").strip()
-    if not text:
-        raise HttpError(400, "Нечего озвучивать")
-
-    target = (payload.lang or "ru")[:2].lower()
-    source = (msg.source_lang or "ru")[:2].lower()
-    lang = source
-    if target != source:
-        try:
-            m2 = translate_message(actor, message_id, target_lang=target)
-            translated = (m2.translations or {}).get(target, "").strip()
-            if translated:
-                text = translated
-                lang = target
-        except DialogueError:
-            pass  # translation unavailable (offline) — speak the original
-
-    from apps.dialogue.speech import get_tts
-
-    tts = get_tts()
-    if tts is None:
-        raise HttpError(503, "TTS offline: no key on server")
-    try:
-        audio = tts.synthesize(text, lang=lang)
-    except Exception as exc:
-        raise HttpError(503, "TTS failed") from exc
-    if not audio:
-        raise HttpError(503, "TTS failed")
-
-    from django.http import HttpResponse
-
-    return HttpResponse(audio, content_type="audio/mpeg")

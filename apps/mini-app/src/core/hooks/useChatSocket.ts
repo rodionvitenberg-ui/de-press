@@ -149,7 +149,6 @@ export function useChatSocket(dialogueId: string, enabled = true) {
               kind: m.kind,
               body: m.body,
               display_text: m.display_text,
-              transcript: m.transcript,
               source_lang: m.source_lang,
               translations: m.translations,
               duration_ms: m.duration_ms,

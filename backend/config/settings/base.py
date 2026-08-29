@@ -225,11 +225,6 @@ AI_API_KEY = os.environ.get("AI_API_KEY", "") or os.environ.get("DEEPSEEK_API_KE
 AI_BASE_URL = os.environ.get("AI_BASE_URL", "https://api.deepseek.com")
 AI_MODEL = os.environ.get("AI_MODEL", "deepseek-chat")
 
-# Speech-to-text (OpenAI Whisper-compatible). Empty key → offline stub.
-STT_API_KEY = os.environ.get("STT_API_KEY", "") or AI_API_KEY
-STT_BASE_URL = os.environ.get("STT_BASE_URL", "https://api.openai.com/v1")
-STT_MODEL = os.environ.get("STT_MODEL", "whisper-1")
-
 # Dedicated translator (OpenAI-compatible /v1/chat/completions).
 # Empty TRANSLATOR_BASE_URL → existing get_gateway() / OfflineTranslator.
 TRANSLATOR_BASE_URL = os.environ.get("TRANSLATOR_BASE_URL", "")

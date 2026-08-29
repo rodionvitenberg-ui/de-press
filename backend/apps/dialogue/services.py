@@ -845,22 +845,6 @@ def send_voice_message(
     msg.audio = uploaded_file
     msg.save(update_fields=["audio"])
 
-    # STT (sync for MVP; Celery later)
-    from pathlib import Path
-
-    from apps.dialogue.speech import get_stt
-
-    stt = get_stt()
-    try:
-        path = Path(msg.audio.path)
-        transcript = stt.transcribe(path, language=lang)
-    except Exception:
-        transcript = ""
-    if transcript:
-        msg.transcript = transcript[:8000]
-        msg.body = msg.transcript
-        msg.save(update_fields=["transcript", "body"])
-
     d.updated_at = timezone.now()
     d.save(update_fields=["updated_at"])
 
@@ -957,36 +941,6 @@ def send_circle_message(
     return msg
 
 
-def ensure_transcript(actor: Actor, message_id: UUID) -> Message:
-    """Re-run STT if transcript missing (participant only)."""
-    try:
-        msg = Message.objects.select_related("dialogue").get(pk=message_id)
-    except Message.DoesNotExist as exc:
-        raise DialogueError("Message not found") from exc
-    get_dialogue_for_participant(actor, msg.dialogue_id)
-    if msg.kind != MessageKind.VOICE:
-        raise DialogueError("Не голосовое сообщение")
-    if msg.transcript.strip():
-        return msg
-    if not msg.audio:
-        raise DialogueError("Нет аудиофайла")
-
-    from pathlib import Path
-
-    from apps.dialogue.speech import get_stt
-
-    stt = get_stt()
-    try:
-        transcript = stt.transcribe(Path(msg.audio.path), language=msg.source_lang or "ru")
-    except Exception as exc:
-        raise DialogueError("Транскрипция не удалась") from exc
-    msg.transcript = (transcript or "")[:8000]
-    if msg.transcript:
-        msg.body = msg.transcript
-    msg.save(update_fields=["transcript", "body"])
-    return msg
-
-
 def translate_message(
     actor: Actor,
     message_id: UUID,
@@ -1003,6 +957,9 @@ def translate_message(
     code = (target_lang or "en")[:8].lower()
     if not code:
         raise DialogueError("Укажи target_lang")
+    if msg.kind == MessageKind.VOICE and not msg.transcript.strip():
+        # Voice transcription is removed — there is no text to translate.
+        raise DialogueError("Нечего переводить")
 
     source_text = msg.display_text
     if not source_text or source_text.startswith("["):

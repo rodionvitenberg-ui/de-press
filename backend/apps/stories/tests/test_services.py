@@ -93,10 +93,8 @@ def _note() -> SimpleUploadedFile:
 
 
 @pytest.mark.django_db
-def test_publish_voice_only_fills_offline_transcript(tmp_path, settings):
+def test_publish_voice_only_keeps_empty_body(tmp_path, settings):
     settings.MEDIA_ROOT = tmp_path
-    settings.AI_API_KEY = ""
-    settings.STT_BASE_URL = ""
     account = Account.objects.create_user(email="v@ex.com", password="password123")
     actor = Actor(kind="account", account=account)
     story = publish_story_voice(
@@ -108,8 +106,7 @@ def test_publish_voice_only_fills_offline_transcript(tmp_path, settings):
     )
     assert story.audio
     assert story.duration_ms == 1500
-    assert story.body
-    assert "офлайн" in story.body or "offline" in story.body.lower()
+    assert story.body == ""  # voice transcription is removed
 
 
 @pytest.mark.django_db
