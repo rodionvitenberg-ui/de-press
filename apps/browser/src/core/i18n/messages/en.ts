@@ -318,6 +318,8 @@ export const en: Messages = {
     send: "Send",
     sending: "…",
     error: "Couldn’t reply",
+    wipe: "Erase AI dialogs and local memory",
+    wipeConfirm: "Erase AI dialogs and all local records on this device?",
   },
   antiPanic: {
     menuTitle: "What do you need right now?",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from apps.ai.crisis import CRISIS_REPLY_RU, looks_like_crisis
@@ -31,6 +32,15 @@ class SupportReply:
     labeled_ai: bool = True
 
 
+@dataclass(frozen=True, slots=True)
+class SupportStream:
+    """Delta stream after eager validation (see stream_support_chat)."""
+
+    chunks: Iterator[str]
+    crisis: bool
+    offline: bool
+
+
 # In-memory rate counter store via Report-like: use a simple model-free approach
 # counting is harder without a table — use django cache
 def _rate_limit_ai(actor: Actor) -> None:
@@ -49,12 +59,13 @@ def _rate_limit_ai(actor: Actor) -> None:
     cache.set(key, count + 1, timeout=AI_WINDOW_SECONDS)
 
 
-def support_chat(
+def _prepare(
     actor: Actor,
     *,
     messages: list[dict[str, str]],
-    surface: str = "companion",
-) -> SupportReply:
+    surface: str,
+) -> list[ChatMessage]:
+    """Shared validation for both reply paths: surface, identity, rate, history."""
     if surface not in ALLOWED_SURFACES:
         raise AIError("Invalid surface")
     if actor.account is None and actor.session is None:
@@ -77,6 +88,16 @@ def support_chat(
 
     if not cleaned or cleaned[-1].role != "user":
         raise AIError("Нужно последнее сообщение от пользователя")
+    return cleaned
+
+
+def support_chat(
+    actor: Actor,
+    *,
+    messages: list[dict[str, str]],
+    surface: str = "companion",
+) -> SupportReply:
+    cleaned = _prepare(actor, messages=messages, surface=surface)
 
     last_user = cleaned[-1].content
     if looks_like_crisis(last_user):
@@ -94,3 +115,39 @@ def support_chat(
 
     # Second-pass crisis on model output not needed; on input already handled
     return SupportReply(reply=text, crisis=False, offline=offline)
+
+
+def stream_support_chat(
+    actor: Actor,
+    *,
+    messages: list[dict[str, str]],
+    surface: str = "companion",
+) -> SupportStream:
+    """Same pipeline as support_chat, but yields deltas.
+
+    Validation and the crisis short-circuit happen eagerly at call time, so
+    the API layer can still answer 4xx before the SSE stream opens. Crisis
+    replies come as one piece — no typewriter over the 112 instructions.
+    """
+    cleaned = _prepare(actor, messages=messages, surface=surface)
+
+    last_user = cleaned[-1].content
+    if looks_like_crisis(last_user):
+        return SupportStream(chunks=iter([CRISIS_REPLY_RU]), crisis=True, offline=False)
+
+    system = SYSTEM_ANTI_PANIC if surface == "anti_panic" else SYSTEM_COMPANION
+    gateway = get_gateway()
+    offline = gateway.__class__.__name__ == "OfflineGateway"
+    full = [ChatMessage(role="system", content=system), *cleaned]
+
+    def _chunks() -> Iterator[str]:
+        try:
+            for delta in gateway.stream(full):
+                if delta:
+                    yield delta
+        except AIError:
+            raise
+        except Exception as exc:  # noqa: BLE001 — surface as soft error
+            raise AIError(f"Помощник временно недоступен: {exc}") from exc
+
+    return SupportStream(chunks=_chunks(), crisis=False, offline=offline)

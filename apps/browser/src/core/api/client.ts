@@ -160,6 +160,94 @@ async function postStoryVoice(
   return (await res.json()) as Story;
 }
 
+/** SSE handler callbacks for aiSupportStream (events: meta → delta* → done). */
+export type AiStreamHandlers = {
+  onMeta?: (meta: {
+    offline: boolean;
+    crisis: boolean;
+    labeled_ai: boolean;
+  }) => void;
+  onDelta?: (text: string) => void;
+  onDone?: (done: { crisis: boolean; disclaimer: string }) => void;
+  onError?: (detail: string) => void;
+};
+
+function handleSseFrame(frame: string, handlers: AiStreamHandlers): void {
+  let event = "message";
+  const dataLines: string[] = [];
+  for (const line of frame.split("\n")) {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+  }
+  if (!dataLines.length) return;
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(dataLines.join("\n")) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+  if (event === "meta") {
+    handlers.onMeta?.(data as unknown as {
+      offline: boolean;
+      crisis: boolean;
+      labeled_ai: boolean;
+    });
+  } else if (event === "delta") {
+    handlers.onDelta?.(typeof data.text === "string" ? data.text : "");
+  } else if (event === "done") {
+    handlers.onDone?.(data as unknown as {
+      crisis: boolean;
+      disclaimer: string;
+    });
+  } else if (event === "error") {
+    handlers.onError?.(
+      typeof data.detail === "string" ? data.detail : "stream error",
+    );
+  }
+}
+
+async function aiSupportStreamRequest(
+  messages: { role: string; content: string }[],
+  surface: string,
+  handlers: AiStreamHandlers,
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/v1/ai/support/stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ messages, surface }),
+  });
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = (await res.json()) as { detail?: string };
+      if (data.detail) detail = data.detail;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(detail, res.status);
+  }
+  if (!res.body) {
+    throw new ApiError("Streaming not supported", res.status);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let sep = buffer.indexOf("\n\n");
+    while (sep !== -1) {
+      handleSseFrame(buffer.slice(0, sep), handlers);
+      buffer = buffer.slice(sep + 2);
+      sep = buffer.indexOf("\n\n");
+    }
+  }
+}
+
 export const api = {
   health: () => request<HealthResponse>("/api/v1/health"),
 
@@ -591,6 +679,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ messages, surface }),
     }),
+
+  aiSupportStream: (
+    messages: { role: string; content: string }[],
+    surface: "companion" | "anti_panic" = "companion",
+    handlers: AiStreamHandlers = {},
+  ) => aiSupportStreamRequest(messages, surface, handlers),
 
   quietPhrases: (lang: "ru" | "en" = "ru") =>
     request<QuietPhrase[]>(`/api/v1/quiet-phrases?lang=${lang}`),

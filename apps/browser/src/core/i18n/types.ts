@@ -310,6 +310,8 @@ export type Messages = {
     send: string;
     sending: string;
     error: string;
+    wipe: string;
+    wipeConfirm: string;
   };
   antiPanic: {
     menuTitle: string;
