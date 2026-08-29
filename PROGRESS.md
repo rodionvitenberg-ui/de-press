@@ -180,3 +180,9 @@ status: done
 branch: main
 notes: Browser-only i18n dead-key cleanup after the /help gate trim (4ca397c). Removed from apps/browser/src/core/i18n/{types.ts,messages/ru.ts,messages/en.ts}: top-level guides object, top-level safety object, help.resources array, antiPanic.menuHint. Verified before removal: no t.guides.* / t.safety.* / t.help.resources usage in browser src outside i18n; antiPanic.menuHint referenced nowhere after the trim. Kept: antiPanic overlay keys (menuTitle/breatheHint/groundSteps/...), help gate/wait keys, menu/footer strings (safetyLink etc. — different objects). Mini-app untouched on purpose: its HelpPane still actively uses help.resources, safety.*, guides.*, antiPanic.menuHint (alive there). Verified after: browser tsc -b 0, vitest 43/43, vite build ok (bundle 447.56 kB, dead strings gone), zero leftovers of removed keys in src/core/i18n.
 files: apps/browser/src/core/i18n/types.ts, apps/browser/src/core/i18n/messages/ru.ts, apps/browser/src/core/i18n/messages/en.ts, PROGRESS.md
+
+## 2026-08-30  agent=human  id=history-doc
+status: done
+branch: main
+notes: Development history narrative de-press-docs/HISTORY.md (first person, plain language): genesis and rules, pre-git era (v0.0–v0.14 + soft-notify), Next.js → Vite SPA rewrite, platform odyssey (ADR 0013–0019, archived native forks), git init 99723a4, two-agent day 2026-08-29 (A1–A6, B1–B4, MAINPLAN/PROGRESS discipline), both same-day rollbacks (A2 pre-moderation, voice STT/TTS), quiet cuts (rays ADR 0018, clouds-as-gesture ADR 0017, /help gate trim, public pages → landing repo, no Docker, no UI-dictionary "multilingual"), current stage (47 commits, 197 backend tests, deploy kit), rollback ledger table. Linked from de-press-docs/README.md. All facts sourced from PROGRESS/ROADMAP/ADR/git history; no invented dates.
+files: de-press-docs/HISTORY.md, de-press-docs/README.md, PROGRESS.md
