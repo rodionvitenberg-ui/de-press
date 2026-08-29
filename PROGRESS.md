@@ -150,3 +150,9 @@ status: done
 branch: main
 notes: Fixed stale unread badge on the currently open chat. Root cause: DialoguePage called POST /dialogues/{id}/mark-read only once per dialogue switch; incoming messages arriving while the window was hidden/minimized raised server unread_count, background ChatList poll was paused (refetchIntervalInBackground=false), and on refocus refetchOnWindowFocus delivered a fresh unread_count for the open dialogue — badge persisted until the user switched chats. Fix in DialoguePage: markRead is now a deduped callback (in-flight ref) invoked (1) on dialogue open/switch (previous behavior), (2) when a peer message lands while the page is visible (lastReadMarked ref keyed by message id prevents repeat POSTs from the 4s HTTP-fallback poll), (3) on visibilitychange→visible and window focus with the chat open — badge drops on return. Invalidates ["dialogues"] each time so ChatList/TabBar/Sidebar badges clear immediately. Verify: tsc -b ok, vitest 43/43, vite build ok.
 files: apps/browser/src/features/chat/DialoguePage.tsx, PROGRESS.md
+
+## 2026-08-30  agent=human  id=help-gate-trim
+status: done
+branch: main
+notes: Trimmed /help to just the gate per user request: removed the below-the-fold .rest block (crisis/panic card, resources regions, safety paragraphs, guides, feed/patterns footer links). Header + AI half + human half remain; phone/tablet stacking and optional note unchanged; desktop .gate fills the first screen on its own (flex 1 0 auto + min-height), no CSS change needed. Dropped now-unused useAntiPanic import. i18n keys (help.resources, safety.*, guides.*, antiPanic.menuHint) left in messages/types as data-only dead weight, reusable later — no UI references left. Verify: tsc -b ok, vitest 43/43, vite build ok.
+files: apps/browser/src/features/help/HelpPane.tsx, PROGRESS.md
