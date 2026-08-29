@@ -341,7 +341,6 @@ export type Messages = {
   };
   antiPanic: {
     menuTitle: string;
-    menuHint: string;
     menuBreathe: string;
     menuGround: string;
     menuVent: string;
@@ -457,23 +456,9 @@ export type Messages = {
     dayToday: string;
     dayYesterday: string;
   };
-  guides: {
-    title: string;
-    intro: string;
-    whatYouCanTitle: string;
-    whatYouCan: string[];
-    whatNotTitle: string;
-    whatNot: string[];
-    professionalHelpTitle: string;
-    professionalHelpBody: string;
-  };
   help: {
     title: string;
     intro: string;
-    resources: {
-      region: string;
-      items: string[];
-    }[];
     linksIntro: string;
     aiTag: string;
     humanTag: string;
@@ -498,18 +483,6 @@ export type Messages = {
     requestPlaque: string;
     requestAccept: string;
     requestSkip: string;
-  };
-  safety: {
-    title: string;
-    body1: string;
-    body2: string;
-    body3: string;
-    body4: string;
-    body5: string;
-    see: string;
-    guidesLink: string;
-    antiPanicLink: string;
-    crisisIn: string;
   };
   about: {
     title: string;

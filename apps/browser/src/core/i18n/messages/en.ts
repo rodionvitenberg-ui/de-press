@@ -354,7 +354,6 @@ export const en: Messages = {
   },
   antiPanic: {
     menuTitle: "What do you need right now?",
-    menuHint: "Nothing is required. Pick just one thing.",
     menuBreathe: "Calm down (4–7–8)",
     menuGround: "Ground yourself",
     menuVent: "Scream into text (never leaves this device)",
@@ -478,52 +477,10 @@ export const en: Messages = {
     dayToday: "Today",
     dayYesterday: "Yesterday",
   },
-  guides: {
-    title: "Support guides",
-    intro: "Short orientation. Not a “how to treat” manual.",
-    whatYouCanTitle: "What you can do",
-    whatYouCan: [
-      "Listen and reflect: “I hear that it’s heavy for you”",
-      "Send a quiet phrase under a story — one tap, no public replies; only the author sees it",
-      "“I hear you” — the author may then write to you (outreach); you can opt out on the story page",
-      "Your own short note — only after manual review; not a public thread",
-      "Ask what the person wants: to vent or to get advice",
-      "Offer a pause, breathing, leaving the chat",
-      "Leave if you start feeling bad yourself",
-    ],
-    whatNotTitle: "What not to do",
-    whatNot: [
-      "Diagnoses and “you just need to…”",
-      "Pushing “hang in there” / toxic positivity",
-      "Doxxing, threats, manipulation",
-      "Unsolicited advice when the person only asked you to be near",
-    ],
-    professionalHelpTitle: "When external help is needed",
-    professionalHelpBody:
-      "If there is risk to yourself or others, an acute crisis, or weeks of not eating/sleeping — that’s a reason for professional help and emergency services, not only a peer chat.",
-  },
   help: {
     title: "Help nearby",
     intro:
       "A list of starting points. Not a substitute for emergency services. Geo-based matching comes later; for now, general entry points.",
-    resources: [
-      {
-        region: "Russia / emergency",
-        items: [
-          "112 — unified emergency number",
-          "103 — ambulance",
-          "Crisis hotlines (regional) — search “crisis hotline” + your city",
-        ],
-      },
-      {
-        region: "General",
-        items: [
-          "Reach out to someone you trust who is nearby",
-          "If you already have a therapist/psychiatrist — contact them in an acute state",
-          "On the platform: Anti-Panic mode, support guides, peer dialogue only with the author’s consent",
-        ],
-      },
-    ],
     linksIntro: "",
     aiTag: "AI",
     humanTag: "Human",
@@ -552,23 +509,6 @@ export const en: Messages = {
       "A volunteer conversation. You are not a therapist and not an emergency service.",
     requestAccept: "Accept",
     requestSkip: "Skip",
-  },
-  safety: {
-    title: "Safety",
-    see: "For more about support: ",
-    crisisIn: "In crisis — ",
-    body1:
-      "de-press is not a medical service and not a substitute for psychotherapy, psychiatry, or emergency care.",
-    body2:
-      "If you have thoughts of self-harm or suicide — reach out to local emergency services. In Russia: the national crisis hotline and emergency numbers 112 / 103.",
-    body3:
-      "We don’t publish “toxic positivity” and we don’t diagnose. You are not required to “hang in there”.",
-    body4:
-      "You can report a story in the feed. Admins see the queue of reports. No public likes — this is a deliberate choice: a quiet gesture (cloud) is only for the author, no Pulse showcase.",
-    body5:
-      "Only the story author opens a dialogue. A reader can request “I have a similar story” — without unsolicited advice in comments.",
-    guidesLink: "guides",
-    antiPanicLink: "Anti-Panic",
   },
   about: {
     title: "About",
