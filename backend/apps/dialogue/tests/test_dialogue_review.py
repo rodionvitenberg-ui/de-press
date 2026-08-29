@@ -61,6 +61,29 @@ def test_create_request_awaits_helper_not_author():
 
 
 @pytest.mark.django_db
+def test_create_request_reaches_author_when_no_helper_on_duty():
+    Account.objects.create_user(
+        email="offduty@ex.com",
+        password="password123",
+        is_helper=True,
+        is_on_duty=False,
+    )
+    author_acc = Account.objects.create_user(
+        email="reva-direct@ex.com", password="password123"
+    )
+    author = Actor(kind="account", account=author_acc)
+    story = publish_story(author, "нужно ухо")
+    peer = Actor(kind="anonymous", session=AnonymousSession.objects.create())
+    req = create_request(peer, story.id, intent="listen")
+    assert req.status == DialogueRequestStatus.PENDING
+    assert list_inbox(author)[0].id == req.id
+    assert Notification.objects.filter(
+        kind=NotificationKind.DIALOGUE_REQUEST,
+        recipient_account=author_acc,
+    ).exists()
+
+
+@pytest.mark.django_db
 def test_helper_reject_hides_from_author():
     helper_acc = Account.objects.create_user(
         email="rejh@ex.com", password="password123", is_helper=True, is_on_duty=True

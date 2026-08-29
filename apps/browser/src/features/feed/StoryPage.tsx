@@ -128,8 +128,6 @@ function MicIcon() {
 export function StoryPage() {
   const { id } = useParams<{ id: string }>();
   const [params] = useSearchParams();
-  const highlightCloud = params.get("cloud");
-  const entryParam = params.get("entry");
   const { locale, t } = useI18n();
   const toast = useToast();
   const navigate = useNavigate();
@@ -144,7 +142,6 @@ export function StoryPage() {
   const [nextBody, setNextBody] = useState("");
   const [editing, setEditing] = useState<Story | null>(null);
   const [ctxMenu, setCtxMenu] = useState<StoryEntryMenuState | null>(null);
-  const [cloudTarget, setCloudTarget] = useState<string | null>(null);
   const live = useFeedLive();
   const livePoll = live.status === "open" ? false : 20_000;
   const seenStory = useRef(false);
@@ -168,10 +165,6 @@ export function StoryPage() {
   useEffect(() => {
     if (params.get("request") === "1") setShowRequest(true);
   }, [params]);
-
-  useEffect(() => {
-    setCloudTarget(entryParam);
-  }, [id, entryParam]);
 
   useEffect(() => {
     seenStory.current = false;
@@ -371,19 +364,9 @@ export function StoryPage() {
     rawThread.find((s) => s.id === activeId) ??
     (query.data?.id === activeId ? query.data : undefined);
   const thread = rawThread.length > 0 ? rawThread : story ? [story] : [];
-  const cloudId = cloudTarget ?? activeId;
   const canSend = nextBody.trim().length > 0;
   const busy =
     addNext.isPending || addVoice.isPending || saveStory.isPending;
-
-  useEffect(() => {
-    if (!highlightCloud) return;
-    const items = threadQuery.data?.items ?? [];
-    const hit = items.find((s) =>
-      (s.received_clouds ?? []).some((c) => c.id === highlightCloud),
-    );
-    if (hit) setCloudTarget(hit.id);
-  }, [highlightCloud, threadQuery.data]);
 
   const canWrite = (hearersQuery.data ?? []).filter(
     (h) => h.outreach_opt_in && !h.has_open_dialogue,
@@ -557,10 +540,7 @@ export function StoryPage() {
                 <div
                   key={entry.id}
                   id={`story-${entry.id}`}
-                  className={`${chat.msgBlock} ${withPrev ? chat.msgTight : chat.msgLoose}${
-                    isAuthor ? "" : ` ${styles.pickable}`
-                  }`}
-                  onClick={() => setCloudTarget(entry.id)}
+                  className={`${chat.msgBlock} ${withPrev ? chat.msgTight : chat.msgLoose}`}
                   onContextMenu={(e) => openCtx(e, entry)}
                   onPointerDown={(e) => onBubblePointerDown(e, entry)}
                   onPointerMove={onBubblePointerMove}
@@ -577,12 +557,7 @@ export function StoryPage() {
                     </div>
                   ) : null}
                   <div
-                    className={`${chat.msg} ${fromMe ? chat.me : chat.them} ${groupClass}${
-                      !fromMe && entry.id === cloudId ? ` ${styles.cloudPick}` : ""
-                    }`}
-                    aria-current={
-                      !fromMe && entry.id === cloudId ? "true" : undefined
-                    }
+                    className={`${chat.msg} ${fromMe ? chat.me : chat.them} ${groupClass}`}
                   >
                     {entry.audio_url ? (
                       <VoiceBubble
@@ -608,12 +583,12 @@ export function StoryPage() {
 
             {isAuthor ? null : (
               <QuietPhrases
-                key={cloudId}
-                storyId={cloudId}
+                storyId={rootId()}
                 sentKey={
                   thread.find((s) => s.my_phrase_key)?.my_phrase_key || ""
                 }
                 onSent={(key) => {
+                  const rid = rootId();
                   queryClient.setQueryData<StoryThread>(
                     ["story-thread", id],
                     (prev) => {
@@ -621,7 +596,7 @@ export function StoryPage() {
                       return {
                         ...prev,
                         items: prev.items.map((s) =>
-                          s.id === cloudId ? { ...s, my_phrase_key: key } : s,
+                          s.id === rid ? { ...s, my_phrase_key: key } : s,
                         ),
                       };
                     },

@@ -286,35 +286,42 @@ def create_request(
         raise DialogueError("Диалог недоступен")
 
     note_s = (note or "").strip()[:280]
+    open_q = Q(
+        story=story,
+        status__in=(
+            DialogueRequestStatus.AWAITING_HELPER,
+            DialogueRequestStatus.PENDING,
+        ),
+    )
+    if actor.account is not None:
+        open_q &= Q(from_account=actor.account)
+    else:
+        open_q &= Q(from_session=actor.session)
+    if DialogueRequest.objects.filter(open_q).exists():
+        raise DialogueError("Запрос уже отправлен")
+
+    review = Account.objects.on_duty_helpers().exists()
+    status = (
+        DialogueRequestStatus.AWAITING_HELPER
+        if review
+        else DialogueRequestStatus.PENDING
+    )
     try:
-        if actor.account:
-            req, created = DialogueRequest.objects.get_or_create(
-                story=story,
-                from_account=actor.account,
-                status=DialogueRequestStatus.AWAITING_HELPER,
-                defaults={
-                    "intent": intent,
-                    "note": note_s,
-                    "from_session": None,
-                },
-            )
-        else:
-            req, created = DialogueRequest.objects.get_or_create(
-                story=story,
-                from_session=actor.session,
-                status=DialogueRequestStatus.AWAITING_HELPER,
-                defaults={
-                    "intent": intent,
-                    "note": note_s,
-                    "from_account": None,
-                },
-            )
+        req = DialogueRequest.objects.create(
+            story=story,
+            from_account=actor.account,
+            from_session=None if actor.account is not None else actor.session,
+            intent=intent,
+            note=note_s,
+            status=status,
+        )
     except IntegrityError as exc:
         raise DialogueError("Запрос уже отправлен") from exc
 
-    if not created:
-        raise DialogueError("Запрос уже отправлен")
-    _notify_helpers_dialogue_review(req, actor)
+    if review:
+        _notify_helpers_dialogue_review(req, actor)
+    else:
+        _notify_author_dialogue_request(req)
     return req
 
 
@@ -374,6 +381,11 @@ def approve_dialogue_request(actor: Actor, request_id: UUID) -> DialogueRequest:
         raise DialogueError("Request is not awaiting review")
     req.status = DialogueRequestStatus.PENDING
     req.save(update_fields=["status", "updated_at"])
+    _notify_author_dialogue_request(req)
+    return req
+
+
+def _notify_author_dialogue_request(req: DialogueRequest) -> None:
     story = req.story
     author = Actor(
         kind="account" if story.author_account_id else "anonymous",
@@ -389,7 +401,6 @@ def approve_dialogue_request(actor: Actor, request_id: UUID) -> DialogueRequest:
             "intent": req.intent,
         },
     )
-    return req
 
 
 @transaction.atomic

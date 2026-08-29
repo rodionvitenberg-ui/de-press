@@ -27,7 +27,8 @@ def create_reviewed_request(
     intent: str = "listen",
     note: str = "",
 ):
+    helper = helper_actor()
     req = create_request(peer, story.id, intent=intent, note=note)
-    approve_dialogue_request(helper_actor(), req.id)
+    approve_dialogue_request(helper, req.id)
     req.refresh_from_db()
     return req

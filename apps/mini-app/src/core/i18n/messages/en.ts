@@ -117,13 +117,13 @@ export const en: Messages = {
   dialogue: {
     similar: "I have a similar story",
     similarHint:
-      "The author gets a request. You can write first only if they open the dialogue.",
+      "If a Helper is on duty they look first. Otherwise the author sees the request immediately. You can write first only if they open the dialogue.",
     noteLabel: "Short note (optional)",
     notePlaceholder: "No advice — just nearby",
     sendRequest: "Send request",
     cancel: "Cancel",
     requestSent:
-      "Request sent. The author will see it and decide whether to open a dialogue. No pressure.",
+      "Request sent. If a Helper is on duty they see it first. Otherwise the author sees it in chats and decides whether to open a dialogue.",
   },
   report: {
     report: "Report",
