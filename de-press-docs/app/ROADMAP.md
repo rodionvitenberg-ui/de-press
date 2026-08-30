@@ -1,48 +1,48 @@
 # Roadmap de-press.co
 
-См. также [README.md](../README.md) (стадия и приоритеты), [CONTEXT.md](../CONTEXT.md), [PILOT.md](./PILOT.md).
+See also [README.md](../README.md) (the stage and priorities), [CONTEXT.md](../CONTEXT.md), [PILOT.md](./PILOT.md).
 
-## Стадия (2026-08)
+## Stage (2026-08)
 
-**Product core v0.0–v0.14 закрыт в коде.**  
-**P1 «Soft-notify» закрыт** (включая `/inbox` по magic-token и `PUBLIC_BASE_URL` в settings).  
-**Browser host (UI Core v2)** — Vite SPA с ТГ-эргономикой: каркас + дожим P0 закрыт.  
-**Кружочки + voice retention на сервере закрыты.**  
-Дальше по продукту: **нативный динамический мультиязык** (P1).  
-По hosts: **Telegram Mini App** (этап), затем/параллельно **own mobile** и **own desktop**.  
-**AI-помощник (полный продукт) — в самую последнюю очередь.**  
-В browser уже есть Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — это companion surface, не закрытый AI-помощник.
+**Product core v0.0–v0.14 is closed in code.**  
+**P1 "Soft-notify" is closed** (including the magic-token `/inbox` and `PUBLIC_BASE_URL` in settings).  
+**Browser host (UI Core v2)** — a Vite SPA with TG ergonomics: the skeleton + the P0 push are closed.  
+**Circles + voice retention on the server are closed.**  
+Next for the product: **native dynamic multilingual** (P1).  
+By hosts: **Telegram Mini App** (a stage), then/in parallel **own mobile** and **own desktop**.  
+**The AI assistant (the full product) — the very last of all.**  
+The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — this is a companion surface, not the closed AI assistant.
 
-**Терапия (ADR 0022, stage B) закрыта в браузере и Mini App** (Solana Pay QR + ручное подтверждение терапевта). Вопросы новой фазы — [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), план — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md).
+**Therapy (ADR 0022, stage B) is closed in the browser and the Mini App** (Solana Pay QR + manual confirmation by the therapist). The questions of the new phase — [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), the plan — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md).
 
-> **Решение (2026-08, уточнено):** этот репозиторий — только приложения.  
-> **Четыре App Hosts:** browser · Telegram Mini App · own desktop · own mobile — см. [`PLATFORMS.md`](./PLATFORMS.md), [ADR 0013](./adr/0013-four-app-hosts.md).  
-> Mini App — одна платформа и интересный этап, **не** замена своим mobile/desktop.  
-> Лендинг — отдельный репозиторий; связь — ссылка-переход.
+> **Decision (2026-08, refined):** this repository is apps only.  
+> **Four App Hosts:** browser · Telegram Mini App · own desktop · own mobile — see [`PLATFORMS.md`](./PLATFORMS.md), [ADR 0013](./adr/0013-four-app-hosts.md).  
+> The Mini App is one platform and an interesting stage, **not** a replacement for own mobile/desktop.  
+> The landing page is a separate repository; the connection is a jump link.
 
 ```
-[ product core ✅ ]  [ soft-notify ✅ ]  [ browser UI core ✅ ]  [ circles/voice ✅ ]  [ ★ Mini App этап ]  [ multilingual ]  [ own mobile/desktop ]
+[ product core ✅ ]  [ soft-notify ✅ ]  [ browser UI core ✅ ]  [ circles/voice ✅ ]  [ ★ Mini App stage ]  [ multilingual ]  [ own mobile/desktop ]
 ```
 
-## Решения фазы (2026-08-30 — все вопросы закрыты, детали в [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md))
+## Phase decisions (2026-08-30 — all questions closed, details in [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md))
 
-| Q | Решение |
-|---|---------|
-| Q1 голос/видео | **A — статус-кво:** live-голос и кружочки живут внутри 1:1 диалога, роль не важна (человек↔человек разрешён) |
-| Q2 звонки в Mini App | **Переносим** — call.* + signaling через dialogue-WS, parity с браузером (план P1.3) |
-| Q3 дашборд хелпера | **A:** вкладка слева, видна только хелперам; развиваем существующий `/helper` |
-| Q4 realtime дашборда | **WS-канал очереди со старта**, без поллинга |
-| Q5 репозиторий | **Публикация на GitHub — последняя задача всего проекта** (после закрытия всех остальных); лицензия, CI, README — в момент публикации |
-| Q6 документация | **EN — канон**; RU-версии перед переводом копируются в `docs-ru-archive/` в корне, папка в `.gitignore` |
-| Q7 прямой вызов хелпера | **Нет** — звонок только внутри диалога |
-| Q8 метрики дашборда | **Приняты:** очередь, медианное ожидание, взятые/закрытые за период, дежурство; без per-helper секунд, рейтингов и engagement |
-| Q9 ретест | **A:** ручной чек-лист по расширенному PILOT smoke; Playwright — после пилота |
-| Q10 анонимы и терапия | **Оставляем.** Инварианты: аноним имеет те же возможности, что и зарегистрированный; **вся история всегда хранится в браузере пользователя, не у нас** |
+| Q | Decision |
+|---|----------|
+| Q1 voice/video | **A — status quo:** live voice and circles live inside the 1:1 dialogue, the role does not matter (human↔human is allowed) |
+| Q2 calls in the Mini App | **We port them** — call.* + signaling over the dialogue WS, parity with the browser (plan P1.3) |
+| Q3 helper dashboard | **A:** a left tab, visible to helpers only; we evolve the existing `/helper` |
+| Q4 dashboard realtime | **A WS queue channel from the start**, no polling |
+| Q5 repository | **GitHub publication is the LAST task of the whole project** (after everything else closes); license, CI, README — at the moment of publication |
+| Q6 documentation | **EN is canon**; the RU versions are copied to `docs-ru-archive/` at the root before the translation, the folder is in `.gitignore` |
+| Q7 calling a helper directly | **No** — a call only inside the dialogue |
+| Q8 dashboard metrics | **Accepted:** the queue, the median wait, taken/closed per period, duty; no per-helper seconds, ratings, or engagement |
+| Q9 retest | **A:** a manual checklist per the extended PILOT smoke; Playwright — after the pilot |
+| Q10 anonymous users and therapy | **We keep it.** Invariants: an anonymous user has the same capabilities as a registered one; **all history always lives in the user's browser, not with us** |
 
-## Уже сделано
+## Already done
 
-| Версия | Содержание | Статус |
-|--------|------------|--------|
+| Version | Content | Status |
+|---------|---------|--------|
 | v0.0–v0.7 | Foundation, safety, monologue, dialogue, Anti-Panic, AI, ZK patterns, help static | ✅ |
 | WS | Channels, typing, reconnect | ✅ |
 | Pilot docs | PILOT.md, smoke | ✅ |
@@ -52,81 +52,80 @@
 | **v0.12** | Design pass (clouds, author vs public) | ✅ |
 | **v0.13** | i18n ru/en + phrase texts | ✅ |
 | **v0.14** | Voice notes + translate | ✅ |
-| **P1 notify (full)** | Notification + EmailDigest + WS + REST + настройки + `/inbox` + `PUBLIC_BASE_URL` | ✅ |
+| **P1 notify (full)** | Notification + EmailDigest + WS + REST + settings + `/inbox` + `PUBLIC_BASE_URL` | ✅ |
 
-## P1 «Soft-notify» — закрыт ✅
+## P1 "Soft-notify" — closed ✅
 
-- ✅ `Notification` (kind, payload, is_read) + `EmailDigest` (magic-token, статусы) + миграции
+- ✅ `Notification` (kind, payload, is_read) + `EmailDigest` (magic token, statuses) + migrations
 - ✅ REST: `/me/notifications`, `unread-count`, `mark-read`, `read-all`
-- ✅ WS `/ws/notifications/` (snapshot, new, read, unread_count, ping) + Anti-Panic kill
-- ✅ `notify()` из dialogue и support (запросы диалога, облачка, approve, сообщения, outreach)
-- ✅ `/me/notify-settings` (opt-in, частота, contact email) + тест дайджеста
-- ✅ **`POST /auth/inbox`** — вход по magic-token (account → login, anon → bind anon-cookie)
-- ✅ **Страница `/inbox`** (`?token=...`) — открывает приватный инбокс, отмечает прочитанные
-- ✅ **`PUBLIC_BASE_URL`** вынесен в settings/env (softnotify использует `settings.PUBLIC_BASE_URL`)
-- ✅ Тесты: open_inbox (account/anon/invalid) + tsc чист
+- ✅ WS `/ws/notifications/` (snapshot, new, read, unread_count, ping) + the Anti-Panic kill
+- ✅ `notify()` from dialogue and support (dialogue requests, clouds, approve, messages, outreach)
+- ✅ `/me/notify-settings` (opt-in, frequency, contact email) + the digest test
+- ✅ **`POST /auth/inbox`** — sign-in via a magic token (account → login, anon → bind the anon cookie)
+- ✅ **The `/inbox` page** (`?token=...`) — opens the private inbox, marks the read ones
+- ✅ **`PUBLIC_BASE_URL`** moved into settings/env (softnotify uses `settings.PUBLIC_BASE_URL`)
+- ✅ Tests: open_inbox (account/anon/invalid) + tsc clean
 
-## Дальше (новый порядок приоритетов)
+## Next (the new priority order)
 
-| Приоритет | Содержание |
-|-----------|------------|
-| **P0 ✅** | **UI Core / Browser host**: Vite + React SPA, токены/темы, 3-зонный ТГ-каркас, лента/чат, «МНЕ ХУЕВО» |
-| **P0 ✅** | **Кружочки**: `POST …/messages/circle` + ephemeral purge on close |
-| **P0 ✅** | **Голосовые с опцией удаления**: `/me/voice-retention` + per-sender purge on close |
-| **P0** | **Хвосты паритета browser ↔ Mini App**: фонд (FundCard/TipBanner/TipWalletForm), звонки в Mini App (Q2: переносим); терапия в Mini App ✅ |
-| **P0** | **Хелперский дашборд**: вкладка слева, видна только хелперам; очередь по WS-каналу со старта (Q4), приём → диалог, сводка — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
-| **P0** | **Перевод документации на EN (RU-архив в `docs-ru-archive/`, gitignored) + полный ретест → ручная QA** — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
-| 🗄 снято | **Нативный динамический мультиязык** (STT → translate → TTS) — снято: без ключей адекватно не реализовать; остался перевод текста |
-| **P1** | **Telegram Mini App host (этап)**: Bot + Mini App, initData auth, theme bridge, optional bot soft-notify; диалоги остаются на de-press backend — **не** замена own mobile |
-| **P1** | **Own Mobile**: ТГ-таб-бар layout → PWA / нативная обёртка / store (отдельный host) |
-| **P1** | **Own Desktop**: обёртка UI Core (Tauri / Electron — решение позже) |
-| **P1 ✅** | **PWA bridge on browser host** — installable standalone + phone/tablet chrome; native store still later. Prod-build verified (manifest+icons 200, sw.js served, install row in More, offline shell per sw.js); live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md) |
-| 🗄 → лендинг | **Публичные страницы (помощь, гайды)** — перенесено в лендинг-репо (гайды срезаны 2026-08-30; в приложении /help — только гейт) |
-| **P1** | Pilot ops: staging, закрытая когорта, feedback loop; deploy-комплект: [`DEPLOY.md`](./DEPLOY.md) |
-| **P1** | Onboarding Helpers; этичные ops-метрики; media/S3; secrets/backup |
-| **P2** | Geo-help v2; pre-mod / AI-assist для репортов |
-| **last** | **AI-помощник** — самая последняя очередь |
-| **после всего** | **Публикация репозитория на GitHub** (лицензия, CI, README) — последняя задача проекта, после закрытия всех остальных (Q5) |
+| Priority | Content |
+|----------|---------|
+| **P0 ✅** | **UI Core / Browser host**: Vite + React SPA, tokens/themes, the 3-zone TG skeleton, feed/chat, "I'M NOT OK" |
+| **P0 ✅** | **Circles**: `POST …/messages/circle` + an ephemeral purge on close |
+| **P0 ✅** | **Voice notes with a delete option**: `/me/voice-retention` + a per-sender purge on close |
+| **P0** | **The browser ↔ Mini App parity tails**: the fund (FundCard/TipBanner/TipWalletForm), calls in the Mini App (Q2: we port them); therapy in the Mini App ✅ |
+| **P0** | **The helper dashboard**: a left tab, visible to helpers only; the queue over a WS channel from the start (Q4), take → dialogue, the summary — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
+| **P0** | **The docs translation into EN (the RU archive in `docs-ru-archive/`, gitignored) + the full retest → manual QA** — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
+| 🗄 dropped | **Native dynamic multilingual** (STT → translate → TTS) — dropped: cannot be implemented adequately without keys; text translation remains |
+| **P1** | **Telegram Mini App host (a stage)**: Bot + Mini App, initData auth, the theme bridge, optional bot soft-notify; the dialogues stay on the de-press backend — **not** a replacement for own mobile |
+| **P1** | **Own Mobile**: the TG tab-bar layout → a PWA / a native wrapper / a store (a separate host) |
+| **P1** | **Own Desktop**: a UI Core wrapper (Tauri / Electron — the decision later) |
+| **P1 ✅** | **PWA bridge on the browser host** — installable standalone + phone/tablet chrome; a native store still later. The prod build is verified (manifest+icons 200, sw.js served, the install row in More, the offline shell per sw.js); a live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md) |
+| 🗄 → landing | **Public pages (help, guides)** — moved to the landing repo (the guides were cut on 2026-08-30; in the app `/help` is the gate only) |
+| **P1** | Pilot ops: staging, a closed cohort, a feedback loop; the deploy kit: [`DEPLOY.md`](./DEPLOY.md) |
+| **P1** | Helper onboarding; ethical ops metrics; media/S3; secrets/backup |
+| **P2** | Geo-help v2; pre-mod / AI-assist for reports |
+| **last** | **The AI assistant** — the very last of all |
+| **after everything** | **Publishing the repository on GitHub** (license, CI, README) — the last task of the project, after all the others are closed (Q5) |
 
-## Голос
+## Voice
 
-1. ✅ Voice note в Dialogue
-2. 🗄 STT — снято (offline-заглушки не годятся, без ключей адекватно не реализовать)
-3. ✅ Translate (LLM gateway или offline marker)
-4. ✅ **Кружочки** (video circles) — self-destruct при закрытии чата
-5. ✅ **Голосовые с опцией удаления** (настраиваемо, per-sender)
-6. 🗄 **Нативный динамический перевод** (STT → translate → TTS) — снято; остался перевод текста
-7. ✅ **Live 1:1 voice в диалоге** (ADR 0021, signaling через dialogue-WS, TURN/STUN самохост); групповые rooms — по-прежнему не делаем
+1. ✅ A voice note in the Dialogue
+2. 🗄 STT — dropped (offline stubs are no good; cannot be implemented adequately without keys)
+3. ✅ Translate (an LLM gateway or an offline marker)
+4. ✅ **Circles** (video circles) — self-destruct when the chat closes
+5. ✅ **Voice notes with a delete option** (configurable, per-sender)
+6. 🗄 **Native dynamic translation** (STT → translate → TTS) — dropped; text translation remains
+7. ✅ **Live 1:1 voice in the dialogue** (ADR 0021, signaling over the dialogue WS, self-hosted TURN/STUN); group rooms — still not doing
 
-## Модель «облачков» (принята)
+## The "clouds" model (accepted)
 
-**Публично:** монолог + «Я слышу тебя» + тихие фразы (без следа) + запрос диалога.  
-**Автору:** Hearer List (если есть кому писать), жест облачка на своей строке ленты, inbox запросов диалога, чат. Pulse и список облачков в UI нет (ADR 0017).
+**Public:** the monologue + "I hear you" + quiet phrases (no trace) + a dialogue request.  
+**For the author:** the Hearer List (if there is someone to write to), the cloud gesture on their own feed row, the inbox of dialogue requests, the chat. No pulse and no cloud list in the UI (ADR 0017).
 
-| Канал | Модерация | Видимость |
-|-------|-----------|-----------|
-| Silent Empathy / лучи | нет | UI снят (ADR 0018); API Pulse/hearers живы |
-| Quiet Phrase | нет | жест на своей строке ленты; не список, не колокольчик |
-| Moderated Cloud | ручная | то же после approve; очередь Helper |
+| Channel | Moderation | Visibility |
+|---------|-----------|------------|
+| Silent Empathy / rays | none | removed from the UI (ADR 0018); the Pulse/hearers API is alive |
+| Quiet Phrase | none | a gesture on their own feed row; not a list, not a bell |
+| Moderated Cloud | manual | the same after approve; the Helper queue |
 | Dialogue | post-mod / report | 1-1 |
 
-Инвариант: **нет** публичных комментариев, лайков и витрины реакций на странице записи.
+Invariant: **no** public comments, likes, or reaction showcases on an entry page.
 
-## Фонд (ADR 0020) — готов в браузер-SPA и Mini App
+## The fund (ADR 0020) — done in the browser SPA and the Mini App
 
-Некастодиальный контур: публичная казна (Squads-мультисиг, `TREASURY_SOLANA_ADDRESS` — пусто = UI скрыт), opt-in кошелёк чаевых хелпера (виден только в закрытом диалоге благодарному собеседнику, с предупреждением «отдельный кошелёк»), дежурный фонд с посуточным капом и ленивым stale-close, публичный псевдонимный отчёт `GET /v1/fund/report?period=YYYY-MM` — подписанты мультисига делят казну по нему. Деньги ходят только кошелёк → кошелёк; бэкенд не трогает ключи, платежи и RPC.
-Дальше: страница публичного отчёта, верификация владения подписью (phase 2).
+A non-custodial contour: a public treasury (a Squads multisig, `TREASURY_SOLANA_ADDRESS` — empty = the UI is hidden), a helper's opt-in tip wallet (visible only in a closed dialogue to the grateful peer, with the "a separate wallet" warning), the duty fund with a per-day cap and a lazy stale-close, a public pseudonymous report `GET /v1/fund/report?period=YYYY-MM` — the multisig signers split the treasury by it. Money moves only wallet → wallet; the backend never touches keys, payments, or RPC.
+Next: the public report page, the ownership verification by signature (phase 2).
 
-## Терапия (ADR 0022) — зачаток
+## Therapy (ADR 0022) — a seedling
 
-Каталог терапевтов (доступ по инвайту админа), профиль (псевдоним, подход,
-языки, тариф в SOL, Solana-адрес), запрос сессии клиентом → `awaiting_payment`
-→ Solana Pay QR (прямой перевод клиент → терапевт; ADR 0020 не задет) →
-«Я оплатил» → **ручное подтверждение терапевта** → `paid` → 1:1 диалог и
-live-звонок (ADR 0021) как канал сессии. Бэкенд хранит только статусы и
-ссылки: ключей, процессинга платежей и денег на балансе нет. План:
+A therapist catalog (access by an admin invite), a profile (pseudonym, approach,
+languages, the rate in SOL, a Solana address), a session request by the client → `awaiting_payment`
+→ a Solana Pay QR (a direct client → therapist transfer; ADR 0020 is untouched) →
+"I paid" → **manual confirmation by the therapist** → `paid` → a 1:1 dialogue and
+a live call (ADR 0021) as the session channel. The backend stores only statuses and
+references: no keys, no payment processing, no money balances. Plan:
 [`VOICE_THERAPY_PLAN.md`](./VOICE_THERAPY_PLAN.md).
 
-## Не делаем
+## Not doing
 
-Публичный thread, публичный who-heard, trauma map на сервере, AI как скрытый peer, open matching «всех со всеми», voice rooms до готовности notes. Словари-переводчики интерфейса как «мультиязык» — не нужны; нужен нативный динамический перевод контента. Хранение истории контента на сервере — вся история всегда живёт в браузере пользователя (инвариант приватности, решение Q10).

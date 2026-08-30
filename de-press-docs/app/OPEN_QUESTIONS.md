@@ -1,78 +1,78 @@
-# Открытые вопросы — август 2026
+# Open questions — August 2026
 
-Собраны перед фазой «паритет + дашборд хелпера + перевод доков + ретест» — см. [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md). Формат: вопрос → варианты → рекомендация → статус. Решения зафиксированы 2026-08-30 (все 10 отвечены; сводка — в [ROADMAP.md](./ROADMAP.md), раздел «Решения фазы»).
+Collected before the "parity + helper dashboard + docs translation + retest" phase — see [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md). Format: question → options → recommendation → status. The decisions are fixed 2026-08-30 (all 10 answered; the summary is in [ROADMAP.md](./ROADMAP.md), the "Phase decisions" section).
 
-## Q1. Кому доступен голос/видео
+## Q1. Who has access to voice/video
 
-Вопрос: отдавать ли live-голос (ADR 0021) и кружочки (video) всем пользователям для общения друг с другом, или только в разговоре с хелпером/психологом?
+Question: should live voice (ADR 0021) and circles (video) be available to all users to talk to each other, or only in a conversation with a helper/therapist?
 
-- **A. Статус-кво:** голос и видео живут внутри 1:1 диалога, роль не важна (друг с другом — да; хелпер/терапевт — те же диалоги).
-- **B. Только с хелпером/терапевтом:** role-gate в signaling-consumers и UI.
-- **C. Открытые группы/rooms** — не делаем (ROADMAP «Не делаем»).
+- **A. Status quo:** voice and video live inside the 1:1 dialogue, the role does not matter (with each other — yes; helper/therapist — the same dialogues).
+- **B. Only with a helper/therapist:** a role gate in the signaling consumers and the UI.
+- **C. Open groups/rooms** — not doing (ROADMAP "Not doing").
 
-**Рекомендация: A.** Оба участника уже в диалоге (согласие есть), звонок отклоняем, есть busy и anti-panic kill; взаимная поддержка «человек человеку» — ядро продукта, ограничивать ролью — убить смысл; терапевт получает тот же механизм без спецкода. Кружочки эфемерны (удаление при закрытии чата).
-Статус: ✅ решено (2026-08-30): A — статус-кво подтверждён.
+**Recommendation: A.** Both participants are already in the dialogue (consent exists), the call is declineable, there is busy and the anti-panic kill; peer support "human to human" is the core of the product — restricting it by role kills the point; the therapist gets the same mechanism with no special code. Circles are ephemeral (deleted when the chat closes).
+Status: ✅ resolved (2026-08-30): A — the status quo is confirmed.
 
-## Q2. Звонки в Mini App
+## Q2. Calls in the Mini App
 
-Вопрос: переносить ли `call.*` (live-voice) в Mini App сейчас?
+Question: should `call.*` (live voice) be ported to the Mini App now?
 
-Контекст: WebRTC в TG-webview ведёт себя по-разному на клиентах; signaling через dialogue-WS уже готов; проверить реально можно только на устройствах в пилоте.
+Context: WebRTC in the TG webview behaves differently across clients; the signaling over the dialogue WS is already ready; it can only be really tested on devices in the pilot.
 
-**Рекомендация:** отложить до пилота, в коде не блокировать (позже — feature-detect `navigator.mediaDevices`). Текст и голосовые заметки в Mini App уже есть.
-Статус: ✅ решено (2026-08-30): переносим в Mini App — работы добавлены в план (P1.3).
+**Recommendation:** defer until the pilot, do not block in the code (later — feature-detect `navigator.mediaDevices`). Text and voice notes already exist in the Mini App.
+Status: ✅ resolved (2026-08-30): we port them to the Mini App — the work is added to the plan (P1.3).
 
-## Q3. Что значит «открытый дашборд» хелпера
+## Q3. What "an open dashboard" of a helper means
 
-- **A.** Вкладка в левой панели, видна только хелперам (`is_helper`), внутри — прозрачная статистика очереди.
-- **B.** Публичная страница прозрачности для всех.
+- **A.** A tab in the left panel, visible to helpers only (`is_helper`), with transparent queue statistics inside.
+- **B.** A public transparency page for everyone.
 
-**Рекомендация: A сейчас** (`/helper` уже существует и скрыт от не-хелперов — развиваем его в дашборд), **B позже** как отдельная агрегированная страница без PII.
-Статус: ✅ решено (2026-08-30): A.
+**Recommendation: A now** (`/helper` already exists and is hidden from non-helpers — we evolve it into the dashboard), **B later** as a separate aggregated page without PII.
+Status: ✅ resolved (2026-08-30): A.
 
-## Q4. Realtime дашборда: WS или поллинг
+## Q4. Dashboard realtime: WS or polling
 
-**Рекомендация:** v1 — поллинг (react-query `refetchInterval` 15–30s, как в существующих панелях); WS-канал очереди — только если пилот покажет, что задержка мешает. YAGNI.
-Статус: ✅ решено (2026-08-30): WS-канал очереди со старта, без поллинга.
+**Recommendation:** v1 — polling (react-query `refetchInterval` 15–30s, as in the existing panels); a WS queue channel — only if the pilot shows the lag hurts. YAGNI.
+Status: ✅ resolved (2026-08-30): a WS queue channel from the start, no polling.
 
-## Q5. Подготовка репозитория
+## Q5. Repository preparation
 
-Подвопросы: публиковать ли на GitHub (private/public)? Лицензия (рекомендация: **AGPL-3.0** — самохостинг + защита от облачных клонов)? Чистить ли git-историю (email автора)? CI (GitHub Actions: ruff + pytest чанками, vitest, оба vite-билда)?
+Sub-questions: publish to GitHub (private/public)? A license (recommendation: **AGPL-3.0** — self-hosting + protection from cloud clones)? Clean the git history (the author's email)? CI (GitHub Actions: ruff + pytest in chunks, vitest, both vite builds)?
 
-**Рекомендация:** private → public после ретеста; AGPL-3.0; историю не переписывать, но проверить `git log --format=%ae | sort -u`; минимальный CI — при публикации.
-Статус: ✅ решено (2026-08-30): публикация на GitHub — последняя задача всего проекта (после закрытия всех остальных); лицензия/CI/README — в момент публикации.
+**Recommendation:** private → public after the retest; AGPL-3.0; do not rewrite the history, but check `git log --format=%ae | sort -u`; a minimal CI — at publication.
+Status: ✅ resolved (2026-08-30): the GitHub publication is the last task of the whole project (after everything else is closed); license/CI/README — at the moment of publication.
 
-## Q6. Перевод документации: EN вместо RU или билингва?
+## Q6. Docs translation: EN instead of RU or bilingual?
 
-- **A.** EN становится каноном, RU-версии удаляются.
-- **B.** Держать оба языка (двойная правка при каждом изменении).
+- **A.** EN becomes canon, the RU versions are removed.
+- **B.** Keep both languages (a double edit on every change).
 
-**Рекомендация: A.** Глоссарий зафиксировать до перевода (хелпер → helper, облако → support cloud, тихие фразы → quiet phrases, «мне хуёво» → «I'm not ok», кружочки → video circles и т.д.).
-Статус: ✅ решено (2026-08-30): A — EN канон; RU-версии копируются в `docs-ru-archive/` в корне проекта (папка в .gitignore).
+**Recommendation: A.** Fix the glossary before the translation (the pairs live in [GLOSSARY.md](./GLOSSARY.md): хелпер → helper, облако → support cloud, тихие фразы → quiet phrases, «мне хуёво» → "I'm not ok", кружочки → video circles, etc.).
+Status: ✅ resolved (2026-08-30): A — EN canon; the RU versions are copied to `docs-ru-archive/` at the project root (the folder is in .gitignore).
 
-## Q7. Прямой вызов хелпера пользователем
+## Q7. A user calling a helper directly
 
-Вопрос: может ли пользователь инициировать звонок хелперу напрямую, вне диалога?
+Question: can a user initiate a call to a helper directly, outside a dialogue?
 
-**Рекомендация: нет.** Звонок остаётся внутри диалога (отклоняемое «кольцо», busy, anti-panic; никаких «холодных» звонков). Беседа с хелпером начинается через запрос помощи/облачко — это уже работает.
-Статус: ✅ решено (2026-08-30): нет, рекомендация принята.
+**Recommendation: no.** The call stays inside the dialogue (a declineable "ring", busy, anti-panic; no cold calls). A conversation with a helper starts via a help request/a cloud — that already works.
+Status: ✅ resolved (2026-08-30): no, the recommendation is accepted.
 
-## Q8. Какие метрики этичны для дашборда
+## Q8. Which metrics are ethical for the dashboard
 
-**Предложение:** длина очереди, медианное время ожидания, число взятых/закрытых запросов за период, кто на дежурстве. **НЕТ:** per-helper время ответа в секундах, рейтинги, «продуктивность», любые engagement-метрики (инвариант ADR 0017).
-Статус: ✅ решено (2026-08-30): принято.
+**Proposal:** the queue length, the median waiting time, the number of taken/closed requests per period, who is on duty. **NO:** per-helper response time in seconds, ratings, "productivity", any engagement metrics (the ADR 0017 invariant).
+Status: ✅ resolved (2026-08-30): accepted.
 
-## Q9. Глубина полного ретеста
+## Q9. The depth of the full retest
 
-- **A.** Ручной чек-лист по PILOT.md smoke, расширенный до всех функций.
-- **B.** Playwright E2E поверх.
+- **A.** A manual checklist per the PILOT.md smoke, extended to all features.
+- **B.** Playwright E2E on top.
 
-**Рекомендация: A сейчас** (быстрее дойти до ручной QA), B — после пилота, когда сценарии устоятся.
-Статус: ✅ решено (2026-08-30): A — ручной чек-лист.
+**Recommendation: A now** (a faster path to manual QA), B — after the pilot, when the scenarios settle.
+Status: ✅ resolved (2026-08-30): A — a manual checklist.
 
-## Q10. Анонимные клиенты терапии
+## Q10. Anonymous therapy clients
 
-Сейчас аноним (без аккаунта) может запросить платную сессию (backend это позволяет). Оставить для пилота?
+Currently an anonymous user (without an account) can request a paid session (the backend allows it). Keep it for the pilot?
 
-**Рекомендация: оставить** (privacy-first, оплата вне платформы); спам мониторим на пилоте.
-Статус: ✅ решено (2026-08-30): оставляем. Принцип: аноним имеет те же возможности, что и зарегистрированный; **вся история всегда хранится в браузере пользователя, не у нас**.
+**Recommendation: keep** (privacy-first, the payment is off-platform); we monitor spam in the pilot.
+Status: ✅ resolved (2026-08-30): we keep it. The principle: an anonymous user has the same capabilities as a registered one; **all history always lives in the user's browser, not with us**.

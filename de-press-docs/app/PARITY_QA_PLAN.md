@@ -1,44 +1,44 @@
-# План: паритет, дашборд хелпера, перевод, ретест (август 2026)
+# Plan: parity, the helper dashboard, the translation, the retest (August 2026)
 
-Смежные: [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) (вопросы Q1–Q10), [ROADMAP.md](./ROADMAP.md), [VOICE_THERAPY_PLAN.md](./VOICE_THERAPY_PLAN.md) (закрыт).
+Related: [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) (the questions Q1–Q10), [ROADMAP.md](./ROADMAP.md), [VOICE_THERAPY_PLAN.md](./VOICE_THERAPY_PLAN.md) (closed).
 
-Принципы: минимальные диффы; parity = перенос существующего, не новые фичи; каждый шаг заканчивается зелёными проверками и коммитом. Все вопросы решены 2026-08-30 — сводка в [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) и «Решения фазы» [ROADMAP.md](./ROADMAP.md).
+Principles: minimal diffs; parity = porting the existing, not new features; every step ends with green checks and a commit. All questions are resolved 2026-08-30 — the summary in [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) and the "Phase decisions" of [ROADMAP.md](./ROADMAP.md).
 
-## P1. Хвосты паритета browser ↔ Mini App
+## P1. The browser ↔ Mini App parity tails
 
-| Шаг | Что | Статус |
-|-----|-----|--------|
-| P1.1 | **Терапия в Mini App**: TherapyPane + PayModal (Solana Pay QR), api-методы и типы (`TherapistProfileOut`/`TherapySession`/`Me.is_therapist`), i18n `therapy.*` (31 ключ) + `nav.therapy`, иконка в Sidebar-рельсе, `qrcode` dep | ✅ сделано |
-| P1.2 | **Фонд в Mini App**: FundCard, TipBanner (DialoguePage), TipWalletForm (UserMenu), `wallet.ts` (тест остался в browser — та же логика, vitest в mini-app не добавляем), api `fundInfo`/`setTipWallet`, i18n `fund.*` (15 ключей) | ✅ сделано |
-| P1.3 | **Calls в Mini App**: переносим (Q2) — callMachine/useCall/CallModal, signaling через dialogue-WS (`CallSignalEvent`+`sendCall` в useChatSocket), api `rtcConfig`, кнопка скрыта без `navigator.mediaDevices`, i18n `calls.*` (17 ключей) | ✅ сделано |
+| Step | What | Status |
+|------|------|--------|
+| P1.1 | **Therapy in the Mini App**: TherapyPane + PayModal (a Solana Pay QR), the api methods and types (`TherapistProfileOut`/`TherapySession`/`Me.is_therapist`), i18n `therapy.*` (31 keys) + `nav.therapy`, an icon in the Sidebar rail, the `qrcode` dep | ✅ done |
+| P1.2 | **The fund in the Mini App**: FundCard, TipBanner (DialoguePage), TipWalletForm (UserMenu), `wallet.ts` (the test stayed in the browser — the same logic, no vitest in the mini-app), the api `fundInfo`/`setTipWallet`, i18n `fund.*` (15 keys) | ✅ done |
+| P1.3 | **Calls in the Mini App**: we port them (Q2) — callMachine/useCall/CallModal, the signaling over the dialogue WS (`CallSignalEvent`+`sendCall` in useChatSocket), the api `rtcConfig`, the button hidden without `navigator.mediaDevices`, i18n `calls.*` (17 keys) | ✅ done |
 
-Приёмка: `npm run build` (tsc + vite) в mini-app зелёный; i18n синхронно ru/en/types; суммарный каталог ≤ 640 ключей (общий кап `i18n_ui.MAX_KEYS`).
+Acceptance: `npm run build` (tsc + vite) in the mini-app is green; i18n is in sync ru/en/types; the total catalog is ≤ 640 keys (the shared cap `i18n_ui.MAX_KEYS`).
 
-## P2. Публикация репозитория — в самом конце проекта (Q5)
+## P2. Publishing the repository — at the very end of the project (Q5)
 
-Решение Q5: GitHub-публикация отложена до закрытия всех остальных задач проекта.
-- В момент публикации: лицензия (AGPL-3.0), CI (GitHub Actions: ruff + pytest чанками, vitest, оба vite-билда), README (быстрый старт, стек, структура).
-- Перед публикацией: `git log --format=%ae | sort -u` (email в истории), `.env.example` сверить с `settings/base.py`.
+The Q5 decision: the GitHub publication is deferred until all the other project tasks are closed.
+- At the moment of publication: the license (AGPL-3.0), CI (GitHub Actions: ruff + pytest in chunks, vitest, both vite builds), README (a quick start, the stack, the structure).
+- Before publication: `git log --format=%ae | sort -u` (the emails in the history), `.env.example` checked against `settings/base.py`.
 
-## P3. Перевод документации на EN
+## P3. Translating the documentation into EN
 
-- Инвентарь: 15 доков в `de-press-docs/app` + 22 ADR + 6 в корне = **43 файла** (~2.6k строк).
-- Сначала глоссарий (Q6), затем пачками: корень (README, PRIVACY, CONTEXT, MAINPLAN, PROGRESS) → app-доки → ADR.
-- Формат: EN заменяет RU (решено Q6-A); перед переводом RU-версии копируются в `docs-ru-archive/` в корне проекта, папка в `.gitignore`.
+- Inventory: 15 docs in `de-press-docs/app` + 22 ADR + 6 at the root = **43 files** (~2.6k lines).
+- First the glossary (Q6), then in batches: the root (README, PRIVACY, CONTEXT, MAINPLAN, PROGRESS) → the app docs → the ADR.
+- Format: EN replaces RU (resolved Q6-A); before the translation the RU versions are copied to `docs-ru-archive/` at the project root, the folder is in `.gitignore`.
 
-## P4. Полный ретест
+## P4. The full retest
 
-- **Backend** (чанками, ~30s таймаут раннера): therapy, fund, identity, common+notifications, dialogue, ai (`env -u DEEPSEEK_API_KEY`), empathy+moderation, support, stories.
-- **Frontend:** browser vitest 64 + tsc + build; mini-app build.
-- **Smoke-матрица** для ручной проверки (P6): антипаника · лента+облачка · тихие фразы · диалог+голос+кружочки · помощь human/AI · хелпер (очередь, дежурство, инвайты) · паттерны ZK · уведомления+`/inbox` · фонд (кошелёк/баннер/отчёт) · терапия (инвайт → каталог → сессия → QR → «я оплатил» → подтверждение → диалог) · переключение i18n · всё то же в Mini App внутри Telegram.
+- **Backend** (in chunks, a ~30s runner timeout): therapy, fund, identity, common+notifications, dialogue, ai (`env -u DEEPSEEK_API_KEY`), empathy+moderation, support, stories.
+- **Frontend:** browser vitest 64 + tsc + build; the mini-app build.
+- **The smoke matrix** for the manual check (P6): anti-panic · feed+clouds · quiet phrases · dialogue+voice+circles · help human/AI · helper (the queue, duty, invites) · the ZK patterns · notifications+`/inbox` · the fund (the wallet/banner/report) · therapy (invite → catalog → session → QR → "I paid" → confirmation → dialogue) · the i18n switch · all the same in the Mini App inside Telegram.
 
-## P5. Хелперский дашборд
+## P5. The helper dashboard
 
-- Вкладка слева (browser), видна только `is_helper`; существующий `/helper` (HelperQueue) развивается в дашборд.
-- Состав v1: живая очередь запросов по WS-каналу со старта (Q4; паттерн notifications-WS), «взять» → открытие диалога (кнопка звонка уже в диалоге), статус дежурства (существующий toggle), сводка (существующая), метрики из Q8.
-- Инициирование беседы с хелпером пользователем — уже работает через запрос помощи; прямых звонков нет (Q7).
-- Дизайн по токенам DESIGN_V2; backend-тесты на новые эндпоинты, если появятся.
+- A left tab (browser), visible to `is_helper` only; the existing `/helper` (HelperQueue) evolves into the dashboard.
+- The v1 composition: a live request queue over a WS channel from the start (Q4; the notifications-WS pattern), "take" → opening the dialogue (the call button is already in the dialogue), the duty status (the existing toggle), the summary (the existing one), the metrics from Q8.
+- A user starting a conversation with a helper already works via a help request; no direct calls (Q7).
+- The design by the DESIGN_V2 tokens; backend tests for new endpoints, if any appear.
 
-## P6. Ручная QA
+## P6. Manual QA
 
-Критерии готовности: P1–P5 закрыты, smoke-матрица P4 отработана, известные ограничения записаны в PROGRESS. Дальше — пилот (pilot ops в ROADMAP).
+The readiness criteria: P1–P5 are closed, the P4 smoke matrix is done, the known limitations are recorded in PROGRESS. Next — the pilot (pilot ops in the ROADMAP).

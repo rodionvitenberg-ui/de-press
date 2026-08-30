@@ -1,14 +1,14 @@
-# Anti-Panic (режим тишины)
+# Anti-Panic (the silence mode)
 
-«Мне хуево» — стоп-кнопка. Один общий `AntiPanicProvider`. Не путать с Mini App.
+"I'm not ok" — the stop button. One shared `AntiPanicProvider`. Do not confuse with the Mini App.
 
-## Поведение
+## Behavior
 
-- **Enter** (rail / tab bar / Help): обрыв всех WS, пауза `audio`/`video`, оверлей 4–7–8 + 5–4–3–2–1.
-- **Пока активен:** `useFeedSocket` / `useChatSocket` / `useNotifications` выключены (`enabled=false`) — нет reconnect и HTTP poll тостов.
-- **Exit:** только кнопка «Выйти из режима». Escape не закрывает.
-- **Persist:** `localStorage depress_anti_panic=1`. Reload оставляет оверлей.
+- **Enter** (rail / tab bar / Help): severing all WS, pausing `audio`/`video`, the 4–7–8 + 5–4–3–2–1 overlay.
+- **While active:** `useFeedSocket` / `useChatSocket` / `useNotifications` are off (`enabled=false`) — no reconnect and no HTTP-poll toasts.
+- **Exit:** the "Leave the mode" button only. Escape does not close it.
+- **Persist:** `localStorage depress_anti_panic=1`. A reload keeps the overlay.
 
-## Не в этом проходе
+## Not in this pass
 
-ИИ-шаг, локальный «поорать в текст», серверный флаг.
+An AI step, a local "scream into text", a server flag.
