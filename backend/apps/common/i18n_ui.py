@@ -6,6 +6,8 @@ import json
 import logging
 import re
 
+from django.conf import settings
+
 from apps.dialogue.speech import get_translator, is_stub_translation
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,48 @@ _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.I | re.M)
 
 class I18nUiError(Exception):
     pass
+
+
+def _dedicated_translator_configured() -> bool:
+    """TRANSLATOR_BASE_URL targets a specialized MT model (e.g. Hunyuan-MT).
+    That model class wants its exact per-string template, not JSON blobs."""
+    return bool(str(getattr(settings, "TRANSLATOR_BASE_URL", "") or "").strip())
+
+
+def _translate_per_value(
+    translator,
+    strings: dict[str, str],
+    *,
+    target: str,
+    source: str,
+) -> dict[str, str]:
+    """One dedicated call per string: fits the MT template and the dedicated
+    max_tokens budget (a 500-key JSON blob does not). A translator that is
+    down fails the whole catalog (honest marker — the client falls back to
+    on-device translation), but a single meta-explained string only keeps
+    its source text — one weird word must not kill the whole language."""
+    out: dict[str, str] = {}
+    for key, value in strings.items():
+        if not value.strip():
+            out[key] = value
+            continue
+        # Model occasionally meta-explains short ambiguous words instead of
+        # translating them; such output is several times longer than the
+        # source. Resample once (temperature sampling differs per call),
+        # then keep the source text rather than serving garbage.
+        cap = 3 * len(value) + 40
+        try:
+            raw = translator.translate(value, target_lang=target, source_lang=source)
+            if raw and not is_stub_translation(raw) and len(raw) > cap:
+                raw = translator.translate(
+                    value, target_lang=target, source_lang=source
+                )
+        except Exception as exc:
+            raise I18nUiError("Перевод сейчас недоступен") from exc
+        if not raw or is_stub_translation(raw):
+            raise I18nUiError("Перевод сейчас недоступен")
+        out[key] = value if len(raw) > cap else raw
+    return {k: out.get(k) or strings[k] for k in strings}
 
 
 def translate_ui_strings(
@@ -36,6 +80,8 @@ def translate_ui_strings(
     source = (source_lang or "en")[:8].lower() or "en"
 
     translator = get_translator()
+    if _dedicated_translator_configured():
+        return _translate_per_value(translator, strings, target=target, source=source)
     keys = list(strings.keys())
     out: dict[str, str] = {}
     for i in range(0, len(keys), CHUNK):

@@ -16,7 +16,8 @@ class _Echo:
         return json.dumps({k: f"DE:{v}" for k, v in data.items()}, ensure_ascii=False)
 
 
-def test_translate_ui_strings_keeps_keys(monkeypatch):
+def test_translate_ui_strings_keeps_keys(monkeypatch, settings):
+    settings.TRANSLATOR_BASE_URL = ""  # env may set it; force the JSON-blob path
     monkeypatch.setattr("apps.common.i18n_ui.get_translator", lambda: _Echo())
     out = translate_ui_strings(
         {"nav.feed": "Feed", "nav.panic": "I'm not ok"},

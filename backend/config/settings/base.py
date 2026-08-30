@@ -230,6 +230,9 @@ AI_MODEL = os.environ.get("AI_MODEL", "deepseek-chat")
 TRANSLATOR_BASE_URL = os.environ.get("TRANSLATOR_BASE_URL", "")
 TRANSLATOR_MODEL = os.environ.get("TRANSLATOR_MODEL", "Hy-MT1.5-1.8B")
 TRANSLATOR_API_KEY = os.environ.get("TRANSLATOR_API_KEY", "")
+# Per-call timeout for the dedicated translator; local CPU inference needs
+# more headroom than the previous hard-coded 30s (first call loads the model).
+TRANSLATOR_TIMEOUT = float(os.environ.get("TRANSLATOR_TIMEOUT", "60") or "60")
 
 # Local sim_kids (Ollama). Not used in production product paths.
 KIDS_BASE_URL = os.environ.get("KIDS_BASE_URL", "http://127.0.0.1:11434/v1")

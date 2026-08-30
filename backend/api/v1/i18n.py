@@ -14,7 +14,9 @@ router = Router(tags=["i18n"])
 
 RATE_LIMIT = 20
 RATE_WINDOW = 3600
-CATALOG_TTL = 60 * 60 * 24
+# Key already hashes the catalog contents → no staleness; a long TTL amortizes
+# the slow local CPU translation (minutes per language on a cache miss).
+CATALOG_TTL = 60 * 60 * 24 * 7
 
 
 class UiCatalogIn(Schema):
