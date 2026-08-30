@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+import json
+
 from ninja import Router, Schema
 from ninja.errors import HttpError
 from django.core.cache import cache
@@ -11,6 +14,7 @@ router = Router(tags=["i18n"])
 
 RATE_LIMIT = 20
 RATE_WINDOW = 3600
+CATALOG_TTL = 60 * 60 * 24
 
 
 class UiCatalogIn(Schema):
@@ -48,8 +52,23 @@ def _assert_rate(request) -> None:
         cache.set(key, 1, RATE_WINDOW)
 
 
+def _catalog_key(target_lang: str, source_lang: str, strings: dict[str, str]) -> str:
+    """Stable key: same source catalog + language → same translation."""
+    blob = json.dumps(strings, ensure_ascii=False, sort_keys=True)
+    digest = hashlib.sha256(blob.encode("utf-8")).hexdigest()[:24]
+    lang = (target_lang or "").strip().lower()[:8]
+    src = (source_lang or "en").strip().lower()[:8]
+    return f"i18n-ui:cat:{lang}:{src}:{digest}"
+
+
 @router.post("/i18n/ui-catalog", response=UiCatalogOut)
 def ui_catalog(request, payload: UiCatalogIn):
+    key = _catalog_key(payload.target_lang, payload.source_lang, payload.strings)
+    cached = cache.get(key)
+    if cached is not None:
+        return UiCatalogOut(
+            target_lang=payload.target_lang[:8].lower(), strings=cached
+        )
     _assert_rate(request)
     try:
         strings = translate_ui_strings(
@@ -59,4 +78,5 @@ def ui_catalog(request, payload: UiCatalogIn):
         )
     except I18nUiError as exc:
         raise HttpError(400, str(exc)) from exc
+    cache.set(key, strings, CATALOG_TTL)
     return UiCatalogOut(target_lang=payload.target_lang[:8].lower(), strings=strings)

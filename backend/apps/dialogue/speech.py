@@ -31,11 +31,8 @@ class OfflineTranslator:
         if not t:
             return ""
         code = (target_lang or "en")[:2].lower()
-        # Honest offline marker — not a fake translation.
-        if code == "en":
-            return f"[offline en] {t}"
-        if code == "ru":
-            return f"[офлайн ru] {t}"
+        # Honest offline marker — not a fake translation. Stable ASCII sentinel
+        # ("[offline {code}]") so clients detect it regardless of any locale.
         return f"[offline {code}] {t}"
 
 

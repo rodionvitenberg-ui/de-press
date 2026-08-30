@@ -98,7 +98,7 @@ export function AuthorClouds({ storyId, highlightId }: AuthorCloudsProps) {
                     {c.kind === "free_text" ? ` · ${t.clouds.freeText}` : ""}
                     {c.created_at
                       ? ` · ${new Date(c.created_at).toLocaleString(
-                          locale === "en" ? "en-GB" : "ru-RU",
+                          locale,
                           {
                             day: "numeric",
                             month: "short",

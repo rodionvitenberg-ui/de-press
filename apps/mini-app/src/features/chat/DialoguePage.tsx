@@ -17,11 +17,11 @@ function mediaUrl(path: string | null | undefined): string | null {
   return `${API_URL.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-function formatTime(iso: string): string {
+function formatTime(iso: string, locale: string): string {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   } catch {
     return "";
   }
@@ -50,7 +50,7 @@ function formatDayLabel(
     const diffDays = Math.round((now - day) / 86_400_000);
     if (diffDays === 0) return labels.today;
     if (diffDays === 1) return labels.yesterday;
-    return d.toLocaleDateString(locale === "en" ? "en-GB" : "ru-RU", {
+    return d.toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
       year: d.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
@@ -483,7 +483,7 @@ export function DialoguePage() {
           const video = mediaUrl(m.video_url);
           const isCircle = m.kind === "circle" || !!video;
           const isVoice = !isCircle && (m.kind === "voice" || !!audio);
-          const time = formatTime(m.created_at);
+          const time = formatTime(m.created_at, locale);
           const prev = messages[i - 1];
           const next = messages[i + 1];
           const showDay =

@@ -34,6 +34,8 @@ export const en: Messages = {
     label: "Language",
     ru: "RU",
     en: "EN",
+    search: "Find a language",
+    unavailable: "Interface translation unavailable",
   },
   home: {
     eyebrow: "de-press.co",
@@ -570,5 +572,24 @@ export const en: Messages = {
     self: "Self",
     crisis: "Crisis moment",
     other: "Other",
+  },
+  theme: {
+    label: "Theme",
+    auto: "Auto",
+    dark: "Dark",
+    light: "Light",
+  },
+  composer: {
+    title: "Add a note",
+    hint: "A quiet monologue, no comments. Dialogue opens only if you choose to.",
+    thoughtLabel: "Thought",
+    thoughtPlaceholder: "What's on your mind…",
+    aliasLabel: "Pseudonym (optional)",
+    aliasPlaceholder: "What to call you",
+    topicLabel: "Topic",
+    topicNone: "No topic",
+    publish: "Publish",
+    publishing: "Publishing…",
+    publishError: "Couldn't publish the note.",
   },
 };

@@ -15,7 +15,10 @@ import styles from "./ChatList.module.css";
 const ROW_ESTIMATE = 72;
 const VIRTUAL_THRESHOLD = 24;
 
-function listTime(iso: string | null | undefined): string {
+function listTime(
+  iso: string | null | undefined,
+  locale: string,
+): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
@@ -23,15 +26,15 @@ function listTime(iso: string | null | undefined): string {
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const startThen = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   if (startThen === startToday) {
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   }
-  return d.toLocaleDateString([], { day: "numeric", month: "short" });
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
 
 export function ChatList() {
   const { id: activeId } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { active: panic } = useAntiPanic();
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");
@@ -193,7 +196,7 @@ export function ChatList() {
             ? t.chat.dialogueClosed
             : d.last_preview || d.source || "…"
         }
-        time={listTime(d.updated_at)}
+        time={listTime(d.updated_at, locale)}
         avatarText={d.peer_label || d.intent}
         active={activeId === d.id}
         muted={Boolean(d.muted)}
@@ -246,7 +249,7 @@ export function ChatList() {
               muted
               title={t.help.requestTitle}
               subtitle={r.note?.trim() ? r.note : "—"}
-              time={listTime(r.created_at)}
+              time={listTime(r.created_at, locale)}
               avatarText="?"
             />
             <p className={styles.safety}>{t.help.requestPlaque}</p>
@@ -285,7 +288,7 @@ export function ChatList() {
               muted
               title={t.me.inboxTitle}
               subtitle={`${r.intent}${r.note ? ` · ${r.note}` : ""}`}
-              time={listTime(r.created_at)}
+              time={listTime(r.created_at, locale)}
               avatarText="?"
             />
             <p className={styles.safety}>{t.shell.safetyBanner}</p>

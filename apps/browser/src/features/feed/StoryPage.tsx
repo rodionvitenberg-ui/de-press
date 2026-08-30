@@ -37,12 +37,12 @@ function mediaUrl(path: string | null | undefined): string | null {
   return `${API_URL.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-function formatTime(iso: string | null): string {
+function formatTime(iso: string | null, locale: string): string {
   if (!iso) return "";
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   } catch {
     return "";
   }
@@ -532,7 +532,7 @@ export function StoryPage() {
                       ? chat.groupFirst
                       : chat.groupSolo;
               const fromMe = Boolean(isAuthor);
-              const time = formatTime(entry.published_at);
+              const time = formatTime(entry.published_at, locale);
               const showMeta = !withNext;
               const visibleBody =
                 entry.body && !isOfflineTranscript(entry.body) ? entry.body : null;

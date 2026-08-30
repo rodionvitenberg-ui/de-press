@@ -685,4 +685,21 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ on }),
     }),
+
+  translateUiCatalog: (
+    targetLang: string,
+    strings: Record<string, string>,
+    sourceLang = "en",
+  ) =>
+    request<{ target_lang: string; strings: Record<string, string> }>(
+      "/api/v1/i18n/ui-catalog",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          target_lang: targetLang,
+          source_lang: sourceLang,
+          strings,
+        }),
+      },
+    ),
 };

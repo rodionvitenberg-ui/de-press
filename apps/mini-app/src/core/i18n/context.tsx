@@ -4,9 +4,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { api } from "@/core/api/client";
+import { getCachedCatalog, setCachedCatalog } from "./catalogCache";
+import { applyFlat, catalogHash, flattenMessages } from "./flatten";
 import {
   DEFAULT_LOCALE,
   getMessages,
@@ -15,31 +19,79 @@ import {
   type Locale,
   type Messages,
 } from "./index";
+import { en } from "./messages/en";
+import { isHandwritten } from "./uiLangs";
 
 interface I18nContextValue {
   locale: Locale;
   messages: Messages;
   setLocale: (locale: Locale) => void;
   t: Messages;
+  loading: boolean;
+  catalogUnavailable: boolean;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const [messages, setMessages] = useState<Messages>(() => getMessages(DEFAULT_LOCALE));
+  const [loading, setLoading] = useState(false);
+  const [catalogUnavailable, setCatalogUnavailable] = useState(false);
+  const seq = useRef(0);
+
+  const applyLocale = useCallback(async (next: Locale) => {
+    const token = ++seq.current;
+    if (isHandwritten(next)) {
+      if (token !== seq.current) return;
+      setMessages(getMessages(next));
+      setLocaleState(next);
+      setCatalogUnavailable(false);
+      persistLocale(next);
+      return;
+    }
+    const flatEn = flattenMessages(en);
+    const hash = catalogHash(flatEn);
+    const cached = await getCachedCatalog(next, hash);
+    if (cached) {
+      if (token !== seq.current) return;
+      const hydrated = applyFlat(en, cached);
+      setMessages(hydrated);
+      setLocaleState(next);
+      setCatalogUnavailable(false);
+      persistLocale(next);
+      document.title = hydrated.meta.title;
+      return;
+    }
+    setLoading(true);
+    try {
+      const pack = await api.translateUiCatalog(next, flatEn, "en");
+      await setCachedCatalog(next, hash, pack.strings);
+      if (token !== seq.current) return;
+      const hydrated = applyFlat(en, pack.strings);
+      setMessages(hydrated);
+      setLocaleState(next);
+      setCatalogUnavailable(false);
+      persistLocale(next);
+      document.title = hydrated.meta.title;
+    } catch {
+      /* translation unavailable — keep previous pack, mark honestly */
+      if (token === seq.current) setCatalogUnavailable(true);
+    } finally {
+      if (token === seq.current) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const next = readStoredLocale();
-    setLocaleState(next);
-    persistLocale(next);
-  }, []);
+    void applyLocale(readStoredLocale());
+  }, [applyLocale]);
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    persistLocale(next);
-  }, []);
-
-  const messages = useMemo(() => getMessages(locale), [locale]);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      void applyLocale(next);
+    },
+    [applyLocale],
+  );
 
   const value = useMemo(
     () => ({
@@ -47,8 +99,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       messages,
       setLocale,
       t: messages,
+      loading,
+      catalogUnavailable,
     }),
-    [locale, messages, setLocale],
+    [locale, messages, setLocale, loading, catalogUnavailable],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

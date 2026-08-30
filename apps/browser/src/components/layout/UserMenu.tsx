@@ -22,7 +22,7 @@ interface UserMenuProps {
 type Mode = "menu" | "login" | "register" | "langs";
 
 export function UserMenu({ open, onClose }: UserMenuProps) {
-  const { t, locale, setLocale, loading: localeLoading } = useI18n();
+  const { t, locale, setLocale, loading: localeLoading, catalogUnavailable } = useI18n();
   const queryClient = useQueryClient();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -231,6 +231,9 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
                 </li>
               ))}
             </ul>
+            {catalogUnavailable && !localeLoading ? (
+              <p className={styles.langNote}>{t.locale.unavailable}</p>
+            ) : null}
             <button
               type="button"
               className={styles.switch}

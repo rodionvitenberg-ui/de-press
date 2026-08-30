@@ -235,3 +235,65 @@
   color: var(--accent-panic);
   font-size: 0.9rem;
 }
+
+.langSearch {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  padding: 0.4rem 0.85rem;
+}
+
+.langSearch:focus,
+.langSearch:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.langList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 16rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.langItem,
+.langActive {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: start;
+}
+
+.langItem:hover {
+  background: var(--bg-hover);
+}
+
+.langActive {
+  background: var(--bg-active);
+}
+
+.langCode {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.langNote {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

@@ -14,7 +14,6 @@ import { applyFlat, catalogHash, flattenMessages } from "./flatten";
 import {
   DEFAULT_LOCALE,
   getMessages,
-  isHandwrittenLocale,
   persistLocale,
   readStoredLocale,
   type Locale,
@@ -29,6 +28,7 @@ interface I18nContextValue {
   setLocale: (locale: Locale) => void;
   t: Messages;
   loading: boolean;
+  catalogUnavailable: boolean;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -37,15 +37,17 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
   const [messages, setMessages] = useState<Messages>(() => getMessages(DEFAULT_LOCALE));
   const [loading, setLoading] = useState(false);
+  const [catalogUnavailable, setCatalogUnavailable] = useState(false);
   const seq = useRef(0);
 
   const applyLocale = useCallback(async (next: Locale) => {
     const token = ++seq.current;
-    persistLocale(next);
-    if (isHandwrittenLocale(next) || isHandwritten(next)) {
+    if (isHandwritten(next)) {
       if (token !== seq.current) return;
       setMessages(getMessages(next));
       setLocaleState(next);
+      setCatalogUnavailable(false);
+      persistLocale(next);
       return;
     }
     const flatEn = flattenMessages(en);
@@ -53,10 +55,12 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     const cached = await getCachedCatalog(next, hash);
     if (cached) {
       if (token !== seq.current) return;
-      setMessages(applyFlat(en, cached));
+      const hydrated = applyFlat(en, cached);
+      setMessages(hydrated);
       setLocaleState(next);
+      setCatalogUnavailable(false);
       persistLocale(next);
-      document.title = applyFlat(en, cached).meta.title;
+      document.title = hydrated.meta.title;
       return;
     }
     setLoading(true);
@@ -67,9 +71,12 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       const hydrated = applyFlat(en, pack.strings);
       setMessages(hydrated);
       setLocaleState(next);
+      setCatalogUnavailable(false);
+      persistLocale(next);
       document.title = hydrated.meta.title;
     } catch {
-      /* keep previous pack */
+      /* translation unavailable — keep previous pack, mark honestly */
+      if (token === seq.current) setCatalogUnavailable(true);
     } finally {
       if (token === seq.current) setLoading(false);
     }
@@ -93,8 +100,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       setLocale,
       t: messages,
       loading,
+      catalogUnavailable,
     }),
-    [locale, messages, setLocale, loading],
+    [locale, messages, setLocale, loading, catalogUnavailable],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

@@ -42,7 +42,9 @@ export function QuietPhrases({ storyId, sentKey, onSent }: QuietPhrasesProps) {
     onError: (err) => {
       const msg = err instanceof ApiError ? err.message : t.common.error;
       setStatus(msg);
-      if (msg.includes("одно")) setSent(true);
+      // Duplicate-cloud is the only 400 this call can produce with a valid key;
+      // never match on the localized message text.
+      if (err instanceof ApiError && err.status === 400) setSent(true);
     },
   });
 

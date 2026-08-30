@@ -133,7 +133,7 @@ export function PatternsPane() {
                 </span>
                 <time className={styles.rowTime}>
                   {new Date(e.at).toLocaleString(
-                    locale === "en" ? "en-GB" : "ru-RU",
+                    locale,
                   )}
                 </time>
               </li>

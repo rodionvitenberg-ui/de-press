@@ -34,6 +34,8 @@ export const ru: Messages = {
     label: "Язык",
     ru: "RU",
     en: "EN",
+    search: "Найти язык",
+    unavailable: "Перевод интерфейса недоступен",
   },
   home: {
     eyebrow: "de-press.co",
@@ -575,5 +577,24 @@ export const ru: Messages = {
     self: "Отношение к себе",
     crisis: "Кризисный момент",
     other: "Другое",
+  },
+  theme: {
+    label: "Тема",
+    auto: "Авто",
+    dark: "Тёмная",
+    light: "Светлая",
+  },
+  composer: {
+    title: "Добавить запись",
+    hint: "Тихий монолог без комментариев. Диалог — только если вы сами откроете.",
+    thoughtLabel: "Мысль",
+    thoughtPlaceholder: "Ваша мысль…",
+    aliasLabel: "Псевдоним (необязательно)",
+    aliasPlaceholder: "Как вас назвать",
+    topicLabel: "Тема",
+    topicNone: "Без темы",
+    publish: "Опубликовать",
+    publishing: "Публикуем…",
+    publishError: "Не удалось опубликовать мысль.",
   },
 };

@@ -24,3 +24,18 @@ describe("flattenMessages", () => {
     expect(a.length).toBeGreaterThan(0);
   });
 });
+
+describe("applyFlat", () => {
+  it("swaps leaf strings and keeps the rest of the tree", () => {
+    const flat = flattenMessages(en);
+    const translated = { ...flat, "nav.feed": "FEED!" };
+    const out = applyFlat(en, translated);
+    expect(flattenMessages(out)).toEqual(translated);
+  });
+});
+
+describe("catalog budget", () => {
+  it("stays under the backend MAX_KEYS limit (500)", () => {
+    expect(Object.keys(flattenMessages(en)).length).toBeLessThanOrEqual(499);
+  });
+});

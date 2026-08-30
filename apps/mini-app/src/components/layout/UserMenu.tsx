@@ -5,6 +5,7 @@ import { api, ApiError } from "@/core/api/client";
 import type { VoiceRetention } from "@/core/api/types";
 import { useHost } from "@/core/host/HostContext";
 import { useI18n } from "@/core/i18n/context";
+import { UI_LANGS, langLabel } from "@/core/i18n/uiLangs";
 import { readVoiceRetention, writeVoiceRetention } from "@/core/mediaPrefs";
 import { ThemeSwitch } from "./ThemeSwitch";
 import styles from "./UserMenu.module.css";
@@ -14,10 +15,10 @@ interface UserMenuProps {
   onClose: () => void;
 }
 
-type Mode = "menu" | "login" | "register";
+type Mode = "menu" | "login" | "register" | "langs";
 
 export function UserMenu({ open, onClose }: UserMenuProps) {
-  const { t, locale, setLocale } = useI18n();
+  const { t, locale, setLocale, loading: localeLoading, catalogUnavailable } = useI18n();
   const { isTelegram, telegramAuthError } = useHost();
   const queryClient = useQueryClient();
   const titleId = useId();
@@ -25,6 +26,7 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
   const [mode, setMode] = useState<Mode>("menu");
+  const [langQ, setLangQ] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pseudonym, setPseudonym] = useState("");
@@ -203,7 +205,9 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
               ? t.auth.loginTitle
               : mode === "register"
                 ? t.auth.registerTitle
-                : t.nav.account}
+                : mode === "langs"
+                  ? t.locale.label
+                  : t.nav.account}
           </h2>
           <button
             type="button"
@@ -215,7 +219,56 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
           </button>
         </header>
 
-        {mode === "menu" ? (
+        {mode === "langs" ? (
+          <div className={styles.body}>
+            <input
+              type="search"
+              className={styles.langSearch}
+              value={langQ}
+              onChange={(e) => setLangQ(e.target.value)}
+              placeholder={t.locale.search}
+              aria-label={t.locale.search}
+            />
+            <ul className={styles.langList}>
+              {UI_LANGS.filter((code) => {
+                const q = langQ.trim().toLowerCase();
+                if (!q) return true;
+                const label = langLabel(code, locale).toLowerCase();
+                return code.includes(q) || label.includes(q);
+              }).map((code) => (
+                <li key={code}>
+                  <button
+                    type="button"
+                    className={
+                      locale === code ? styles.langActive : styles.langItem
+                    }
+                    onClick={() => {
+                      setLocale(code);
+                      setMode("menu");
+                      setLangQ("");
+                    }}
+                  >
+                    {langLabel(code, locale)}
+                    <span className={styles.langCode}>{code}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {catalogUnavailable && !localeLoading ? (
+              <p className={styles.langNote}>{t.locale.unavailable}</p>
+            ) : null}
+            <button
+              type="button"
+              className={styles.ghostBtn}
+              onClick={() => {
+                setMode("menu");
+                setLangQ("");
+              }}
+            >
+              {t.dialogue.cancel}
+            </button>
+          </div>
+        ) : mode === "menu" ? (
           <div className={styles.body}>
             <div className={styles.profile}>
               <span className={styles.avatar} aria-hidden>
@@ -262,6 +315,17 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
                 onClick={() => setLocale("en")}
               >
                 {t.locale.en}
+              </button>
+              <button
+                type="button"
+                className={styles.localeBtn}
+                onClick={() => {
+                  setLangQ("");
+                  setMode("langs");
+                }}
+              >
+                {langLabel(locale, locale)}
+                {localeLoading ? ` · ${t.common.loading}` : ""}
               </button>
             </div>
 

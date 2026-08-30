@@ -1,4 +1,4 @@
-export type Locale = "ru" | "en";
+export type Locale = string;
 
 export const LOCALES: Locale[] = ["ru", "en"];
 export const DEFAULT_LOCALE: Locale = "ru";
@@ -38,6 +38,8 @@ export type Messages = {
     label: string;
     ru: string;
     en: string;
+    search: string;
+    unavailable: string;
   };
   home: {
     eyebrow: string;
@@ -495,4 +497,23 @@ export type Messages = {
     cancel: string;
   };
   topics: Record<string, string>;
+  theme: {
+    label: string;
+    auto: string;
+    dark: string;
+    light: string;
+  };
+  composer: {
+    title: string;
+    hint: string;
+    thoughtLabel: string;
+    thoughtPlaceholder: string;
+    aliasLabel: string;
+    aliasPlaceholder: string;
+    topicLabel: string;
+    topicNone: string;
+    publish: string;
+    publishing: string;
+    publishError: string;
+  };
 };

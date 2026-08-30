@@ -38,7 +38,7 @@ export function StoryComposer() {
       const msg =
         err instanceof ApiError
           ? err.message
-          : "Не удалось опубликовать мысль.";
+          : t.composer.publishError;
       setError(msg);
     },
   });
@@ -79,17 +79,17 @@ export function StoryComposer() {
         <Link to="/feed" className={styles.backLink} aria-label={t.nav.feed}>
           ←
         </Link>
-        <h1 className={styles.title}>Добавить запись</h1>
+        <h1 className={styles.title}>{t.composer.title}</h1>
       </header>
       <p className={styles.hint}>
-        Тихий монолог без комментариев. Диалог — только если вы сами откроете.
+        {t.composer.hint}
       </p>
 
       <label className={styles.field}>
-        <span className={styles.label}>Мысль</span>
+        <span className={styles.label}>{t.composer.thoughtLabel}</span>
         <textarea
           className={styles.textarea}
-          placeholder="Ваша мысль…"
+          placeholder={t.composer.thoughtPlaceholder}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={6}
@@ -99,11 +99,11 @@ export function StoryComposer() {
       </label>
 
       <label className={styles.field}>
-        <span className={styles.label}>Псевдоним (необязательно)</span>
+        <span className={styles.label}>{t.composer.aliasLabel}</span>
         <input
           type="text"
           className={styles.input}
-          placeholder="Как вас назвать"
+          placeholder={t.composer.aliasPlaceholder}
           value={pseudonym}
           onChange={(e) => setPseudonym(e.target.value)}
           maxLength={64}
@@ -112,14 +112,14 @@ export function StoryComposer() {
       </label>
 
       <label className={styles.field}>
-        <span className={styles.label}>Тема</span>
+        <span className={styles.label}>{t.composer.topicLabel}</span>
         <select
           className={styles.select}
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           disabled={publish.isPending || topicsQuery.isLoading}
         >
-          <option value="">Без темы</option>
+          <option value="">{t.composer.topicNone}</option>
           {(topicsQuery.data ?? []).map((t) => (
             <option key={t.value} value={t.value}>
               {t.label}
@@ -154,8 +154,8 @@ export function StoryComposer() {
           }}
         >
           {publish.isPending || publishVoice.isPending
-            ? "Публикуем…"
-            : "Опубликовать"}
+            ? t.composer.publishing
+            : t.composer.publish}
         </button>
       </div>
     </div>
