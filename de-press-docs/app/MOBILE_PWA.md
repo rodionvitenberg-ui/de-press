@@ -12,7 +12,7 @@ One Shell. `useViewportMode()` writes `document.documentElement.dataset.layout`:
 | tablet | 760–1099px | List + main. Tab bar. No rail. |
 | desktop | ≥ 1100px | Rail + list + main. No tab bar. |
 
-Tab bar (fixed): **Лента · Чаты · Уведомления · Ещё**. Panic is the last slot, not a hideable tab.
+Tab bar (fixed): **Feed · Chats · Notifications · More**. Panic is the last slot, not a hideable tab.
 
 On phone, nested `/feed/:id`, `/feed/new`, `/chat/:id` hide the tab bar so the composer can sit on the safe-area bottom. `/feed/mine` stays a list filter (tab bar visible).
 

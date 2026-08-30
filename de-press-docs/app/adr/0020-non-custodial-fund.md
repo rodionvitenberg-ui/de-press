@@ -6,7 +6,7 @@ Accepted (2026-08).
 
 ## Context
 
-The platform needs a funding contour (Web3 microgrant requirement) that is compatible with its core claim — «анонимность по архитектуре». Any server-side payment handling (custody, keys, commissions, KYC, RPC infrastructure) would turn a privacy-verifiable product into a money processor. At the same time the project wants: a public treasury with transparent spend, a way for grateful peers to thank a listener directly, and honest accounting of helper duty hours.
+The platform needs a funding contour (Web3 microgrant requirement) that is compatible with its core claim — "anonymity by architecture". Any server-side payment handling (custody, keys, commissions, KYC, RPC infrastructure) would turn a privacy-verifiable product into a money processor. At the same time the project wants: a public treasury with transparent spend, a way for grateful peers to thank a listener directly, and honest accounting of helper duty hours.
 
 ## Decision
 

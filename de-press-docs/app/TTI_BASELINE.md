@@ -1,4 +1,4 @@
-# Browser TTI baseline (DESIGN_V2 §11.5 п.6)
+# Browser TTI baseline (DESIGN_V2 §11.5 item 6)
 
 Samples live in the browser `sessionStorage` key `depress:tti-samples` (never sent to the server). After a session, dump via DevTools:
 

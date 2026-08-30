@@ -33,7 +33,7 @@
 | Phone | **≤ 759px** | List XOR detail; no rail |
 | Tablet | **760–1099px** | List + main; no rail; tab bar |
 | Desktop | **≥ 1100px** | Current 3-column; no tab bar |
-| Tab bar | **56px** + `env(safe-area-inset-bottom)` | Лента · Чаты · Уведомления · Ещё + panic slot |
+| Tab bar | **56px** + `env(safe-area-inset-bottom)` | Feed · Chats · Notifications · More + panic slot |
 | Nested phone | `/feed/:id`, `/feed/new`, `/chat/:id` | Tab bar hidden so composer sits on the bottom inset. `/feed/mine` is a list filter. |
 | Hit target | **≥44px** | `--hit-touch` |
 | Inputs | **16px** | Avoid iOS focus-zoom |
@@ -82,4 +82,4 @@
 7. [ ] Composer bar flush bottom
 8. [ ] Empty main is centered TG-style
 9. [ ] Soft badges only
-10. [ ] “МНЕ ХУЕВО” always reachable on rail
+10. [ ] I'M NOT OK always reachable on rail

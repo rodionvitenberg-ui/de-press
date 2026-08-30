@@ -80,7 +80,7 @@ Paste tunnel URL into BotFather Mini App settings. Open bot in Telegram → Laun
 
 - TG-only accounts use synthetic email `tg{id}@users.de-press.local` (not a mailbox).
 - Password unusable; login is Mini App / future link flows.
-- Public pseudonym = first_name (or username / «гость»); **@username is not shown as feed identity by default**.
+- Public pseudonym = first_name (or username / "guest"); **@username is not shown as feed identity by default**.
 - Dialogues stay on de-press WS/API — not Bot chats.
 
 ## Tests
@@ -105,7 +105,7 @@ On nested routes Telegram shows the native Back control:
 ## Soft-notify (Bot)
 
 1. Account must have `telegram_id` (Mini App login).
-2. User enables **«Тихие напоминания в Telegram»** in UserMenu (`notify_telegram_opt_in`).
+2. User enables **"Quiet Telegram reminders"** in UserMenu (`notify_telegram_opt_in`).
 3. Frequency:
    - **`immediate`** — on each `notify()`, Bot message + deep-link  
      `https://t.me/<bot>?startapp=chat_<uuid>|story_…|notifications`

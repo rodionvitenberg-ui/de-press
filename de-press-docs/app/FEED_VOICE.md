@@ -16,7 +16,7 @@ Scope: `apps/browser` + Django `stories`. Mini App JSON publish stays text-only 
 - **Edit:** `PATCH` still text-only. Audio is not replaced.
 - **Delete/hide:** deleting a story deletes the file. Hide keeps the file (post can be unhidden).
 - **Limits:** same as chat — 5 MiB, 120 s, 20 voice stories / window (reuse dialogue constants or a shared module).
-- **List UI:** no player, no autoplay. Subtitle = typed body or a real transcript. If body is empty or an offline STT stub (`[офлайн…]` / `[offline…]`), show `Голосовое · 0:12` instead of the stub. Player (`VoiceBubble`) only on the open story/thread.
+- **List UI:** no player, no autoplay. Subtitle = typed body or a real transcript. If body is empty or an offline STT stub (`[офлайн…]` / `[offline…]`), show `Voice · 0:12` instead of the stub. Player (`VoiceBubble`) only on the open story/thread.
 - **Anti-Panic:** pause/stop any playing feed audio (same as chat once panic kills the overlay world).
 - **Recorder:** extract the MediaRecorder flow from `DialoguePage` into a shared hook used by chat + both feed composers. Reuse `VoiceBubble`.
 

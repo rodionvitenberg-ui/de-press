@@ -41,8 +41,8 @@ Use **the same host** for API and cookies: `127.0.0.1` (not mix with `localhost`
 cp .env.example .env
 # optional: AI_API_KEY=...
 
-# 1) Postgres (системный; docker не нужен)
-# Роль и БД создаются один раз:
+# 1) Postgres (system; docker is not needed)
+# The role and the DB are created once:
 #   sudo -u postgres psql -c "CREATE ROLE depress WITH LOGIN PASSWORD 'depress';"
 #   sudo -u postgres psql -c "CREATE DATABASE depress OWNER depress;"
 
@@ -189,7 +189,7 @@ Smoke:
 ```bash
 curl -s http://127.0.0.1:8088/v1/chat/completions \
   -H 'Content-Type: application/json' \
-  -d '{"model":"Hy-MT1.5-1.8B","temperature":0,"messages":[{"role":"user","content":"Translate to language code '"'"'en'"'"':\n\nМне тяжело это писать."}]}'
+  -d '{"model":"Hy-MT1.5-1.8B","temperature":0,"messages":[{"role":"user","content":"Translate to language code '"'"'en'"'"':\n\nIt is hard for me to write this."}]}'
 ```
 
 Then send a chat message from a `ru` user to an `en` UI (or POST
