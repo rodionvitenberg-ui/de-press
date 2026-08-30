@@ -4,6 +4,7 @@ import hashlib
 import json
 
 from ninja import Router, Schema
+from django.conf import settings
 from ninja.errors import HttpError
 from django.core.cache import cache
 
@@ -36,8 +37,11 @@ def _rate_key(request) -> str:
         return f"i18n-ui:{actor.account_id}"
     if actor and actor.session:
         return f"i18n-ui:s:{actor.session.id}"
+    # Privacy: a raw IP must never be stored anywhere, not even in Redis.
+    # Keep only a SECRET_KEY-salted hash, usable for rate counting within TTL.
     ip = request.META.get("REMOTE_ADDR") or "anon"
-    return f"i18n-ui:ip:{ip}"
+    digest = hashlib.sha256(f"{settings.SECRET_KEY}:i18n-rate:{ip}".encode()).hexdigest()[:32]
+    return f"i18n-ui:ip:{digest}"
 
 
 def _assert_rate(request) -> None:
