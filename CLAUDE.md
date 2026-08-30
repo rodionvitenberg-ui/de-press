@@ -8,7 +8,7 @@
 - `apps/browser/` — browser only (no Telegram Web A / no Mini App bridge)
 - `apps/mini-app/` — Mini App; target shell = Telegram Web A (`vendor/telegram-tt`, GPLv3)
 Never import mini-app vendor into browser. See `apps/README.md`, ADR 0014.
-Legacy Next: `_archive/legacy/next-frontend/` (архив). Django: `backend/apps/`.
+Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/`.
 
 ---
 

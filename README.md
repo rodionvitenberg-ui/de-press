@@ -1,99 +1,99 @@
 # de-press.co
 
-Некоммерческая, эмпатичная платформа-«тихая гавань» для людей, которым тяжело:
+A non-profit, empathetic "quiet harbor" platform for people having a hard time:
 
-**монологи без лайков** · **тихая эмпатия** · **диалог только с согласия автора** · **Anti-Panic** · **ИИ без toxic positivity** · **паттерны только на устройстве**.
+**monologues without likes** · **silent empathy** · **dialogue only with the author's consent** · **Anti-Panic** · **AI without toxic positivity** · **patterns stay on the device**.
 
-| Документ | Зачем |
-|----------|--------|
-| [`de-press-docs/`](./de-press-docs/) | **Единая документация** (app + site) |
-| [`CONTEXT.md`](./CONTEXT.md) | Словарь домена (термины) |
+| Document | Purpose |
+|----------|---------|
+| [`de-press-docs/`](./de-press-docs/) | **Single documentation** (app + site) |
+| [`CONTEXT.md`](./CONTEXT.md) | Domain vocabulary (terms) |
 | [`de-press-docs/app/PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md) | **4 hosts**: browser · Mini App · desktop · mobile |
-| [`de-press-docs/app/`](./de-press-docs/app/) | Дизайн, роадмап, ADR, пилот |
-| [`de-press-docs/app/DESIGN_V2.md`](./de-press-docs/app/DESIGN_V2.md) | ТГ-каркас, темы, аксиомы |
-| [`de-press-docs/app/TG_SHELL_SPEC.md`](./de-press-docs/app/TG_SHELL_SPEC.md) | Геометрия shell «как Telegram Desktop» |
-| [`de-press-docs/app/ROADMAP.md`](./de-press-docs/app/ROADMAP.md) | Приоритеты продукта |
-| [`CLAUDE.md`](./CLAUDE.md) | Правила кода (часть устарела по стеку UI — смотри DESIGN_V2 / PLATFORMS) |
+| [`de-press-docs/app/`](./de-press-docs/app/) | Design, roadmap, ADR, pilot |
+| [`de-press-docs/app/DESIGN_V2.md`](./de-press-docs/app/DESIGN_V2.md) | TG skeleton, themes, axioms |
+| [`de-press-docs/app/TG_SHELL_SPEC.md`](./de-press-docs/app/TG_SHELL_SPEC.md) | Shell geometry "like Telegram Desktop" |
+| [`de-press-docs/app/ROADMAP.md`](./de-press-docs/app/ROADMAP.md) | Product priorities |
+| [`CLAUDE.md`](./CLAUDE.md) | Code rules (some UI-stack parts are outdated — see DESIGN_V2 / PLATFORMS) |
 
-> **Это не медицина и не замена терапии / экстренной помощи.**  
-> Кризис → 112 / 103, не «удержи чатботом».
+> **This is not medicine and not a replacement for therapy / emergency help.**  
+> In a crisis → 112 / 103, not "hold a chatbot".
 
 ---
 
-## Где мы сейчас
+## Where we are now
 
-**Два независимых клиента + backend** — [`apps/README.md`](./apps/README.md), [ADR 0014](./de-press-docs/app/adr/0014-split-browser-and-mini-app-gpl-shell.md):
+**Two independent clients + backend** — [`apps/README.md`](./apps/README.md), [ADR 0014](./de-press-docs/app/adr/0014-split-browser-and-mini-app-gpl-shell.md):
 
-| App | Path | Статус |
+| App | Path | Status |
 |-----|------|--------|
-| **Browser** | `apps/browser/` | отдельный веб (не shell Телеги) |
-| **Native Android** | `_archive/native/android/` | 🗄 вынесено в архив (fork Telegram Android, ADR 0016) |
-| **Native Desktop** | `_archive/native/desktop/` | 🗄 вынесено в архив (tdesktop на паузе) |
-| **Native iOS** | later | после Android |
-| **Mini App** | `apps/mini-app/` | не product shell |
+| **Browser** | `apps/browser/` | standalone web (not a Telegram shell) |
+| **Native Android** | `_archive/native/android/` | 🗄 archived (fork Telegram Android, ADR 0016) |
+| **Native Desktop** | `_archive/native/desktop/` | 🗄 archived (tdesktop on pause) |
+| **Native iOS** | later | after Android |
+| **Mini App** | `apps/mini-app/` | not the product shell |
 
 ```
 [ product core ✅ ]  [ soft-notify ✅ ]  [ browser UI core ✅ ]  [ circles/voice ✅ ]  [ ★ Mini App ]  [ multilingual ]  [ own mobile/desktop ]
 ```
 
-| Слой | Статус | Комментарий |
-|------|--------|-------------|
-| **Домен + ADR** | ✅ | `CONTEXT.md`, ADR в `de-press-docs/app/adr/` (в т.ч. 0013 four hosts) |
+| Layer | Status | Comment |
+|------|--------|---------|
+| **Domain + ADR** | ✅ | `CONTEXT.md`, ADRs in `de-press-docs/app/adr/` (incl. 0013 four hosts) |
 | **Backend** | ✅ | Django + Ninja + Channels: stories, empathy, dialogue+voice, support, notify, helper, AI |
-| **Browser (`apps/browser/`)** | ✅ | Отдельный Vite SPA; без Mini App / GPL vendor |
-| **Mini App (`apps/mini-app/`)** | 🟡 | Отдельный app; interim SPA + TG bridge; vendor Web A в `vendor/telegram-tt` |
-| **Legacy `_archive/legacy/next-frontend/`** | 🗄 | Next.js — архив |
-| **Own Desktop / Own Mobile** | ⏳ | Отдельные hosts; Mini App их **не** заменяет |
+| **Browser (`apps/browser/`)** | ✅ | Standalone Vite SPA; no Mini App / GPL vendor |
+| **Mini App (`apps/mini-app/`)** | 🟡 | Standalone app; interim SPA + TG bridge; Web A vendor in `vendor/telegram-tt` |
+| **Legacy `_archive/legacy/next-frontend/`** | 🗄 | Next.js — archived |
+| **Own Desktop / Own Mobile** | ⏳ | Separate hosts; the Mini App does **not** replace them |
 | **Circles** | ✅ | `POST /api/v1/dialogues/{id}/messages/circle` + purge video on close |
 | **Voice retention** | ✅ | `GET/POST /me/voice-retention`; per-sender purge on close |
-| **Нативный мультиязык (STT/TTS)** | 🗄 | снято: без ключей адекватно не реализовать; остался перевод текста («Перевод») |
+| **Native multilingual (STT/TTS)** | 🗄 | dropped: not feasible without keys; text translation remains ("Translate") |
 | **Pilot / prod ops** | ⏳ | staging, secrets, backup, CDN media |
 
-**Итог:** backend-MVP закрыт; кружочки и voice retention на сервере; browser UI Core дожат к v2.0.  
-Дальше: Mini App host.
+**Bottom line:** the backend MVP is done; circles and voice retention live on the server; the browser UI core is pushed to v2.0.  
+Next: the Mini App host.
 
 ---
 
-## Что умеет продукт
+## What the product can do
 
 ### Visitor / Hearer
 
-1. Читать **Safe Monologue** в ленте (темы, без лайков).  
-2. **Тихие фразы** (Quiet Phrase) → private Support Cloud: гость шлёт жест, публичного следа нет.  
-3. **Dialogue Request** — диалог пишет только автор после accept.  
-4. **Anti-Panic** («МНЕ ХУЕВО») — kill WS, minimal UI.  
-5. **Patterns** — mood notes только в IndexedDB (ZK).  
-6. **Help** — кризисные ориентиры + safety + гайды.
+1. Read **Safe Monologues** in the feed (topics, no likes).  
+2. **Quiet Phrases** → a private Support Cloud: the guest sends a gesture, no public trace.  
+3. **Dialogue Request** — only the author writes, after accept.  
+4. **Anti-Panic** ("I'M NOT OK") — kills WS, minimal UI.  
+5. **Patterns** — mood notes only in IndexedDB (ZK).  
+6. **Help** — crisis guidance + safety + guides.
 
-### Автор
+### Author
 
-- Публикация мысли, Hearers (если есть кому писать), outreach, inbox запросов, 1-on-1 чат. Облачко — жест на своей строке ленты, не список под записью. Pulse в UI нет.
+- Publish a thought, Hearers (if there is someone to write to), outreach, an inbox of requests, 1-on-1 chat. A cloud is a gesture on your own feed row, not a list under the entry. No pulse in the UI.
 
-### Диалог
+### Dialogue
 
-- Text + voice notes; перевод текстовых сообщений (кнопка «Перевод»).  
+- Text + voice notes; text message translation (the "Translate" button).  
 - WS + typing + reconnect + HTTP fallback.  
-- Circles: запись/превью + `POST …/messages/circle`; файлы удаляются при закрытии диалога.  
-- Soft badges, date chips (Сегодня/Вчера), same-author bubble stack.
+- Circles: record/preview + `POST …/messages/circle`; files are deleted when the dialogue closes.  
+- Soft badges, date chips (Today/Yesterday), same-author bubble stack.
 
 ### Helper
 
-- Очередь moderated clouds (`/helper`), если `me.is_helper`.
+- The moderated clouds queue (`/helper`), if `me.is_helper`.
 
-**Инвариант:** нет публичных комментариев, лайков, who-heard, счётчиков и списков реакций на странице записи.
+**Invariant:** no public comments, likes, who-heard lists, counters, or reaction lists on an entry page.
 
 ---
 
-## Структура репозитория
+## Repository structure
 
 ```
 de-press/
 ├── CONTEXT.md
 ├── CLAUDE.md
-├── README.md                 ← этот файл
+├── README.md                 ← this file
 ├── apps/
-│   ├── README.md             # Browser ⟂ Mini App (строго раздельно)
-│   ├── browser/              # ★ браузерное приложение (:5174)
+│   ├── README.md             # Browser ⟂ Mini App (strictly separate)
+│   ├── browser/              # ★ browser app (:5174)
 │   └── mini-app/             # ★ Telegram Mini App (:5175)
 │       ├── src/              # interim SPA + TG WebApp bridge
 │       └── vendor/telegram-tt/  # Telegram Web A (GPLv3), fetch script
@@ -101,43 +101,43 @@ de-press/
 │   ├── apps/                 # Django domain apps (identity, stories, …)
 │   ├── api/v1/
 │   └── …
-├── _archive/                 # 🗄 вынесенное из активной зоны (позже в .gitignore)
-│   ├── legacy/next-frontend/ # старый Next.js — не основной UI
-│   ├── native/               # fork Telegram Android / tdesktop (ADR 0015/0016)
-│   └── AngelSlim/            # сторонний LLM-тулкит (клон)
-├── de-press-docs/            # документация product (app + site)
+├── _archive/                 # 🗄 moved out of the active zone (to .gitignore later)
+│   ├── legacy/next-frontend/ # old Next.js — not the main UI
+│   ├── native/               # fork of Telegram Android / tdesktop (ADR 0015/0016)
+│   └── AngelSlim/            # third-party LLM toolkit (clone)
+├── de-press-docs/            # product documentation (app + site)
 │   └── app/                  # DESIGN_V2, PLATFORMS, ROADMAP, MINI_APP, ADR
 └── scripts/
     ├── dev_local.sh
     └── smoke_api.sh
 ```
 
-**Browser и Mini App — один код** (`apps/web/`), разные hosts. Не два frontend-проекта.
+**Browser and Mini App share one code** (`apps/web/`), different hosts. Not two frontend projects.
 
-### Стек
+### Stack
 
-| Слой | Технологии |
+| Layer | Technologies |
 |------|------------|
-| **UI Core (все hosts)** | Vite 6, React 19, TypeScript, React Router 7, TanStack Query + Virtual, CSS Modules, design tokens |
+| **UI Core (all hosts)** | Vite 6, React 19, TypeScript, React Router 7, TanStack Query + Virtual, CSS Modules, design tokens |
 | **Backend** | Django, Django Ninja, Channels 4, Daphne |
-| **DB / cache** | PostgreSQL (обязателен для dev/prod), Redis |
+| **DB / cache** | PostgreSQL (required for dev/prod), Redis |
 | **AI** | OpenAI-compatible + offline stubs |
-| **Стили** | **Строго без Tailwind** — CSS Modules + CSS variables |
+| **Styles** | **Strictly no Tailwind** — CSS Modules + CSS variables |
 
 ---
 
-## Запуск проекта (локально)
+## Running the project (locally)
 
-Нужны: **Python 3.12+**, **Node 20+**, **PostgreSQL 5432**, **Redis** (для Channels).
+You need: **Python 3.12+**, **Node 20+**, **PostgreSQL 5432**, **Redis** (for Channels).
 
-### 1. Один раз — Postgres
+### 1. Once — Postgres
 
 ```bash
 sudo -u postgres psql -c "CREATE ROLE depress WITH LOGIN PASSWORD 'depress';"
 sudo -u postgres psql -c "CREATE DATABASE depress OWNER depress;"
 ```
 
-Переменные по умолчанию (можно положить в корневой `.env` или export):
+Default variables (put them in a root `.env` or export):
 
 ```bash
 export POSTGRES_HOST=127.0.0.1
@@ -148,25 +148,25 @@ export POSTGRES_PASSWORD=depress
 export REDIS_URL=redis://127.0.0.1:6379/0
 ```
 
-> SQLite **только** для pytest (`DEPRESS_USE_SQLITE=1`). Не запускай daphne на SQLite.
+> SQLite is **only** for pytest (`DEPRESS_USE_SQLITE=1`). Never run daphne on SQLite.
 
-### 2. Backend (API + WebSocket) — порт **8005**
+### 2. Backend (API + WebSocket) — port **8005**
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows: .venv\\Scripts\\activate
 pip install -r requirements/local.txt
 
 python manage.py migrate --noinput
 python manage.py seed_local        # 3 stories + phrases + demo data
-python manage.py check_db          # убедись: NAME=depress
+python manage.py check_db          # make sure NAME=depress
 
 # ASGI (Channels / WS)
 daphne -b 127.0.0.1 -p 8005 config.asgi:application
 ```
 
-Проверка:
+Check:
 
 ```bash
 curl -s http://127.0.0.1:8005/api/v1/health
@@ -174,15 +174,15 @@ curl -s http://127.0.0.1:8005/api/v1/stories | head -c 200
 # OpenAPI: http://127.0.0.1:8005/api/docs
 ```
 
-### 3. Browser app — порт **5174**
+### 3. Browser app — port **5174**
 
 ```bash
 cd apps/browser && npm install && npm run dev
 ```
 
-Открыть: **http://127.0.0.1:5174**
+Open: **http://127.0.0.1:5174**
 
-### 3b. Mini App (отдельное приложение) — порт **5175**
+### 3b. Mini App (standalone app) — port **5175**
 
 ```bash
 cd apps/mini-app && npm install && npm run dev
@@ -190,28 +190,28 @@ cd apps/mini-app && npm install && npm run dev
 ./scripts/fetch_telegram_tt.sh
 ```
 
-Vite проксирует `/api`, `/ws` → `:8005`.
+Vite proxies `/api`, `/ws` → `:8005`.
 
-### 4. Скрипт «всё сразу» (опционально)
+### 4. All-in-one script (optional)
 
 ```bash
 ./scripts/dev_local.sh
 ```
 
-Скрипт: migrate + seed + Daphne `:8005` + Vite app `:5174`.  
-Логи: `/tmp/depress_daphne.log`, `/tmp/depress_vite.log`.
+The script: migrate + seed + Daphne `:8005` + Vite app `:5174`.  
+Logs: `/tmp/depress_daphne.log`, `/tmp/depress_vite.log`.
 
 ### Demo login (seed)
 
-| Поле | Значение |
-|------|----------|
+| Field | Value |
+|------|--------|
 | Email | `seed@de-press.local` |
 | Password | `seedseed12` |
 
-В UI: аватар в левом rail → **Войти**.  
-После логина: лента, чат, уведомления (soft badge), helper (если роль).
+In the UI: avatar in the left rail → **Log in**.  
+After login: the feed, chat, notifications (soft badge), helper (if you have the role).
 
-### Опциональные env (AI / soft-notify)
+### Optional env (AI / soft-notify)
 
 ```bash
 export AI_API_KEY=...
@@ -220,37 +220,37 @@ export AI_MODEL=deepseek-chat
 export PUBLIC_BASE_URL=http://127.0.0.1:5174   # magic-link soft-notify
 ```
 
-Без ключа AI работает offline-stub (перевод текста — честный offline-marker).
+Without an AI key it runs an offline stub (text translation shows an honest offline marker).
 
-### Legacy Next (не нужен для обычной разработки)
+### Legacy Next (not needed for normal development)
 
 ```bash
-cd _archive/legacy/next-frontend && npm install && npm run dev   # :3005, архив
+cd _archive/legacy/next-frontend && npm install && npm run dev   # :3005, archived
 ```
 
 ---
 
-## UI-маршруты (`apps/web/`)
+## UI routes (`apps/web/`)
 
-| Путь | Назначение |
-|------|------------|
-| `/feed` | Лента монологов (TG-list) |
-| `/feed/new` | Публикация мысли |
-| `/feed/:id` | Карточка-мысль + quiet phrases |
-| `/chat` | Диалоги + Dialogue Requests |
-| `/chat/:id` | 1-on-1 чат (WS, voice, circles UI) |
-| `/notifications` | Приватные уведомления |
+| Path | Purpose |
+|------|---------|
+| `/feed` | The monologue feed (TG-list) |
+| `/feed/new` | Publishing a thought |
+| `/feed/:id` | Thought card + quiet phrases |
+| `/chat` | Dialogues + Dialogue Requests |
+| `/chat/:id` | 1-on-1 chat (WS, voice, circles UI) |
+| `/notifications` | Private notifications |
 | `/patterns` | ZK mood notes (IndexedDB) |
-| `/help` | Помощь / safety / гайды |
-| `/help/wait` | Ожидание ответа Helper (human path) |
-| `/help/ai` | AI-компаньон (CompanionPane) |
-| `/helper` | Очередь Helper (роль) |
+| `/help` | Help / safety / guides |
+| `/help/wait` | Waiting for a Helper (the human path) |
+| `/help/ai` | AI companion (CompanionPane) |
+| `/helper` | The Helper queue (role) |
 
-Shell: **icon rail 72px** · **resizable list** · **main** (см. `TG_SHELL_SPEC.md`).
+Shell: **icon rail 72px** · **resizable list** · **main** (see `TG_SHELL_SPEC.md`).
 
 ---
 
-## API (кратко)
+## API (briefly)
 
 | | |
 |--|--|
@@ -264,55 +264,55 @@ Shell: **icon rail 72px** · **resizable list** · **main** (см. `TG_SHELL_SPE
 | Help presence | `GET /api/v1/help/presence`; `POST /api/v1/help/heartbeat` |
 | Docs | `http://127.0.0.1:8005/api/docs` |
 
-Клиент app: `apps/web/src/core/api/client.ts`.
+The app client: `apps/web/src/core/api/client.ts`.
 
 ---
 
-## Тесты
+## Tests
 
 ```bash
 cd backend && source .venv/bin/activate
 DEPRESS_USE_SQLITE=1 CHANNEL_LAYER=memory pytest -q
 
-# smoke HTTP (нужен живой daphne)
+# smoke HTTP (needs a live daphne)
 ./scripts/smoke_api.sh
 ```
 
 ---
 
-## Приоритеты дальше
+## Priorities next
 
-1. **Telegram Mini App host** (этап) — auth, theme bridge, optional bot notify; не единственный mobile.  
-2. **Own mobile** (tab-bar + PWA/native) и **own desktop** (shell поверх core).  
+1. **Telegram Mini App host** (a stage) — auth, theme bridge, optional bot notify; not the only mobile.  
+2. **Own mobile** (tab-bar + PWA/native) and **own desktop** (a shell over the core).  
 3. Pilot ops · production media.
 
-Не делаем: публичные лайки/комменты, open matching, trauma map на сервере, AI как скрытый peer; **не** считаем Mini App заменой своему mobile/desktop.
+We do not do: public likes/comments, open matching, a server-side trauma map, AI as a hidden peer; we do **not** count the Mini App as a replacement for our own mobile/desktop.
 
 ---
 
-## Принципы
+## Principles
 
-1. Нет публичных лайков / рейтингов страдания.  
-2. Нет публичных комментариев под историей.  
-3. Диалог инициирует **только автор**.  
-4. ИИ всегда помечен; без диагнозов и toxic positivity.  
-5. Emotional maps — только device (ZK).  
-6. Anti-Panic важнее ленты и realtime.  
-7. Не медицина — кризис → 112/103.  
-8. Helper ≠ терапевт по умолчанию.  
-9. PostgreSQL обязателен (не SQLite) для app/API.  
-10. Без Tailwind — CSS Modules + tokens.  
-11. **Форма ≈ Telegram ergonomics, цвет = de-press** (не копируем GPL-код tdesktop/Web A).  
-12. **Четыре hosts:** browser · Telegram Mini App · own desktop · own mobile; один UI Core + один backend ([`PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md)).
+1. No public likes / suffering ratings.  
+2. No public comments under a story.  
+3. The dialogue is initiated by **the author only**.  
+4. AI is always labeled; no diagnoses, no toxic positivity.  
+5. Emotional maps — device only (ZK).  
+6. Anti-Panic outranks the feed and realtime.  
+7. Not medicine — a crisis → 112/103.  
+8. A Helper is not a therapist by default.  
+9. PostgreSQL is required (not SQLite) for the app/API.  
+10. No Tailwind — CSS Modules + tokens.  
+11. **Form ≈ Telegram ergonomics, color = de-press** (we do not copy GPL tdesktop/Web A code).  
+12. **Four hosts:** browser · Telegram Mini App · own desktop · own mobile; one UI Core + one backend ([`PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md)).
 
 ---
 
-## Документация для разработки
+## Development documentation
 
-- Термины → [`CONTEXT.md`](./CONTEXT.md)  
-- **Платформы (4 hosts)** → [`de-press-docs/app/PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md)  
-- Дизайн UI → [`de-press-docs/app/DESIGN_V2.md`](./de-press-docs/app/DESIGN_V2.md)  
+- Terms → [`CONTEXT.md`](./CONTEXT.md)  
+- **Platforms (4 hosts)** → [`de-press-docs/app/PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md)  
+- UI design → [`de-press-docs/app/DESIGN_V2.md`](./de-press-docs/app/DESIGN_V2.md)  
 - TG geometry → [`de-press-docs/app/TG_SHELL_SPEC.md`](./de-press-docs/app/TG_SHELL_SPEC.md)  
 - Roadmap → [`de-press-docs/app/ROADMAP.md`](./de-press-docs/app/ROADMAP.md)  
-- Пилот → [`de-press-docs/app/PILOT.md`](./de-press-docs/app/PILOT.md)  
+- Pilot → [`de-press-docs/app/PILOT.md`](./de-press-docs/app/PILOT.md)  
 - ADR → [`de-press-docs/app/adr/`](./de-press-docs/app/adr/)

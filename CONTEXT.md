@@ -28,12 +28,12 @@ _Avoid_: anonymous user, guest session (ambiguous with HTTP session alone)
 A text monologue published without public comments. Authored by an Account or an AnonymousSession.
 _Avoid_: post, tweet, entry, article
 
-**Feed** (Лента):
+**Feed**:
 The public, time-ordered list of published Stories (Safe Monologues) a Visitor sees on `/feed`, filterable by Story Topic. A monologue-only surface: no comments, likes, or engagement counters. Distinct from the private Inbox and from any author-private aggregate.
 _Avoid_: timeline (as a social-media feed with engagement), newsfeed
 
 **Silent Empathy**:
-The signal «Я слышу тебя» from a Hearer to a Story. No likes, no public counters, no public who-lists.
+The signal "I hear you" from a Hearer to a Story. No likes, no public counters, no public who-lists.
 _Avoid_: like, reaction, upvote, kudos
 
 **Hearer**:
@@ -124,7 +124,7 @@ _Avoid_: public feed, email-as-password (it is a magic link)
 An email/web digest nudge to the recipient (Account or AnonymousSession) about unread private events, gated by opt-in and digest frequency. Uses a magic token; never public.
 _Avoid_: spam newsletter, public notification feed
 
-**Circle** (Кружочек):
+**Circle** (video circle):
 A short video message inside an initiated Dialogue, recorded in the browser. Circles are ephemeral by design: they are deleted when the dialogue is closed.
 _Avoid_: public video post, permanent gallery
 

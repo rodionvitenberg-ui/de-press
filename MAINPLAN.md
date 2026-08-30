@@ -1,166 +1,166 @@
-# MAINPLAN — два агента, две ветки, один backend
+# MAINPLAN — two agents, two branches, one backend
 
-После утверждения этого документа создать в корне репозитория:
+After this document is approved, create at the repo root:
 
-- `MAINPLAN.md` — этот текст (контракт на работу)
-- `PROGRESS.md` — живой журнал; оба агента дописывают его в **конце каждой задачи**
+- `MAINPLAN.md` — this text (the work contract)
+- `PROGRESS.md` — a living journal; both agents append to it **at the end of every task**
 
-Не начинать фичи, пока Gate 0 не закрыт.
+Do not start features until Gate 0 is closed.
 
 ---
 
-## Кто что ведёт
+## Who owns what
 
-| | Агент A — **Grok** (эта сессия) | Агент B — **второй агент** |
+| | Agent A — **Grok** (this session) | Agent B — **the second agent** |
 |---|---|---|
-| Ветка git | `feat/agent-a-helper-ops` | `feat/agent-b-companion-hosts` |
-| Тема | Роль Helperа в browser + backend | ИИ-компаньон, Mini App, мультиязык, hosts |
-| База | `main` после Gate 0 | `main` после Gate 0 |
+| Git branch | `feat/agent-a-helper-ops` | `feat/agent-b-companion-hosts` |
+| Theme | The Helper role in browser + backend | AI companion, Mini App, multilingual, hosts |
+| Base | `main` after Gate 0 | `main` after Gate 0 |
 
-Grok только что собирал Help Request — контекст Helperа горячий, поэтому Track A здесь. Второй агент не дублирует browser-Help и не трогает `dialogue.help`.
-
----
-
-## Стек (не отходить)
-
-Общий backend: Django + Ninja + Channels, Postgres обязателен (SQLite только pytest), Redis для WS.
-
-Browser и Mini App — **два приложения**, ADR 0014. Не импортировать `apps/mini-app/vendor` в browser. Без Tailwind: CSS Modules + токены `--bg-main`, `--bg-surface`, `--text-primary`, `--text-muted`, `--accent-hope`.
-
-ИИ: существующий OpenAI-compatible gateway (DeepSeek / офлайн-стаб). Не менять провайдера «заодно». Промпты: валидация чувств, без диагнозов, без toxic positivity. ИИ всегда помечен. Anti-Panic **не** зовёт ИИ.
-
-Домен: Helper ≠ терапевт ≠ 112. Кризис → 112/103. Нет публичных лайков/комментов. Паттерны и память компаньона — только устройство (ZK).
+Grok just built the Help Request — the Helper context is hot, so Track A lives here. The second agent does not duplicate browser-Help and does not touch `dialogue.help`.
 
 ---
 
-## Gate 0 (только Grok, до параллели)
+## Stack (do not deviate)
 
-Репозиторий только что получил git. Фича HELP лежит на `feat/help-human-ai` (14 коммитов после `99723a4`). Remote нет.
+Shared backend: Django + Ninja + Channels, Postgres required (SQLite for pytest only), Redis for WS.
 
-1. Руками пройти `/help` на http://127.0.0.1:5174 (карточки, wait, accept Helperом, `/help/ai`, телефонный viewport).
-2. Слить `feat/help-human-ai` → `main` локально.
-3. Создать от `main`: `feat/agent-a-helper-ops` и `feat/agent-b-companion-hosts`.
-4. Положить в корень `MAINPLAN.md` и `PROGRESS.md`, закоммитить в `main`.
-5. Написать в `PROGRESS.md` строку Gate 0 = done.
+Browser and Mini App are **two apps**, ADR 0014. Never import `apps/mini-app/vendor` into browser. No Tailwind: CSS Modules + the `--bg-main`, `--bg-surface`, `--text-primary`, `--text-muted`, `--accent-hope` tokens.
 
-Пока Gate 0 не done, агент B **не** стартует (иначе разъедутся базы).
+AI: the existing OpenAI-compatible gateway (DeepSeek / offline stub). Do not swap the provider "while we are at it". Prompts: emotional validation, no diagnoses, no toxic positivity. AI is always labeled. Anti-Panic does **not** call the AI.
+
+Domain: Helper ≠ therapist ≠ 112. Crisis → 112/103. No public likes/comments. Patterns and companion memory — device only (ZK).
+
+---
+
+## Gate 0 (Grok only, before parallelization)
+
+The repo just got git. The HELP feature lives on `feat/help-human-ai` (14 commits after `99723a4`). No remote.
+
+1. Walk `/help` manually at http://127.0.0.1:5174 (cards, wait, accept by the Helper, `/help/ai`, the phone viewport).
+2. Merge `feat/help-human-ai` → `main` locally.
+3. From `main`, create `feat/agent-a-helper-ops` and `feat/agent-b-companion-hosts`.
+4. Put `MAINPLAN.md` and `PROGRESS.md` at the root, commit to `main`.
+5. Write the Gate 0 = done line into `PROGRESS.md`.
+
+Until Gate 0 is done, agent B does **not** start (otherwise the bases drift apart).
 
 ---
 
 ## Track A — Grok: Helper ops
 
-Порядок внутри трека **жёсткий**. Каждый пункт — отдельный коммит-пакет, зелёные тесты, запись в `PROGRESS.md`.
+The order inside the track is **strict**. Every item is a separate commit package, green tests, a `PROGRESS.md` entry.
 
-### A1. Репорт в help-чате без Story
+### A1. Report in the help chat without a Story
 
-Сейчас `Report.story` обязателен; `submit_message_report` падает, если `dialogue.story_id is None`.
+Currently `Report.story` is required; `submit_message_report` breaks when `dialogue.story_id is None`.
 
-- `Report.story` → `null=True`; XOR: есть story или есть message (help-чат).
-- Уникальность open-репорта для help: по `(message, from_account|from_session)`, не по story.
-- UI: репорт в `DialoguePage` работает при `source=help`.
-- Файлы: `backend/apps/moderation/**`, `backend/api/v1/moderation.py`, при необходимости `MessageMenu.tsx`.
+- `Report.story` → `null=True`; XOR: either a story or a message (the help chat).
+- Open-report uniqueness for help: by `(message, from_account|from_session)`, not by story.
+- UI: the report in `DialoguePage` works at `source=help`.
+- Files: `backend/apps/moderation/**`, `backend/api/v1/moderation.py`, `MessageMenu.tsx` if needed.
 
-### A2. Проверка Dialogue Request Helperом
+### A2. Dialogue Request review by the Helper
 
-Плашка «мы проверили — вам безопасно» уже в UI и **лжёт**. Helper должен видеть запрос до автора.
+The "we checked — you are safe" banner is already in the UI and **lies**. The Helper must see the request before the author.
 
-- Статус: `awaiting_helper` → после approve автором виден как `pending` (принять/отклонить как сейчас). Reject Helperом → `declined`, автор не видит серую строку.
-- Inbox автора `GET /api/v1/me/dialogue-requests` — только уже проверенные.
-- Inbox Helperа: `GET /api/v1/moderation/dialogue-requests` + approve/reject.
-- UI Helperа: серые строки в `/chat` **ниже** Help Request, **выше** авторских Dialogue Request. `/helper` не делать вторым инбоксом разговоров.
-- Notify: Helperам `dialogue_request_review`; автору существующий `dialogue_request` только после approve.
-- Файлы: `backend/apps/dialogue/models.py` (статус), `services.py` (`create_request` / `list_inbox` / новые approve), `api/v1/dialogue.py` или `moderation.py`, `ChatList.tsx` (Grok уже владеет этим файлом).
+- Status: `awaiting_helper` → after the author's approve it shows as `pending` (accept/decline as now). A Helper's reject → `declined`, the author does not see the grey row.
+- The author's inbox `GET /api/v1/me/dialogue-requests` — reviewed ones only.
+- The Helper's inbox: `GET /api/v1/moderation/dialogue-requests` + approve/reject.
+- The Helper's UI: grey rows in `/chat` **below** the Help Request, **above** the author's Dialogue Requests. Do not make `/helper` a second conversations inbox.
+- Notify: Helpers get `dialogue_request_review`; the author keeps the existing `dialogue_request` only after approve.
+- Files: `backend/apps/dialogue/models.py` (status), `services.py` (`create_request` / `list_inbox` / new approve), `api/v1/dialogue.py`
 
-### A3. Онбординг Helperа
+### A3. Helper onboarding
 
-Сейчас только `is_helper` в Django admin.
+Currently only `is_helper` in the Django admin.
 
-- Staff/существующий Helper создаёт **одноразовый инвайт** (токен, org, TTL).
-- Кандидат (аккаунт) открывает `/helper/join?token=` → короткий pledge (не врач, не 112, можно уйти) → `is_helper=True`, `helper_org` с инвайта.
-- Нет открытой самозаписи «стать Helperом».
-- Список инвайтов — в дашборде (A4), не публично.
-- Файлы: `backend/apps/identity/**` (модель инвайта), новый `api/v1/helper_invite.py`, `apps/browser/src/features/helper/HelperJoin.tsx`, пункт в UserMenu только у staff.
+- Staff / an existing Helper creates a **one-time invite** (token, org, TTL).
+- The candidate (an account) opens `/helper/join?token=` → a short pledge (not a doctor, not 112, free to leave) → `is_helper=True`, `helper_org` from the invite.
+- No open self-signup "become a Helper".
+- The invite list lives in the dashboard (A4), never public.
+- Files: `backend/apps/identity/**` (the invite model), a new `api/v1/helper_invite.py`, `apps/browser/src/features/helper/HelperJoin.tsx`, a UserMenu item for staff only.
 
-### A4. Дашборд модерации
+### A4. Moderation dashboard
 
-API `GET /api/v1/moderation/dashboard` жив, UI нет.
+The API `GET /api/v1/moderation/dashboard` is live, the UI is not.
 
-- `/helper` становится две вкладки: **Облачка** (текущая очередь) + **Сводка** (числа дашборда + последние репорты, без публичных счётчиков страдания).
-- Репорты help-чатов из A1 видны в сводке.
-- Не тащить сюда Help Request и Dialogue Request (они в `/chat`).
-- Файлы: `HelperQueue.tsx` + css, client уже имеет dashboard.
+- `/helper` becomes two tabs: **Clouds** (the current queue) + **Summary** (the dashboard numbers + the latest reports, no public suffering counters).
+- The help-chat reports from A1 are visible in the summary.
+- Do not drag Help Requests and Dialogue Requests here (they live in `/chat`).
+- Files: `HelperQueue.tsx` + css; the client already has the dashboard.
 
-### A5. Дежурство
+### A5. Duty
 
-- Поле `is_on_duty` (или эквивалент) на Account-Helper. Тумблер в `/helper` сводке и/или UserMenu.
+- An `is_on_duty` field (or equivalent) on an Account-Helper. The toggle in the `/helper` summary and/or UserMenu.
 - `POST /api/v1/me/helper-duty` `{on: bool}`.
-- Notify и inbox Help Request / dialogue-review — **только** `is_helper && is_on_duty && is_active`. Если никто не на смене — wait как сейчас + 112 + ссылка на ИИ. Не обещать «ответ за 30 секунд».
-- Файлы: identity model, `dialogue/help.py` (`_notify_helpers`, `list_help_inbox`), ChatList не обязателен.
+- Notify and the inbox of Help Request / dialogue-review — **only** `is_helper && is_on_duty && is_active`. If nobody is on shift — wait as now + 112 + the AI link. Do not promise "an answer in 30 seconds".
+- Files: the identity model, `dialogue/help.py` (`_notify_helpers`, `list_help_inbox`), ChatList is optional.
 
-### A6. Онлайн + мгновенный матч
+### A6. Online + instant match
 
-Только после A5.
+Only after A5.
 
-- Heartbeat: Helper с открытым `/chat` или `/helper` шлёт ping (HTTP каждые 20с или лёгкий WS). «Онлайн» = ping < 45с.
-- Если есть дежурный **и** онлайн — Help Request назначается одному (round-robin / least-recent), сразу `Dialogue source=help`, wait сразу «открыть чат». Остальные не видят строку.
-- Если никого — очередь A5.
-- Публично не светить имена и «N хелперов онлайн». Максимум для ждущего: «сейчас кто-то на смене» / «сейчас никого у экрана».
-- Файлы: `dialogue/help.py`, тонкий `presence` (новый модуль, не раздувать `help.py` бесконечно), `HelpWaitPane.tsx`.
+- Heartbeat: a Helper with an open `/chat` or `/helper` pings (HTTP every 20s or a light WS). "Online" = a ping < 45s.
+- If there is a Helper on duty **and** online — the Help Request is assigned to one of them (round-robin / least-recent), immediately `Dialogue source=help`, the wait instantly turns into "open the chat". The others do not see the row.
+- If nobody — the A5 queue.
+- Never expose names or "N helpers online". The maximum for the waiting person: "someone is on shift now" / "nobody at the screen right now".
+- Files: `dialogue/help.py`, a thin `presence` (a new module, do not bloat `help.py` forever), `HelpWaitPane.tsx`.
 
 ---
 
-## Track B — второй агент: компаньон и hosts
+## Track B — the second agent: companion and hosts
 
-Не ждать A2–A6, кроме контрактов ниже. Стартовать после Gate 0.
+Do not wait for A2–A6, except for the contracts below. Start after Gate 0.
 
-### B1. Стриминг ИИ + память IndexedDB
+### B1. Streaming AI + IndexedDB memory
 
-- Новый endpoint **рядом**, не ломая POST `/api/v1/ai/support`: например `POST /api/v1/ai/support/stream` (SSE). Старый POST остаётся для тестов и Mini App до порта.
-- Gateway: `stream` у OpenAI-compatible client. Офлайн-стаб — одним куском (или по предложениям).
-- Кризисный short-circuit — без «красивой печати» инструкций 112.
-- IndexedDB: новый store в `apps/browser/src/core/memory/` (версия DB +1), **не** класть реплики в `mood_entries`. На сервер по-прежнему последние ≤12 реплик за ход.
-- Стереть память — тем же wipe, что паттерны, отдельным подтверждением «и диалоги с ИИ».
-- UI: только `CompanionPane.tsx` (+ css). Не строка в `/chat`. Anti-Panic не звать.
-- Файлы: `backend/apps/ai/**`, `backend/api/v1/ai.py`, `CompanionPane.*`, `core/memory/db.ts`.
+- A new endpoint **next to**, without breaking POST `/api/v1/ai/support`: for example `POST /api/v1/ai/support/stream` (SSE). The old POST stays for tests and the Mini App until the port.
+- Gateway: `stream` on the OpenAI-compatible client. The offline stub — in one chunk (or sentence by sentence).
+- The crisis short-circuit — without "pretty printing" 112 instructions.
+- IndexedDB: a new store in `apps/browser/src/core/memory/` (DB version +1), **do not** put the replicas into `mood_entries`. The server still receives the last ≤12 replicas per turn.
+- Wiping the memory — the same wipe as the patterns, with a separate confirmation "and the AI dialogues".
+- UI: only `CompanionPane.tsx` (+ css). Not a row in `/chat`. Do not call Anti-Panic.
+- Files: `backend/apps/ai/**`, `backend/api/v1/ai.py`, `CompanionPane.*`, `core/memory/db.ts`.
 
 ### B2. Mini App parity
 
-`apps/mini-app` — отдельное дерево. Сейчас Help статичный, нет `/help/wait`, `/help/ai`, нет серых Help Request в чатах. Telegram auth уже есть.
+`apps/mini-app` is a separate tree. Currently Help is static, there is no `/help/wait`, `/help/ai`, no grey Help Requests in the chats. Telegram auth already exists.
 
-- Перенести (копировать, не общий пакет) HELP-карточки, wait, companion, help-inbox в ChatList, join Helperа если A3 уже в `main`.
+- Port (copy, not a shared package) the HELP cards, wait, companion, the help-inbox into ChatList, the Helper join if A3 is already in `main`.
 - `startapp`: `help_wait`, `help_ai`, `helper_join`.
-- Не начинать интеграцию `vendor/telegram-tt` в этом пункте.
-- Если API A5/A6 ещё нет — duty/match просто отсутствуют в Mini App (очередь как сейчас).
-- Файлы: **только** `apps/mini-app/**`. Запрещено импортировать из `apps/browser`.
+- Do not start the `vendor/telegram-tt` integration in this item.
+- If the A5/A6 APIs are not there yet — duty/match are simply absent in the Mini App (the queue as now).
+- Files: **only** `apps/mini-app/**`. Importing from `apps/browser` is forbidden.
 
-### B3. Нативный динамический мультиязык
+### B3. Native dynamic multilingual
 
-Контент, не словари UI. Уже есть STT/translate стабы в `backend/apps/dialogue/speech.py`.
+Content, not UI dictionaries. STT/translate stubs already exist in `backend/apps/dialogue/speech.py`.
 
-- Цепочка STT → translate → TTS для голосовых в Initiated Dialogue (включая help-чаты).
-- Язык цели — locale актора (уже есть UI locale). Маркер офлайна, если нет ключа.
-- Не подменять i18n-каталог интерфейса этим пайплайном.
-- Файлы: `speech.py`, API transcribe/translate (уже частично), `VoiceBubble` / composer в **mini-app** если B2; **browser** VoiceBubble — только если Grok не держит файл. Правило: browser `features/chat/VoiceBubble.tsx` и `DialoguePage.tsx` принадлежат **Grok** для A-трека. B3 в browser — отдельный согласованный слот в `PROGRESS.md` («B3-browser-voice: waiting for A idle»), либо B3 сначала только API + Mini App, browser-voice — после A6.
+- The chain STT → translate → TTS for voice notes in the Initiated Dialogue (including help chats).
+- The target language — the actor's locale (the UI locale already exists). An offline marker when there is no key.
+- Do not replace the UI i18n catalog with this pipeline.
+- Files: `speech.py`, the transcribe/translate API (already partial), `VoiceBubble` / the composer in **mini-app** if B2; the **browser** VoiceBubble — only if Grok does not hold the file. Rule: browser `features/chat/VoiceBubble.tsx` and `DialoguePage.tsx` belong to **Grok** for the A track. B3 in the browser — a separate agreed slot in `PROGRESS.md` ("B3-browser-voice: waiting for A idle"), or B3 starts as API + Mini App only, the browser voice after A6.
 
-### B4. Own mobile / own desktop (горизонт внутри трека, не store-релиз)
+### B4. Own mobile / own desktop (a horizon inside the track, not a store release)
 
-Не «опубликовать в сторах». Первый конкретный выход:
+Not "publish to the stores". The first concrete exit:
 
-- Зафиксировать ADR-дополнение: Mini App ≠ own mobile.
-- Browser PWA уже live — описать, чего не хватает до own mobile (push, store chrome).
-- Own desktop: выбор оболочки (Tauri vs отложенно) одним ADR, без большого нативного кода в этом MAINPLAN.
-- Папка `native/` если появится — только агент B.
+- Fix an ADR addendum: the Mini App ≠ own mobile.
+- The browser PWA is already live — describe what is missing before own mobile (push, store chrome).
+- Own desktop: choosing a shell (Tauri vs deferred) in one ADR, without big native code in this MAINPLAN.
+- A `native/` folder, if it appears — agent B only.
 
 ---
 
-## Владение файлами (конфликт = нарушение плана)
+## File ownership (a conflict = a plan violation)
 
-### Только агент A (Grok)
+### Agent A (Grok) only
 
 ```
 backend/apps/dialogue/help.py
 backend/apps/dialogue/models.py          # HelpRequest, DialogueRequest statuses, Dialogue.story
-backend/apps/dialogue/services.py        # request/accept/outreach; не speech.py
+backend/apps/dialogue/services.py        # request/accept/outreach; not speech.py
 backend/apps/identity/**
 backend/apps/moderation/**
 backend/api/v1/help.py
@@ -169,11 +169,11 @@ backend/api/v1/identity.py
 apps/browser/src/features/help/HelpPane.*
 apps/browser/src/features/help/HelpWaitPane.*
 apps/browser/src/features/helper/**
-apps/browser/src/features/chat/**         # ChatList, DialoguePage, menus, voice в browser
+apps/browser/src/features/chat/**         # ChatList, DialoguePage, menus, voice in the browser
 apps/browser/src/components/layout/UserMenu.tsx
 ```
 
-### Только агент B
+### Agent B only
 
 ```
 backend/apps/ai/**
@@ -181,30 +181,30 @@ backend/api/v1/ai.py
 backend/apps/dialogue/speech.py
 apps/browser/src/features/help/CompanionPane.*
 apps/browser/src/core/memory/**
-apps/mini-app/**                          # всё дерево
+apps/mini-app/**                          # the whole tree
 ```
 
-### Общие файлы — протокол, не свободная правка
+### Shared files — protocol, not a free edit
 
-| Файл | Как трогать |
-|------|-------------|
-| `apps/browser/src/App.tsx` | Добавлять **только свой** `<Route>`. Не переставлять чужие. |
-| `apps/browser/src/core/api/client.ts` + `types.ts` | Добавлять методы/типы в конец своего блока. Не реформатировать файл. |
-| `apps/browser/src/core/i18n/messages/ru.ts` `en.ts` `types.ts` | A: `help.*` кроме companion, `helper.*`, `me.*`, `shell.safetyBanner`. B: `companion.*`. Новые ключи только append. Не переименовывать чужие. |
-| `apps/browser/src/core/hooks/useNotifications.ts` | A добавляет kinds review/duty. B не добавляет kinds без строки в PROGRESS. |
-| `backend/api/main.py` | Одна строка `add_router` за раз, алфавит/конец списка. |
-| `backend/apps/notifications/models.py` | Новые `NotificationKind` — сначала строка в PROGRESS «claim: kind=…», потом коммит. |
-| `CAPABILITIES.md` `README.md` `CONTEXT.md` | Дописывать строки/абзацы своей фичи. Не переписывать таблицы целиком. |
-| `MAINPLAN.md` | Менять только по согласованию обоих (или человека). |
-| `PROGRESS.md` | Оба пишут; не удалять чужие строки. |
+| File | How to touch |
+|------|--------------|
+| `apps/browser/src/App.tsx` | Add **only your own** `<Route>`. Do not reorder others'. |
+| `apps/browser/src/core/api/client.ts` + `types.ts` | Append methods/types at the end of your block. Do not reformat the file. |
+| `apps/browser/src/core/i18n/messages/ru.ts` `en.ts` `types.ts` | A: `help.*` except companion, `helper.*`, `me.*`, `shell.safetyBanner`. B: `companion.*`. New keys are append-only. Do not rename others' keys. |
+| `apps/browser/src/core/hooks/useNotifications.ts` | A adds the kinds review/duty. B adds no kinds without a line in PROGRESS. |
+| `backend/api/main.py` | One `add_router` line at a time, alphabetically / at the end of the list. |
+| `backend/apps/notifications/models.py` | New `NotificationKind` — first a PROGRESS line "claim: kind=…", then the commit. |
+| `CAPABILITIES.md` `README.md` `CONTEXT.md` | Append the lines/paragraphs of your feature. Do not rewrite whole tables. |
+| `MAINPLAN.md` | Change only with the agreement of both (or the human). |
+| `PROGRESS.md` | Both write; never delete others' lines. |
 
-Если нужен файл из чужой зоны — **стоп**, строка `blocked-on: A|B` в PROGRESS, не «маленький патч в чужом файле».
+If you need a file from someone else's zone — **stop**, a `blocked-on: A|B` line in PROGRESS, not "a tiny patch in someone else's file".
 
 ---
 
-## Контракты API (B может опираться, когда A напишет `contract:ready` в PROGRESS)
+## API contracts (B may rely on them once A writes `contract:ready` into PROGRESS)
 
-Уже в `main` после Gate 0:
+Already in `main` after Gate 0:
 
 ```
 POST /api/v1/help/requests
@@ -216,7 +216,7 @@ GET  /api/v1/moderation/dashboard
 POST /api/v1/auth/telegram
 ```
 
-A2 добавит (имена зафиксировать в PROGRESS при коммите):
+A2 will add (the names are fixed in PROGRESS at commit time):
 
 ```
 GET  /api/v1/moderation/dialogue-requests
@@ -237,20 +237,20 @@ A5–A6:
 GET  /api/v1/me
      + is_on_duty, maybe presence
 POST /api/v1/me/helper-duty
-GET  /api/v1/help/presence     # { someone_on_duty: bool, someone_online: bool } без счётчиков людей
+GET  /api/v1/help/presence     # { someone_on_duty: bool, someone_online: bool } without human counters
 ```
 
 B1:
 
 ```
-POST /api/v1/ai/support/stream   # SSE; старый /support не удалять
+POST /api/v1/ai/support/stream   # SSE; the old /support is not removed
 ```
 
 ---
 
-## Журнал `PROGRESS.md` (формат)
+## The PROGRESS.md journal (format)
 
-Каждая запись — блок, не эссе:
+Every entry is a block, not an essay:
 
 ```markdown
 ## YYYY-MM-DD HH:MM  agent=A|B  id=A2
@@ -258,33 +258,33 @@ status: started | blocked-on:A3 | contract:ready | done
 branch: feat/agent-a-helper-ops
 commit: abc1234
 notes: one line
-files: list of paths touched
-api: METHOD /path  (if contract)
+files: list of the paths touched
+api: METHOD /path  (if a contract)
 ```
 
-Правила:
+Rules:
 
-- Перед началом задачи — `status: started`, чтобы второй не взял то же.
-- После API, которым пользуется другой — `contract:ready` + точный path.
-- `blocked-on` обязателен, если ждёшь чужой файл/контракт.
-- Не ребазить чужую ветку. На `main` — только после Gate 0 и явных merge от человека.
-
----
-
-## Что не делаем в этом MAINPLAN
-
-- Токсичная позитивность, диагнозы, ИИ как скрытый пир в `/chat`.
-- Публичные лайки, комменты, витрина «N хелперов онлайн».
-- Duty hours календаря (cron смены) — только тумблер «на смене».
-- Публиковать Mini App на Web A shell и сторы native.
-- Общий npm-пакет между browser и mini-app.
+- Before starting a task — `status: started`, so the other does not take the same one.
+- After an API the other relies on — `contract:ready` + the exact path.
+- `blocked-on` is mandatory when waiting for someone else's file/contract.
+- Do not rebase someone else's branch. Push to `main` only after Gate 0 and explicit merges by the human.
 
 ---
 
-## Критерий «трек закрыт»
+## What we do not do in this MAINPLAN
 
-**A:** help-чат репортится; Dialogue Request сначала у Helperа; инвайт-онбординг; дашборд на `/helper`; дежурство режет нотификации; при онлайн-дежурном Help Request открывает чат сразу.
+- Toxic positivity, diagnoses, AI as a hidden peer in `/chat`.
+- Public likes, comments, a showcase "N helpers online".
+- Duty hours of a calendar (cron shifts) — only the "on shift" toggle.
+- Publishing the Mini App on the Web A shell and the native stores.
+- A shared npm package between browser and mini-app.
 
-**B:** `/help/ai` стримит и помнит на устройстве; Mini App умеет те же HELP-пути и telegram login; голосовые переводятся по пайплайну STT→translate→TTS хотя бы в Mini App + API; ADR по own desktop/mobile записан, кода стора нет.
+---
 
-Человек мержит ветки в `main`. Агенты не форсят push.
+## The "track is closed" criterion
+
+**A:** the help chat can be reported; the Dialogue Request goes to the Helper first; the invite onboarding; the dashboard on `/helper`; duty cuts the notifications; with an on-duty online Helper the Help Request opens the chat instantly.
+
+**B:** `/help/ai` streams and remembers on the device; the Mini App handles the same HELP paths and telegram login; voice goes through the STT→translate→TTS pipeline at least in the Mini App + API; an ADR for own desktop/mobile is recorded, with no store code.
+
+The human merges the branches into `main`. The agents never force-push.
