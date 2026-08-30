@@ -65,3 +65,6 @@ _archive/native/android/.env
 
 # Embedded clone, not part of this product
 _archive/AngelSlim/
+
+# RU docs archive (kept locally only, EN is canon — decision Q6 2026-08-30)
+docs-ru-archive/
