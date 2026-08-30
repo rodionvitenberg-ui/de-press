@@ -1,93 +1,92 @@
 # Design V2 — de-press.co
 
-> Дизайн-спецификация версии 2.0. Живой документ: обсуждаем, фиксируем, дорабатываем.
-> Связан с: `CONTEXT.md` (домен), `FRONTEND_PLAN.md` (инженерный план), `ROADMAP.md`.
+> The design spec of version 2.0. A living document: we discuss, fix, refine.
+> Related to: `CONTEXT.md` (the domain), `FRONTEND_PLAN.md` (the engineering plan), `ROADMAP.md`.
 
 ---
 
-## 1. Аксиомы (не подлежат пересмотру без отдельного решения)
+## 1. Axioms (not subject to revision without a separate decision)
 
-1. **ТГ-эргономика — один в один.** Интерфейс обязан функционировать так же, как текущий Telegram:
-   - десктопная версия (3-панельная компоновка);
-   - мобильная версия (нижний таб-бар / вложенность экранов).
-   Мы берём эргономику Телеги по максимуму: она отвечает задачам проекта. Это главное положение дизайна.
-2. **Узнаваемость + вайб = 50/50.** Знакомство ТГ-паттернов и собственная «тихая тёплая» атмосфера в равной мере.
-   - Дизайн ТГ «слизывается» там, где это эргономика/компоновка (аксиома 1);
-   - собственные функции продукта получают собственные решения (см. §5).
-3. **Многотемность — императив.**
-   - Тёмная тема — базовая (текущая);
-   - светлая тема («рассвет») — обязательная в v2.0;
-   - архитектура токенов обязана поддерживать дальнейшие темы без рефакторинга;
-   - нужен переключатель тем (авто / тёмная / светлая), без хардкода цветов в компонентах.
-4. **Цвета — наши.** Форма — ТГ, цвет/свет/вайб — de-press (мятный `hope`, спокойная тёмная/светлая гаммы).
-5. **Скриншот пользователя — источник истины по разметке экранов** (см. §5). Изображение временно недоступно агенту — разметка зафиксирована текстом ниже и требует подтверждения.
+1. **TG ergonomics — one to one.** The interface must function the same way as the current Telegram:
+   - the desktop version (a 3-pane layout);
+   - the mobile version (a bottom tab bar / nested screens).
+   We take Telegram's ergonomics to the maximum: it fits the project's goals. This is the main statement of the design.
+2. **Recognition + vibe = 50/50.** The familiarity of the TG patterns and our own "quiet warm" atmosphere in equal measure.
+   - The TG design is "borrowed" where it is ergonomics/layout (axiom 1);
+   - our own product functions get our own solutions (see §5).
+3. **Multi-theming — an imperative.**
+   - The dark theme is the base one (current);
+   - the light theme ("dawn") is mandatory in v2.0;
+   - the token architecture must support further themes without a refactor;
+   - a theme switcher is needed (auto / dark / light), no hardcoded colors in the components.
+4. **The colors are ours.** The form is TG, the color/light/vibe is de-press (the mint `hope`, calm dark/light palettes).
+5. **The user's screenshot is the source of truth for the screen layout** (see §5). The image is temporarily unavailable to the agent — the layout is fixed as text below and requires a confirmation.
 
 ---
 
-## 2. Сайт ≠ Приложение; приложение = 4 hosts
+## 2. Site ≠ App; the app = 4 hosts
 
-**Жёсткая линия:** лендинг и приложение разделены.  
-**Этот репозиторий** — только приложения. У приложения **четыре направления (App Hosts)** — см. [`PLATFORMS.md`](./PLATFORMS.md) и [ADR 0013](./adr/0013-four-app-hosts.md).
+**A hard line:** the landing page and the app are separated.  
+**This repository** — apps only. The app has **four directions (App Hosts)** — see [`PLATFORMS.md`](./PLATFORMS.md) and [ADR 0013](./adr/0013-four-app-hosts.md).
 
-### 2.1 Лендинг / сайт (marketing surface — ДРУГОЙ РЕПОЗИТОРИЙ)
-- Внешняя, демонстративная информация: идея, правила пользования, помощь, «о проекте», ответы на вопросы, сторителлинг.
-- Разрабатывается **в отдельном репозитории**, на **своём собственном стеке** и **своём визуальном движке**.
-- **Единственная связь** между лендингом и приложением — **ссылка-переход** (например `https://depress.co` → `https://app.depress.co`). И всё.
-- Документация лендинга живёт в общей папке [`de-press-docs/site/`](../site/), код — в своём репозитории.
+### 2.1 The landing / site (marketing surface — ANOTHER REPOSITORY)
+- The external, demonstrative information: the idea, the rules of use, help, "about the project", FAQ, storytelling.
+- It is developed **in a separate repository**, on **its own stack** and **its own visual engine**.
+- **The only connection** between the landing and the app is a **jump link** (for example `https://depress.co` → `https://app.depress.co`). That's all.
+- The landing docs live in the shared folder [`de-press-docs/site/`](../site/), the code — in its repository.
 
-### 2.2 Четыре App Hosts (решение зафиксировано)
+### 2.2 The four App Hosts (the decision is fixed)
 
-| # | Host | Суть |
+| # | Host | The essence |
 |---|------|------|
-| 1 | **Browser** | SPA на `app.` — UI Core, web fallback |
-| 2 | **Telegram Mini App** | Тот же UI Core в WebView Telegram + Bot — **этап и полноценный host**, не замена #3/#4 |
-| 3 | **Own Desktop** | Своё десктопное (обёртка ядра: Tauri / Electron — выбрать позже) |
-| 4 | **Own Mobile** | Своё мобильное (PWA → нативная обёртка / store), ТГ-таб-бар |
+| 1 | **Browser** | A SPA on `app.` — the UI Core, the web fallback |
+| 2 | **Telegram Mini App** | The same UI Core in the Telegram WebView + a Bot — **a stage and a full host**, not a replacement for #3/#4 |
+| 3 | **Own Desktop** | Our own desktop (a wrapper over the core: Tauri / Electron — choose later) |
+| 4 | **Own Mobile** | Our own mobile (PWA → a native wrapper / store), the TG tab bar |
 
-- **UI Core** (`apps/web/`): Vite + React + TypeScript + CSS Modules — один бандл/ядро на все hosts.
-- **Backend** один: Django + Ninja + Channels. Диалоги и монологи **не** едут через MTProto/Bot chat как транспорт.
-- Таргет UX v2: **ТГ-эргономика 1:1** на всех hosts; на Mini App — ещё и буквальный host внутри Telegram.
-- **Поддомен browser:** `app.` (например `app.depress.co`) — зафиксировано.
-- Прямо сейчас: **Browser host** (прототип ядра). Mini App — следующий интересный этап. Own mobile / own desktop — после/параллельно зрелому core.
+- **UI Core** (`apps/web/`): Vite + React + TypeScript + CSS Modules — one bundle/core for all hosts.
+- **One backend**: Django + Ninja + Channels. Dialogues and monologues do **not** ride through MTProto/Bot chat as a transport.
+- The v2 UX target: **TG ergonomics 1:1** on all hosts; on the Mini App — also literally a host inside Telegram.
+- **The browser subdomain:** `app.` (for example `app.depress.co`) — fixed.
+- Right now: **the Browser host** (a core prototype). The Mini App is the next interesting stage. Own mobile / own desktop — after/in parallel with a mature core.
 
-### 2.3 Host adapters (заложить сейчас)
-- Thin adapters: browser | telegram | desktop | mobile — без расползания домена по hosts.
-- Компоненты без жёсткой привязки к одному runtime; изолированный API-слой.
+### 2.3 Host adapters (lay down now)
+- Thin adapters: browser | telegram | desktop | mobile — without the domain spreading across hosts.
+- Components without a hard binding to one runtime; an isolated API layer.
 - Mini App: `initData` auth, themeParams → tokens, BackButton, optional bot soft-notify.
-- Own desktop/mobile: OS shell, install, permissions — поверх того же core.
+- Own desktop/mobile: the OS shell, install, permissions — over the same core.
 
-### 2.4 Стек (решение зафиксировано)
-- **Ядро (UI Core)**: **Vite + React + TypeScript + CSS Modules** — чистый SPA, без SSR; максимальная скорость отклика.
-- **Компоненты v2** (ТГ-эргономика); переиспользуются логика/типы/API/токены, не GPL-вёрстка tdesktop.
-- **PWA** — мост к own mobile (P1+), **не** отменяет отдельный mobile host.
-- Общий `core/`: токены, типы, API-клиент, i18n, WS — для всех четырёх hosts.
-- Legacy `_archive/legacy/next-frontend/` (Next.js) — не основной UI; донор логики при необходимости.
+### 2.4 The stack (the decision is fixed)
+- **The core (UI Core)**: **Vite + React + TypeScript + CSS Modules** — a pure SPA, no SSR; the maximum response speed.
+- **The v2 components** (TG ergonomics); the logic/types/API/tokens are reused, not the GPL layout of tdesktop.
+- **PWA** — a bridge to own mobile (P1+), **not** a cancellation of a separate mobile host.
+- A shared `core/`: tokens, types, the API client, i18n, WS — for all four hosts.
+- Legacy `_archive/legacy/next-frontend/` (Next.js) — not the main UI; a logic donor when needed.
+
+---
+## 3. The concept: "A warm Telegram"
+
+Telegram gives the skeleton: three zones, lists, bubbles, search, a tab bar. de-press adds the tone:
+
+- **Silence instead of pressure.** No showcase counters, no pulsing suffering badges, no "online". "Typing…" — we take it as in TG (§10.4), softening the text tone if needed at the implementation stage.
+- **Breathing instead of haste.** Slow smooth transitions, soft entrances, no sharp animations on high-frequency actions.
+- **The mint accent is the only one.** `--accent-hope` for an action. `--accent-panic` — only crisis/destructive (`I'M NOT OK`).
+- **No Tailwind.** CSS Modules + design tokens (a project rule).
 
 ---
 
-## 3. Концепция: «Тёплый Telegram»
+## 4. Theming
 
-Telegram даёт каркас: три зоны, списки, пузыри, поиск, таб-бар. de-press добавляет тон:
+### 4.1 The requirements (an imperative)
 
-- **Тишина вместо давления.** Нет счётчиков-витрины, пульсирующих бейджей-страдания, «онлайн». «Печатает…» — берём как в ТГ (§10.4), тон текста при необходимости смягчим на этапе реализации.
-- **Дыхание вместо спешки.** Медленные плавные переходы, мягкие входы, никаких резких анимаций на высокочастотных действиях.
-- **Мятный акцент — единственный.** `--accent-hope` для действия. `--accent-panic` — только кризис/деструктив (`МНЕ ХУЕВО`).
-- **Без Tailwind.** CSS Modules + дизайн-токены (правило проекта).
+- All colors — only through CSS tokens (`:root` + `[data-theme="..."]`), not a single hardcode in the modules.
+- Themes: `dark` (current), `light` ("dawn") in v2.0; the scheme allows adding `sepia/dim/contrast` later.
+- The switcher: `Auto (system)` / `Dark` / `Light` — in the sidebar (the user modal, see §5.2) and on the settings page.
+- Every theme overrides the **entire** token set (the background, surface, text, borders, shadows, bubbles, input/composer).
+- `media (prefers-color-scheme)` — the base auto logic; `data-theme` overrides it.
+- `color-scheme: dark/light` — sync with the scrollbars/native controls.
 
----
-
-## 4. Тематизация
-
-### 4.1 Требования (императив)
-
-- Все цвета — только через CSS-токены (`:root` + `[data-theme="..."]`), ни одного хардкода в модулях.
-- Темы: `dark` (текущая), `light` («рассвет») в v2.0; схема позволяет добавить `sepia/dim/contrast` позже.
-- Переключатель: `Auto (system)` / `Dark` / `Light` — в сайдбаре (модальное окно пользователя, см. §5.2) и на странице настроек.
-- Каждая тема переопределяет **весь** набор токенов (фон, поверхность, текст, бордеры, тени, bubble, вход/композер).
-- `media (prefers-color-scheme)` — базовая авто-логика; `data-theme` перебивает.
-- `color-scheme: dark/light` — синхронизировать со скроллбарами/нативными контролами.
-
-### 4.2 Токены к v2.0 (стартовый набор, расширяемый)
+### 4.2 The tokens for v2.0 (a starting set, extendable)
 
 ```
 --bg-main / --bg-surface / --bg-elevated / --bg-sidebar / --bg-chat
@@ -97,187 +96,186 @@ Telegram даёт каркас: три зоны, списки, пузыри, п�
 --accent-hope (+ soft/mid) / --accent-panic
 --border-subtle / --border-soft
 --shadow-elev-1/2, --shadow-cloud
---radius-* (концентрические, см. better-ui: outer = inner + padding)
---transition-* (длительности)
+--radius-* (concentric, see better-ui: outer = inner + padding)
+--transition-* (the durations)
 ```
 
-### 4.3 Светлая тема — кандидаты значений
+### 4.3 The light theme — candidate values
 
-Спокойный «рассвет»: тёплый серо-бежевый фон, текст тёмно-графитовый, bubble-me = мятный (тёмная) на светлом, bubble-them = светло-серый. Точные значения — на этапе реализации + подтверждение вайба. ВАЖНО: светлый режим для ментального здоровья часто критичнее тёмного (меньше контрастной стимуляции днём).
+A calm "dawn": a warm grey-beige background, a dark graphite text, bubble-me = mint (dark) on light, bubble-them = light grey. The exact values — at the implementation stage + a vibe confirmation. IMPORTANT: for mental health the light mode is often more critical than the dark one (less contrast stimulation during the day).
 
 ---
 
-## 5. Каркас: 3 зоны (десктоп) / таб-бар (мобильный)
+## 5. The skeleton: 3 zones (desktop) / a tab bar (mobile)
 
-Разметка из описания скриншота пользователя (требует подтверждения):
+The layout from the user's screenshot description (requires a confirmation):
 
-### 5.1 Схема (десктоп)
+### 5.1 The scheme (desktop)
 
 ```
 ┌────────────────┬─────────────────────┬──────────────────────────┐
-│ РОЗОВАЯ (нав.) │  ЖЁЛТАЯ (список)    │  КРАСНАЯ (контент)       │
+│ PINK (nav.)    │  YELLOW (list)      │  RED (content)           │
 │ ┌────────────┐ │ ┌─────────────────┐ │ ┌──────────────────────┐ │
-│ │ burger     │ │ │ поиск           │ │ │ шапка / заголовок    │ │
-│ │ модалка    │ │ ├─────────────────┤ │ ├──────────────────────┤ │
-│ │ юзера      │ │ │ чат №1          │ │ │ контент              │ │
-│ ├────────────┤ │ │ чат №2  (серый) │ │ │                      │ │
-│ │ лента      │ │ │ …               │ │ │                      │ │
-│ │ чат        │ │ │                 │ │ │                      │ │
-│ │ помощь     │ │ │                 │ │ │                      │ │
-│ │ паттерны   │ │ │                 │ │ ├──────────────────────┤ │
-│ │ уведомления│ │ │                 │ │ │ композер/действия    │ │
-│ │ хелперы*   │ │ │                 │ │ │  [чат] [лучи] […]    │ │
-│ │ edit       │ │ └─────────────────┘ │ └──────────────────────┘ │
+│ │ burger     │ │ │ search          │ │ │ header / title       │ │
+│ │ user modal │ │ ├─────────────────┤ │ ├──────────────────────┤ │
+│ │            │ │ │ chat #1         │ │ │ content              │ │
+│ ├────────────┤ │ │ chat #2 (grey)  │ │ │                      │ │
+│ │ feed       │ │ │ …               │ │ │                      │ │
+│ │ chat       │ │ │                 │ │ │                      │ │
+│ │ help       │ │ │                 │ │ ├──────────────────────┤ │
+│ │ patterns   │ │ │                 │ │ │ composer/actions     │ │
+│ │ notifs     │ │ │                 │ │ │  [chat] [rays] […]   │ │
+│ │ helpers*   │ │ │                 │ │ └──────────────────────┘ │
+│ │ edit       │ │ └─────────────────┘ │                          │
 │ ├────────────┤ │                     │                          │
-│ │ МНЕ ХУЕВО  │ │                     │                          │
+│ │ I'M NOT OK │ │                     │                          │
 │ └────────────┘ │                     │                          │
 └────────────────┴─────────────────────┴──────────────────────────┘
-* хелперы — только для ролей с Helper
+* helpers — visible to Helper roles only
 ```
 
-### 5.2 Розовая зона — левый сайдбар (навигация)
+### 5.2 The pink zone — the left sidebar (navigation)
 
-Список сверху вниз (кнопки обязаны иметь узнаваемые иконки — см. §8):
+A list top-down (the buttons must have recognizable icons — see §8):
 
-1. **Burger / Юзер** — открывает модальное окно пользователя: профиль, настройки, темы, что угодно по проекту.
-2. **Лента** — Feed (монологи).
-3. **Чат** — Dialoques + Dialogue Requests. (Концептуально лента и чат работают почти одинаково: список слева, контент справа.)
-4. **Помощь** — Help (обсуждаем отдельно, §6.6).
-5. **Паттерны** — локальные (ZK).
-6. **Уведомления** — Notification (приватные).
-7. **Хелперы** — Helper queue (только для пользователей с ролью Helper; иначе скрыто).
-8. **Edit** — режим настройки сайдбара: тапом менять порядок кнопок, скрывать/показывать.
+1. **Burger / User** — opens the user modal: profile, settings, themes, whatever the project needs.
+2. **Feed** — the feed (monologues).
+3. **Chat** — Dialogues + Dialogue Requests. (Conceptually the feed and the chat work almost the same: a list on the left, content on the right.)
+4. **Help** — Help (discussed separately, §6.6).
+5. **Patterns** — local (ZK).
+6. **Notifications** — Notification (private).
+7. **Helpers** — the Helper queue (only for users with the Helper role; otherwise hidden).
+8. **Edit** — the sidebar setup mode: reorder the buttons by tap, hide/show.
 
-Внизу — **всегда видимая стоп-кнопка `МНЕ ХУЕВО`** (Anti-Panic). Резко упрощает интерфейс, убирает все источники раздражения, обрывает realtime, показывает минимальный grounding-экран.
+At the bottom — the **always visible stop button `I'M NOT OK`** (Anti-Panic). It sharply simplifies the interface, removes all irritation sources, severs realtime, and shows the minimal grounding screen.
 
-### 5.3 Жёлтая зона — список (УВ = уведомления/сводка)
+### 5.3 The yellow zone — the list (NV = notifications/summary)
 
-- Всегда сверху **поиск** (как в ТГ).
-- **Чат**: список диалогов + **специально оформленные Dialogue Requests**:
-  - выглядит как человек в списке, но «серый»;
-  - первого сообщения не видно;
-  - вместо сообщения — системная плашка: *«Пользователь запрашивает с вами разговор. Мы проверили запрос — вам безопасно его принять»*. Плашка появляется после ручной модерации человеком с ролью Helper (§10.3).
-- **Лента**: в жёлтой зоне — новые мысли (Monologues), оформленные **точно как чаты в ТГ**: аватар/псевдоним участника, текст-превью в 1–2 строки, время. Визуально юзер не отличит «пост в ленте» от «чата в мессенджере» — это намеренно.
-- Первый элемент ленты — **заглушка `ДОБАВИТЬ ЗАПИСЬ`** (собственный пост): стилизована под «новый чат/контакт», тап открывает композер публикации.
+- Always at the top — **search** (as in TG).
+- **Chat**: the dialogue list + **specially styled Dialogue Requests**:
+  - looks like a human in the list, but "grey";
+  - the first message is not visible;
+  - instead of the message — a system banner: *"The user requests a conversation with you. We checked the request — it is safe for you to accept it"*. The banner appears after manual moderation by a human with the Helper role (§10.3).
+- **The feed**: in the yellow zone — new thoughts (Monologues), styled **exactly like TG chats**: the avatar/pseudonym of a participant, a 1–2 line text preview, the time. Visually the user cannot tell a "feed post" from a "chat in a messenger" — that is intentional.
+- The first feed item — the **`ADD ENTRY` placeholder** (your own post): styled as a "new chat/contact", a tap opens the publishing composer.
 
-### 5.4 Красная зона — контент/действия
+### 5.4 The red zone — content/actions
 
-- **Чат**: полностью как в ТГ (шапка, пузыри, время, композер с текстом + микрофоном + отправкой; «кружочки» и голосовые — по роадмапу).
-- **Лента (открытая мысль)**: в красной зоне — свой функционал. Внизу секции, по горизонтали:
-  - слева — кнопка **Чата** (начать/продолжить диалог с автором при согласии);
-  - по центру — **тихий жест** (Quiet Phrase), не лучи;
-  - справа — действие на краю (перевод/отчёт/меню `⋯` — решаем).
-  - Монолог отображается НЕ как чат, а как «мысль» — карточка (доменный формат, §10.1), при этом список в жёлтой зоне — ТГ-стиль. Это ключевое отличие ленты от чата.
+- **Chat**: fully as in TG (the header, bubbles, time, a composer with text + microphone + send; "circles" and voice notes — by the roadmap).
+- **The feed (an open thought)**: in the red zone — its own functionality. At the bottom of the section, horizontally:
+  - on the left — the **Chat** button (start/continue a dialogue with the author with consent);
+  - in the center — the **quiet gesture** (a Quiet Phrase), not rays;
+  - on the right — an edge action (translate/report/menu `⋯` — to decide).
+  - The monologue is displayed NOT as a chat but as a "thought" — a card (the domain format, §10.1), while the list in the yellow zone is TG-styled. This is the key difference between the feed and the chat.
 
-### 5.5 Мобильный
+### 5.5 Mobile
 
-- ТГ-мобильный паттерн: нижний таб-бар + вложенные экраны (список → деталь, назад). Таб-бар: Лента, Чаты, Уведомления, Ещё (или по решению нижней 4–5 кнопок).
-- `МНЕ ХУЕВО` — всегда доступна: плавающая стоп-кнопка в углу/шапке + пункт в «Ещё».
+- The TG mobile pattern: a bottom tab bar + nested screens (list → detail, back). The tab bar: Feed, Chats, Notifications, More (or per the decision on the bottom 4–5 buttons).
+- `I'M NOT OK` — always accessible: a floating stop button in a corner/the header + an item in "More".
 
 ---
 
-## 6. Маппинг домена → поверхности (v2.0)
+## 6. Mapping the domain → surfaces (v2.0)
 
-| Домен (CONTEXT.md) | Где живёт в v2.0 |
+| Domain (CONTEXT.md) | Where it lives in v2.0 |
 |---|---|
-| **Feed** (лента монологов) | Жёлтая зона — ТГ-список; красная зона — просмотр мысли |
-| **Story / Safe Monologue** | Элемент жёлтой зоны (как чат) + карточка мысли в красной зоне |
-| **Silent Empathy** («Я слышу тебя») | Не отдельная кнопка «лучи» (ADR 0018). Жест-облачко + опциональный запрос диалога |
-| **Support Cloud / Moderated Cloud** | Гость шлёт жест с карточки мысли; автору — анимация на своей строке ленты, не список и не бейдж (ADR 0017) |
-| **Dialogue Request** | Жёлтая зона чата — «серый» элемент + системная плашка «запрос безопасен» |
-| **Initiated Dialogue** | Красная зона — ТГ-чат 1:1 |
-| **Inbox / magic-token** | Отдельный экран (вход по токену); вне трёх зон |
-| **Notification** | Пункт «Уведомления» в сайдбаре; бейджи — мягкие |
-| **Helper queue** | Пункт «Хелперы» (только Helper); отдельный экран |
-| **Patterns (ZK)** | Пункт «Паттерны»; локальный экран |
-| **Anti-Panic / «МНЕ ХУЕВО»** | Стоп-кнопка снизу сайдбара + плавающая на мобиле; рушит всё к минимуму |
-| **Auth / Account** | Модалка юзера (burger) |
+| **Feed** (the monologue feed) | The yellow zone — a TG list; the red zone — viewing a thought |
+| **Story / Safe Monologue** | A yellow-zone item (like a chat) + a thought card in the red zone |
+| **Silent Empathy** ("I hear you") | Not a separate "rays" button (ADR 0018). A cloud gesture + an optional dialogue request |
+| **Support Cloud / Moderated Cloud** | The guest sends a gesture from the thought card; the author gets an animation on their own feed row, not a list and not a badge (ADR 0017) |
+| **Dialogue Request** | The yellow zone of the chat — a "grey" item + the system banner "the request is safe" |
+| **Initiated Dialogue** | The red zone — a TG 1:1 chat |
+| **Inbox / magic token** | A separate screen (sign-in by token); outside the three zones |
+| **Notification** | The "Notifications" item in the sidebar; soft badges |
+| **Helper queue** | The "Helpers" item (Helper only); a separate screen |
+| **Patterns (ZK)** | The "Patterns" item; a local screen |
+| **Anti-Panic / "I'M NOT OK"** | The stop button at the bottom of the sidebar + a floating one on mobile; it crushes everything to the minimum |
+| **Auth / Account** | The user modal (burger) |
 
 ---
 
-## 7. Gap-map: текущее → v2.0
+## 7. Gap map: current → v2.0
 
-| Область | Сейчас (код) | Цель v2.0 | Приоритет |
+| Area | Now (code) | The v2.0 target | Priority |
 |---|---|---|---|
-| Сайдбар | `Sidebar.tsx`: 5 пунктов + 4 внизу, panic внизу | Burger-модалка, все 8 пунктов + Edit, «МНЕ ХУЕВО» внизу всегда | P0 |
-| Список (жёлтая зона) | Отсутствует как единый паттерн; лента — карточки (`StoryCard`) | ТГ-список: поиск + строки-чаты; лента-заглушка «ДОБАВИТЬ ЗАПИСЬ» | P0 |
-| Правая зона | `main` контент страниц | Шапка + контент + нижние действия (чат/лучи/…) | P0 |
-| Чат | `DialogueClient` уже ТГ-стиль (пузыри, композер) | Довести до ТГ-деталей: время, скругления 1:1, состояния | P0 |
-| Dialogue Requests | Карточки на `/me` | Серые элементы в жёлтой зоне чата + системная плашка | P0 |
-| Темы | Только тёмная, `color-scheme: dark` | Dark + Light + авто + выбор, все цвета через токены | P0 |
-| Токены | Есть база в `globals.css` | Полный набор (фон/поверх/пузыри/тени), концентричные радиусы | P0 |
-| Иконки | Inline SVG 1.5px в `Sidebar` | Полный сет, узнаваемые глифы, 1.5/2px по весу текста | P1 |
-| Мобильный | `BottomNav` 4 пункта | ТГ-таб-бар + «МНЕ ХУЕВО», вложенность экранов | P1 |
-| Help / Patterns / Helper | Отдельные страницы | Отдельные дизайн-решения (вне ТГ-каркаса) | P2 |
+| Sidebar | `Sidebar.tsx`: 5 items + 4 at the bottom, panic at the bottom | A burger modal, all 8 items + Edit, "I'M NOT OK" at the bottom always | P0 |
+| The list (yellow zone) | Absent as a single pattern; the feed is cards (`StoryCard`) | A TG list: search + chat rows; the feed placeholder "ADD ENTRY" | P0 |
+| The right zone | The `main` content of pages | A header + content + bottom actions (chat/rays/…) | P0 |
+| Chat | `DialogueClient` is already TG-styled (bubbles, composer) | Push to the TG details: time, 1:1 radii, states | P0 |
+| Dialogue Requests | Cards on `/me` | Grey items in the yellow zone of the chat + a system banner | P0 |
+| Themes | Dark only, `color-scheme: dark` | Dark + Light + auto + a choice, all colors through tokens | P0 |
+| Tokens | A base in `globals.css` | The full set (backgrounds/surfaces/bubbles/shadows), concentric radii | P0 |
+| Icons | Inline SVG 1.5px in `Sidebar` | A full set, recognizable glyphs, 1.5/2px by the text weight | P1 |
+| Mobile | `BottomNav` with 4 items | A TG tab bar + "I'M NOT OK", nested screens | P1 |
+| Help / Patterns / Helper | Separate pages | Separate design solutions (outside the TG skeleton) | P2 |
+
+---
+## 8. Icons (P1)
+
+For every sidebar button — a clear, recognizable glyph (by the better-ui principles: `currentColor`, outline by default, fill in the active state, 1.5px for normal text / 2px for semibold, optical alignment):
+
+- Burger/User: an avatar/profile (or a burger)
+- Feed: the "«" mark (a list/feed)
+- Chat: a bubble (the current one)
+- Help: a question mark / a lifebuoy
+- Patterns: a wave/a chart
+- Notifications: a bell
+- Helpers: a shield/a hand
+- Edit: "pencil/mode" (or "⋮⋮" for reordering)
+- I'M NOT OK: alarming but not a "red danger button" — it is a self-care button. Visually: calm, separate, always visible.
+- The red-zone actions: a dialogue request, a quiet gesture, a menu (`⋯`). No support rays (ADR 0018).
 
 ---
 
-## 8. Иконки (P1)
+## 9. The implementation stages (into the task plan)
 
-Для каждой кнопки сайдбара — понятный, узнаваемый глиф (по принципам better-ui: `currentColor`, outline по умолчанию, fill в активном, 1.5px у обычного текста / 2px у semibold, оптическое выравнивание):
-
-- Burger/Юзер: аватар/профиль (или бургер)
-- Лента: знак ««» (список/лента)
-- Чат: пузырь (текущий)
-- Помощь: вопросительный/спасательный круг
-- Паттерны: волна/график
-- Уведомления: колокол
-- Хелперы: щит/рука
-- Edit: «карандаш/режим» (или «⋮⋮» перестановки)
-- МНЕ ХУЕВО: тревожный, но не «красная кнопка опасности» — это кнопка заботы о себе. Визуально: спокойная, отдельная, всегда видимая.
-- Действия в красной зоне: запрос диалога, тихий жест, меню (`⋯`). Лучи поддержки нет (ADR 0018).
-
----
-
-## 9. Этапы внедрения (в проект задачи)
-
-1. **P0 — Токены и темы.** Полный токен-сет (dark+light), `data-theme`, переключатель, `color-scheme`, убрать хардкод цветов.
-2. **P0 — Граница сайт/приложение + 4 hosts.** Лендинг отдельно; browser SPA на `app.`; заложить host adapters (browser / Mini App / own desktop / own mobile) — см. [`PLATFORMS.md`](./PLATFORMS.md).
-3. **P0 — Трёхзонный каркас.** Рефакторинг `Shell` на 3 зоны; сайдбар-список чистой ширины (15rem), красная зона с шапкой и нижними действиями.
-4. **P0 — Жёлтая зона (список).** Паттерн «строка чата»; поиск; рендер ленты как ТГ-списка; заглушка «ДОБАВИТЬ ЗАПИСЬ»; серые Dialogue Requests.
-5. **P0 — Красная зона (контент).** Просмотр мысли с тихим жестом и запросом диалога; доведение чата до ТГ-деталей.
-6. **P1 — Burger-модалка, настройки, Edit-режим сайдбара.**
-7. **P1 — Иконки.** Единый сет.
-8. **P1 — Own Mobile layout.** ТГ-таб-бар, «МНЕ ХУЕВО» в углу, вложенные экраны (host #4).
-9. **P1 — Telegram Mini App host.** Bridge, initData auth, themeParams; этап, не замена own mobile.
-10. **P2 — Help / Patterns / Helper** — отдельные дизайн-брифы.
-11. **P2 — Own Desktop / Own Mobile shells.** Нативные обёртки / PWA поверх UI Core.
+1. **P0 — Tokens and themes.** The full token set (dark+light), `data-theme`, the switcher, `color-scheme`, remove the color hardcodes.
+2. **P0 — The site/app boundary + 4 hosts.** The landing is separate; the browser SPA on `app.`; lay down the host adapters (browser / Mini App / own desktop / own mobile) — see [`PLATFORMS.md`](./PLATFORMS.md).
+3. **P0 — The 3-zone skeleton.** Refactoring `Shell` into 3 zones; a clean-width sidebar list (15rem), the red zone with a header and bottom actions.
+4. **P0 — The yellow zone (the list).** The "chat row" pattern; search; rendering the feed as a TG list; the "ADD ENTRY" placeholder; the grey Dialogue Requests.
+5. **P0 — The red zone (content).** Viewing a thought with a quiet gesture and a dialogue request; pushing the chat to the TG details.
+6. **P1 — The burger modal, settings, the sidebar Edit mode.**
+7. **P1 — Icons.** A single set.
+8. **P1 — The Own Mobile layout.** The TG tab bar, "I'M NOT OK" in a corner, nested screens (host #4).
+9. **P1 — The Telegram Mini App host.** The bridge, initData auth, themeParams; a stage, not a replacement for own mobile.
+10. **P2 — Help / Patterns / Helper** — separate design briefs.
+11. **P2 — Own Desktop / Own Mobile shells.** Native wrappers / PWA over the UI Core.
 
 ---
 
-## 10. Решение по открытым вопросам (зафиксировано)
+## 10. The resolution of the open questions (fixed)
 
-1. **Монолог в красной зоне — рендерим как карточка («мысль»).** Домен: монолог, не сообщение. Список в жёлтой зоне — ТГ-стиль.
-2. **Лучи поддержки сняты с UI (ADR 0018).** Поддержка = тихий жест (облачко) и опциональный запрос диалога, не отдельный тап «я слышу».
-3. **Dialogue Request проверяет человек с ролью Helper.** Модерация **всегда ручная**. Плашка «мы проверили, вам безопасно принять» — после ручной проверки Helper'ом.
-4. **«Печатает…» — берём как в ТГ.** Паттерн остаётся (возможно, смягчим тон текста — на этапе реализации).
-5. **Бейджи непрочитанного — мягкие.** Без витрины страдания, без жёстких ТГ-бейджей-криков.
-6. **Помощь/Паттерны/Хелперы — отдельные дизайн-брифы позже**, но **в той же токен-системе**.
-7. **«МНЕ ХУЕВО» — всегда в сайдбаре. Это переключатель между режимами.** Режим «АНТИ-ПЭНИК» и его отображение будут продумываться отдельно.
+1. **A monologue in the red zone — render it as a card (a "thought").** Domain: a monologue, not a message. The list in the yellow zone — TG-style.
+2. **The support rays are removed from the UI (ADR 0018).** Support = a quiet gesture (a cloud) and an optional dialogue request, not a separate tap "I hear you".
+3. **The Dialogue Request is checked by a human with the Helper role.** Moderation is **always manual**. The banner "we checked, it is safe for you to accept" — after the manual check by the Helper.
+4. **"Typing…" — we take it as in TG.** The pattern stays (we may soften the text tone — at the implementation stage).
+5. **The unread badges — soft.** No showcase of suffering, no hard screaming TG badges.
+6. **Help/Patterns/Helpers — separate design briefs later**, but **in the same token system**.
+7. **"I'M NOT OK" — always in the sidebar. It is a switch between modes.** The "ANTI-PANIC" mode and its display will be thought through separately.
 
 ---
 
-## 11. Итоги (что зафиксировано окончательно)
+## 11. The summary (what is fixed finally)
 
-**Граница = сайт ≠ приложение.** Лендинг отдельно; приложение = **4 hosts** (browser · Mini App · own desktop · own mobile) на одном UI Core. Доступ browser: с лендинга и прямой ссылкой `app.`. Mini App — этап внутри Telegram. Own desktop/mobile — свои оболочки, не «только Mini App».
+**The boundary = site ≠ app.** The landing is separate; the app = **4 hosts** (browser · Mini App · own desktop · own mobile) on one UI Core. The browser access: from the landing and a direct `app.` link. The Mini App — a stage inside Telegram. Own desktop/mobile — our own shells, not "the Mini App only".
 
-**Форма = Telegram 1:1.** Три панели (нав / список / контент) на десктопе, таб-бар + вложенность на мобиле, поиск в списке, пузыри, «печатает…», строки-чаты.
+**The form = Telegram 1:1.** Three panes (nav / list / content) on desktop, a tab bar + nesting on mobile, search in the list, bubbles, "typing…", chat rows.
 
-**Тон = de-press.** Карточка-«мысль» для монолога, тихие жесты без витрины, мягкие бейджи, спокойные переходы, единственный акцент `hope`.
+**The tone = de-press.** A "thought" card for the monologue, quiet gestures without a showcase, soft badges, calm transitions, the single `hope` accent.
 
-**Темы = обязательная многотемность.** тёмная + светлая («рассвет») в v2.0, архитектура под будущие темы, переключатель авто/тёмная/светлая.
+**Themes = mandatory multi-theming.** dark + light ("dawn") in v2.0, an architecture for future themes, an auto/dark/light switcher.
 
-**Безопасность = ручная.** Dialogue Request проходит проверку Helper'ом (человек), модерация всегда ручная.
+**Safety = manual.** The Dialogue Request passes the Helper's check (a human), moderation is always manual.
 
-**Anti-Panic = переключатель режимов.** «МНЕ ХУЕВО» всегда в сайдбаре; сам Anti-Panic-режим — отдельный дизайн-бриф.
+**Anti-Panic = a mode switch.** "I'M NOT OK" is always in the sidebar; the Anti-Panic mode itself is a separate design brief.
 
-**Этапы внедрения** — см. §9. Открытых вопросов по дизайн-концепции больше нет; следующие шаги — инженерные задачи из §9.
+**The implementation stages** — see §9. There are no more open questions on the design concept; the next steps are the engineering tasks from §9.
 
-## 11.5 Стек приложения (зафиксировано)
-1. **Ядро**: Vite + React + TypeScript + CSS Modules — чистый SPA без SSR.
-2. **URL приложения**: поддомен `app.` (например `app.depress.co`).
-3. **Компоненты**: переписываются под v2 (ТГ-эргономика); из `_archive/legacy/next-frontend/` переиспользуются логика/типы/API/токены, не вёрстка.
-4. **Слой `core/`**: токены, типы, API-клиент, i18n, WS — общий для всех 4 hosts; thin host adapters.
-5. **PWA** (offline/installable) — P1, мост к own mobile; Mini App — отдельный host/этап.
-6. **Замер скорости**: baseline TTI/переходов до и после рефакторинга — обязательный критерий приёмки P0.
-7. **Данные/состояние**: TanStack Query (кэш) + лёгкий стейт; виртуализация списков (`@tanstack/react-virtual`) для ТГ-ленты/чатов; типы TS генерировать из OpenAPI Django.
+## 11.5 The app stack (fixed)
+1. **The core**: Vite + React + TypeScript + CSS Modules — a pure SPA without SSR.
+2. **The app URL**: the `app.` subdomain (for example `app.depress.co`).
+3. **The components**: rewritten for v2 (TG ergonomics); from `_archive/legacy/next-frontend/` the logic/types/API/tokens are reused, not the layout.
+4. **The `core/` layer**: tokens, types, the API client, i18n, WS — shared by all 4 hosts; thin host adapters.
+5. **PWA** (offline/installable) — P1, a bridge to own mobile; the Mini App — a separate host/stage.
+6. **The speed measurement**: a baseline TTI/transitions before and after the refactor — a mandatory P0 acceptance criterion.
+7. **Data/state**: TanStack Query (a cache) + a light state; list virtualization (`@tanstack/react-virtual`) for the TG feed/chats; the TS types generated from the OpenAPI of Django.
