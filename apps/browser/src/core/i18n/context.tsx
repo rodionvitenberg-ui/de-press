@@ -10,6 +10,7 @@ import {
 } from "react";
 import { api } from "@/core/api/client";
 import { getCachedCatalog, setCachedCatalog } from "./catalogCache";
+import { translateFlatInBrowser } from "./clientTranslate";
 import { applyFlat, catalogHash, flattenMessages } from "./flatten";
 import {
   DEFAULT_LOCALE,
@@ -75,8 +76,22 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       persistLocale(next);
       document.title = hydrated.meta.title;
     } catch {
-      /* translation unavailable — keep previous pack, mark honestly */
-      if (token === seq.current) setCatalogUnavailable(true);
+      /* server refused (no server translator) — try the browser's built-in
+         on-device Translator API before showing the honest marker */
+      const fallback = await translateFlatInBrowser(flatEn, next);
+      if (token === seq.current) {
+        if (fallback) {
+          await setCachedCatalog(next, hash, fallback);
+          const hydrated = applyFlat(en, fallback);
+          setMessages(hydrated);
+          setLocaleState(next);
+          setCatalogUnavailable(false);
+          persistLocale(next);
+          document.title = hydrated.meta.title;
+        } else {
+          setCatalogUnavailable(true);
+        }
+      }
     } finally {
       if (token === seq.current) setLoading(false);
     }
