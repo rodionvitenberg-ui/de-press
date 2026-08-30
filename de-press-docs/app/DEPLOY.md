@@ -1,16 +1,16 @@
-# DEPLOY — staging/prod на одном VPS (systemd + nginx, без docker)
+# DEPLOY — staging/prod on a single VPS (systemd + nginx, no docker)
 
-Схема: один origin `https://app.depress.co` (замените на свой домен). nginx раздаёт
-статику (browser SPA — `/`, Telegram Mini App — `/tg/`, статика админки — `/static/`,
-медиа — `/media/`) и проксирует `/api` `/admin` `/docs` `/openapi.json` `/ws` на
-daphne `127.0.0.1:8000`. Postgres и Redis — системные пакеты. Celery worker + beat —
-systemd-юниты. Бэкапы — systemd timer (`pg_dump -Fc`, retention 14 дней).
+The scheme: one origin `https://app.depress.co` (replace with your domain). nginx serves
+the static files (the browser SPA — `/`, the Telegram Mini App — `/tg/`, the admin static — `/static/`,
+the media — `/media/`) and proxies `/api` `/admin` `/docs` `/openapi.json` `/ws` to
+daphne `127.0.0.1:8000`. Postgres and Redis — system packages. The Celery worker + beat —
+systemd units. The backups — a systemd timer (`pg_dump -Fc`, a 14-day retention).
 
-Артефакты в `deploy/` репозитория: `depress-api.service`, `depress-celery.service`,
+The artifacts in the `deploy/` of the repository: `depress-api.service`, `depress-celery.service`,
 `depress-celery-beat.service`, `depress-backup.service` + `depress-backup.timer`,
-`nginx-de-press.conf`; env-шаблон — `.env.prod.example` в корне.
+`nginx-de-press.conf`; the env template — `.env.prod.example` at the root.
 
-## 1. Сервер (Ubuntu 24.04)
+## 1. The server (Ubuntu 24.04)
 
 ```bash
 sudo apt update && sudo apt install -y nginx postgresql redis-server python3-venv git
@@ -21,11 +21,11 @@ sudo mkdir -p /etc/depress /var/backups/depress && sudo chown postgres /var/back
 ## 2. Postgres
 
 ```bash
-sudo -u postgres psql -c "CREATE ROLE depress LOGIN PASSWORD '<пароль>';"
+sudo -u postgres psql -c "CREATE ROLE depress LOGIN PASSWORD '<password>';"
 sudo -u postgres createdb -O depress depress
 ```
 
-## 3. Код + venv
+## 3. The code + venv
 
 ```bash
 sudo -u depress git clone <repo-url> /opt/de-press
@@ -40,31 +40,31 @@ sudo cp .env.prod.example /etc/depress/depress.env
 sudo chmod 600 /etc/depress/depress.env && sudoedit /etc/depress/depress.env
 ```
 
-Обязательно заполнить: `DJANGO_SECRET_KEY`, `POSTGRES_PASSWORD`, домен в
+Fill in mandatory: `DJANGO_SECRET_KEY`, `POSTGRES_PASSWORD`, the domain in
 `DJANGO_ALLOWED_HOSTS`/`DJANGO_CORS_ALLOWED_ORIGINS`/`PUBLIC_BASE_URL`.
-Остальное опционально (AI/translator/Telegram — пусто = оффлайн-режимы).
+The rest is optional (AI/translator/Telegram — empty = offline modes).
 
-## 5. Миграции, статика, seed
+## 5. Migrations, static, seed
 
 ```bash
-sudo -u depress bash -c 'cd /opt/de-press/backend && set -a && . /etc/depress/depress.env && set +a && \
-  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py migrate && \
-  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py collectstatic --noinput && \
-  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py seed_quiet_phrases && \
+sudo -u depress bash -c 'cd /opt/de-press/backend && set -a && . /etc/depress/depress.env && set +a && \\
+  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py migrate && \\
+  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py collectstatic --noinput && \\
+  DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py seed_quiet_phrases && \\
   DJANGO_SETTINGS_MODULE=config.settings.production .venv/bin/python manage.py createsuperuser'
 ```
 
-## 6. systemd-юниты
+## 6. The systemd units
 
 ```bash
-sudo cp deploy/depress-api.service deploy/depress-celery.service \
-        deploy/depress-celery-beat.service deploy/depress-backup.service \
+sudo cp deploy/depress-api.service deploy/depress-celery.service \\
+        deploy/depress-celery-beat.service deploy/depress-backup.service \\
         deploy/depress-backup.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now depress-api depress-celery depress-celery-beat depress-backup.timer
 ```
 
-## 7. Фронтонты (сборка локально, на сервер node не нужен)
+## 7. The frontends (build locally, no node is needed on the server)
 
 ```bash
 cd apps/browser && npm ci && npx vite build
@@ -77,81 +77,81 @@ rsync -a --delete apps/mini-app/dist/ deploy@app.depress.co:/opt/de-press/apps/m
 
 ```bash
 sudo cp deploy/nginx-de-press.conf /etc/nginx/sites-available/de-press
-sudo sed -i 's/app.depress.co/<ваш-домен>/g' /etc/nginx/sites-available/de-press
+sudo sed -i 's/app.depress.co/<your-domain>/g' /etc/nginx/sites-available/de-press
 sudo ln -sf /etc/nginx/sites-available/de-press /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
-sudo apt install -y certbot python3-certbot-nginx && sudo certbot --nginx -d <ваш-домен>
+sudo apt install -y certbot python3-certbot-nginx && sudo certbot --nginx -d <your-domain>
 ```
 
-## 8.1 coturn — TURN/STUN для живого голоса (ADR 0021)
+## 8.1 coturn — TURN/STUN for the live voice (ADR 0021)
 
-Живой 1:1 звонок в диалоге идёт P2P; coturn нужен только для строгих NAT.
+The live 1:1 call in the dialogue goes P2P; coturn is needed only for strict NATs.
 
 ```bash
 sudo apt install -y coturn
-sudo systemctl enable --now coturn   # старые пакеты: TURNSERVER_ENABLED=1 в /etc/default/coturn
+sudo systemctl enable --now coturn   # older packages: TURNSERVER_ENABLED=1 in /etc/default/coturn
 ```
 
-Минимальный `/etc/turnserver.conf` (подставьте свои значения):
+A minimal `/etc/turnserver.conf` (substitute your values):
 
 ```
 listening-port=3478
 fingerprint
 lt-cred-mech
-user=<логин>:<пароль>
-realm=<ваш-домен>
-external-ip=<внешний-IP>   # только если VPS за NAT провайдера
+user=<login>:<password>
+realm=<your-domain>
+external-ip=<public-IP>   # only if the VPS is behind the provider's NAT
 min-port=49152
 max-port=65535
 no-cli
 ```
 
-Открыть порты: `3478/udp+tcp` и `49152-65535/udp` (relay-диапазон), затем
-перезапустить: `sudo systemctl restart coturn`. В `/etc/depress/depress.env`:
+Open the ports: `3478/udp+tcp` and `49152-65535/udp` (the relay range), then
+restart: `sudo systemctl restart coturn`. In `/etc/depress/depress.env`:
 
 ```
-WEBRTC_TURN_URL=turn:<ваш-домен-или-IP>:3478?transport=udp
-WEBRTC_TURN_USERNAME=<логин>
-WEBRTC_TURN_CREDENTIAL=<пароль>
+WEBRTC_TURN_URL=turn:<your-domain-or-IP>:3478?transport=udp
+WEBRTC_TURN_USERNAME=<login>
+WEBRTC_TURN_CREDENTIAL=<password>
 ```
 
-Проверка: `curl https://<ваш-домен>/api/v1/rtc/config` → `ice_servers`
-непустые. Пустые переменные = ICE только по прямым кандидатам (LAN,
-перцептивный NAT) — звонок может не соединиться на мобильных сетях.
+Check: `curl https://<your-domain>/api/v1/rtc/config` → `ice_servers`
+non-empty. Empty variables = ICE over direct candidates only (LAN,
+perceptual NAT) — the call may not connect on mobile networks.
 
-## 9. Telegram Mini App
+## 9. The Telegram Mini App
 
-BotFather → Menu Button URL `https://<ваш-домен>/tg/`; `TELEGRAM_BOT_TOKEN` /
-`TELEGRAM_BOT_USERNAME` — в `/etc/depress/depress.env` (initData-аутентификация).
+BotFather → the Menu Button URL `https://<your-domain>/tg/`; `TELEGRAM_BOT_TOKEN` /
+`TELEGRAM_BOT_USERNAME` — into `/etc/depress/depress.env` (initData authentication).
 
-## 10. Обновление (rollout)
+## 10. Updating (rollout)
 
 ```bash
 cd /opt/de-press && sudo -u depress git pull
 cd backend && sudo -u depress .venv/bin/pip install -r requirements/production.txt
-# п.5 (migrate + collectstatic), затем:
+# step 5 (migrate + collectstatic), then:
 sudo systemctl restart depress-api depress-celery depress-celery-beat
-# фронты: собрать локально и rsync (п.7); sw.js обновится новой сборкой browser
+# the frontends: build locally and rsync (step 7); sw.js is updated by the new browser build
 ```
 
-## 11. Бэкапы и восстановление
+## 11. Backups and restore
 
-Ежедневно в 04:00 таймер кладёт `/var/backups/depress/depress-YYYY-MM-DD.dump`
-(`pg_dump -Fc`), старше 14 дней — удаляются. Восстановление:
+Daily at 04:00 the timer puts `/var/backups/depress/depress-YYYY-MM-DD.dump`
+(`pg_dump -Fc`); older than 14 days — deleted. Restore:
 
 ```bash
-sudo -u postgres pg_restore -d depress --clean /var/backups/depress/<файл>.dump
+sudo -u postgres pg_restore -d depress --clean /var/backups/depress/<file>.dump
 ```
 
-## 12. Проверка после деплоя
+## 12. The post-deploy check
 
 ```bash
-curl https://<ваш-домен>/api/v1/health    # {"status":"ok","database":true,...}
-BASE_URL=https://<ваш-домен> bash scripts/smoke_api.sh
-journalctl -u depress-api -f              # при проблемах
+curl https://<your-domain>/api/v1/health    # {"status":"ok","database":true,...}
+BASE_URL=https://<your-domain> bash scripts/smoke_api.sh
+journalctl -u depress-api -f              # when troubleshooting
 ```
 
-Замечания: `config.settings.production` включает `DEBUG=false` и Secure-cookies —
-сайт доступен только по https; `/admin` требует `collectstatic` (п.5); ручной
-пилотный чеклист после деплоя — [`PILOT.md`](./PILOT.md).
+Notes: `config.settings.production` enables `DEBUG=false` and Secure cookies —
+the site is https-only; `/admin` requires `collectstatic` (step 5); the manual
+pilot checklist after the deploy — [`PILOT.md`](./PILOT.md).
