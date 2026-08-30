@@ -36,6 +36,8 @@ import type {
   Story,
   StoryThread,
   SupportCloud,
+  TherapistProfileOut,
+  TherapySession,
   Topic,
   TipWalletResponse,
   UnreadCountResponse,
@@ -76,7 +78,10 @@ export type {
   SendCircleOptions,
   Story,
   SupportCloud,
+  TherapistProfileOut,
   TipWalletResponse,
+  TherapySession,
+  TherapySessionStatus,
   Topic,
   UnreadCountResponse,
   AiSupportResponse,
@@ -811,5 +816,45 @@ export const api = {
 
   rtcConfig: () =>
     request<{ ice_servers: RTCIceServer[] }>("/api/v1/rtc/config"),
+
+  therapistProfiles: () =>
+    request<TherapistProfileOut[]>("/api/v1/therapy/profiles"),
+
+  therapyClaim: (token: string) =>
+    request<TherapistProfileOut>("/api/v1/therapy/claim", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  therapyCreateSession: (therapistId: string, note = "") =>
+    request<TherapySession>("/api/v1/therapy/sessions", {
+      method: "POST",
+      body: JSON.stringify({ therapist_id: therapistId, note }),
+    }),
+
+  therapyMySessions: () =>
+    request<TherapySession[]>("/api/v1/me/therapy/sessions"),
+
+  therapyInbox: () => request<TherapySession[]>("/api/v1/me/therapy/inbox"),
+
+  therapyIPaid: (id: string) =>
+    request<TherapySession>(`/api/v1/therapy/sessions/${id}/i-paid`, {
+      method: "POST",
+    }),
+
+  therapyConfirm: (id: string) =>
+    request<TherapySession>(`/api/v1/therapy/sessions/${id}/confirm`, {
+      method: "POST",
+    }),
+
+  therapyDecline: (id: string) =>
+    request<TherapySession>(`/api/v1/therapy/sessions/${id}/decline`, {
+      method: "POST",
+    }),
+
+  therapyComplete: (id: string) =>
+    request<TherapySession>(`/api/v1/therapy/sessions/${id}/complete`, {
+      method: "POST",
+    }),
 
 };

@@ -20,6 +20,7 @@ from api.v1 import (
     rtc,
     stories,
     support,
+    therapy,
 )
 
 api = NinjaAPI(
@@ -45,3 +46,4 @@ api.add_router("/v1", profile.router)
 api.add_router("/v1", ai.router)
 api.add_router("/v1", i18n.router)
 api.add_router("/v1", rtc.router)
+api.add_router("/v1", therapy.router)

@@ -18,6 +18,7 @@ export type Messages = {
     companion: string;
     patterns: string;
     help: string;
+    therapy: string;
     guides: string;
     safety: string;
     login: string;
@@ -563,6 +564,40 @@ export type Messages = {
     save: string;
     cancel: string;
     back: string;
+    close: string;
+  };
+  therapy: {
+    title: string;
+    lead: string;
+    catalog: string;
+    request: string;
+    languages: string;
+    mySessions: string;
+    statusAwaiting: string;
+    statusClaimed: string;
+    statusPaid: string;
+    statusDeclined: string;
+    statusDone: string;
+    openDialogue: string;
+    openWallet: string;
+    payTitle: string;
+    payText: string;
+    iPaid: string;
+    copy: string;
+    copied: string;
+    awaitingConfirm: string;
+    therapistCabinet: string;
+    client: string;
+    confirmPayment: string;
+    decline: string;
+    complete: string;
+    claimTitle: string;
+    claimText: string;
+    claimPlaceholder: string;
+    claim: string;
+    claimed: string;
+    error: string;
+    empty: string;
   };
   topics: Record<string, string>;
   theme: {

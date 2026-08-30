@@ -13,6 +13,37 @@ export interface Me {
   helper_org?: string;
   helper_badge?: string;
   tip_wallet_address?: string;
+  is_therapist?: boolean;
+}
+
+export interface TherapistProfileOut {
+  id: string;
+  pseudonym: string;
+  approach: string;
+  languages: string;
+  rate_sol: number;
+  solana_address: string;
+}
+
+export type TherapySessionStatus =
+  | "awaiting_payment"
+  | "payment_claimed"
+  | "paid"
+  | "declined"
+  | "done";
+
+export interface TherapySession {
+  id: string;
+  therapist_id: string;
+  therapist_label: string;
+  client_label: string;
+  status: TherapySessionStatus;
+  price_sol: number;
+  note: string;
+  solana_address: string;
+  dialogue_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FundInfo {

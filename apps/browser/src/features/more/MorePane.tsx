@@ -26,12 +26,9 @@ export function MorePane() {
         <h1 className={styles.title}>{t.nav.more}</h1>
       </header>
       <div className={styles.list}>
-        <ListRow
-          to="/patterns"
-          title={t.nav.patterns}
-          avatarText="P"
-        />
+        <ListRow to="/patterns" title={t.nav.patterns} avatarText="P" />
         <ListRow to="/help" title={t.nav.help} avatarText="?" />
+        <ListRow to="/therapy" title={t.nav.therapy} avatarText="T" />
         {isHelper ? (
           <ListRow to="/helper" title={t.nav.helper} avatarText="H" />
         ) : null}

@@ -43,9 +43,11 @@ class MeOut(Schema):
     helper_org: str = ""
     helper_badge: str = ""
     tip_wallet_address: str = ""
+    is_therapist: bool = False
 
 
 def _me_from_account(account) -> MeOut:
+    profile = getattr(account, "therapist_profile", None)
     return MeOut(
         kind="account",
         email=account.email,
@@ -59,6 +61,7 @@ def _me_from_account(account) -> MeOut:
         helper_org=account.helper_org or "",
         helper_badge=account.helper_badge_label if account.is_helper else "",
         tip_wallet_address=account.tip_wallet_address or "",
+        is_therapist=bool(profile and profile.account_id and profile.is_active),
     )
 
 

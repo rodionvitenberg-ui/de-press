@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.dialogue",
     "apps.moderation",
     "apps.fund",
+    "apps.therapy",
     "apps.ai",
     "apps.notifications",
 ]

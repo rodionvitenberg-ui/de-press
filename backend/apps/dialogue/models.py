@@ -33,6 +33,7 @@ class DialogueSource(models.TextChoices):
     REQUEST = "request", "Dialogue request accepted"
     AUTHOR_OUTREACH = "author_outreach", "Author outreach to Hearer"
     HELP = "help", "Help request accepted"
+    THERAPY = "therapy", "Therapy session (ADR 0022)"
 
 
 class DialogueRequest(models.Model):
