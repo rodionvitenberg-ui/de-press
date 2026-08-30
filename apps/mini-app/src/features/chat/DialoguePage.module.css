@@ -449,3 +449,22 @@
   }
 }
 
+.callBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.callBtn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+

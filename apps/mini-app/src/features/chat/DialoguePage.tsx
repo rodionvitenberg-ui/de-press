@@ -5,6 +5,8 @@ import type { ChatMessage, Dialogue } from "@/core/api/types";
 import { useChatSocket } from "@/core/hooks/useChatSocket";
 import { useI18n } from "@/core/i18n/context";
 import { TipBanner } from "@/features/fund/TipBanner";
+import { CallModal } from "@/features/calls/CallModal";
+import { useCall } from "@/features/calls/useCall";
 import { CircleBubble } from "./CircleBubble";
 import {
   CircleRecorder,
@@ -146,6 +148,11 @@ export function DialoguePage() {
   const startedAt = useRef(0);
   const threadRef = useRef<HTMLDivElement | null>(null);
 
+  const sendCallRef = useRef<(msg: Record<string, unknown>) => void>(() => {});
+  const call = useCall((msg) => sendCallRef.current(msg));
+  const callsSupported =
+    typeof navigator !== "undefined" && Boolean(navigator.mediaDevices);
+
   const {
     status: wsStatus,
     messages,
@@ -158,7 +165,19 @@ export function DialoguePage() {
     error: wsError,
     send: wsSend,
     closeDialogue: wsClose,
-  } = useChatSocket(dialogueId, Boolean(dialogueId) && !useHttpFallback);
+    sendCall: wsSendCall,
+  } = useChatSocket(
+    dialogueId,
+    Boolean(dialogueId) && !useHttpFallback,
+    { onCall: call.onSignal },
+  );
+
+  sendCallRef.current = wsSendCall;
+
+  // Signaling socket died (incl. Anti-Panic kill) → the call dies with it.
+  useEffect(() => {
+    if (wsStatus === "closed" || wsStatus === "error") call.onSocketDown();
+  }, [wsStatus, call.onSocketDown]);
 
   const loadMeta = useCallback(async () => {
     if (!dialogueId) return;
@@ -445,6 +464,17 @@ export function DialoguePage() {
             {dialogueStatus} · {statusLabel}
           </p>
         </div>
+        {callsSupported ? (
+          <button
+            type="button"
+            className={styles.callBtn}
+            aria-label={t.calls.call}
+            disabled={!open}
+            onClick={() => call.start()}
+          >
+            📞
+          </button>
+        ) : null}
         <div className={styles.menuWrap} ref={menuRef}>
           <button
             type="button"
@@ -666,6 +696,8 @@ export function DialoguePage() {
           maxSec: t.chat.circleMax,
         }}
       />
+
+      <CallModal call={call} />
     </div>
   );
 }

@@ -648,4 +648,23 @@ export const en: Messages = {
     tipText:
       "If the dialogue helped, you can thank the listener directly — completely optional.",
   },
+  calls: {
+    call: "Call",
+    incoming: "Incoming call",
+    outgoing: "Calling…",
+    connecting: "Connecting…",
+    active: "In call",
+    accept: "Accept",
+    decline: "Decline",
+    cancel: "Cancel",
+    hangup: "Hang up",
+    mute: "Mute microphone",
+    unmute: "Unmute microphone",
+    declined: "Call declined",
+    busy: "Peer is busy",
+    timeout: "No answer",
+    connection: "Connection lost",
+    micError: "Microphone access denied",
+    ended: "Call ended",
+  },
 };

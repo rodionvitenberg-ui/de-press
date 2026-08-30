@@ -568,4 +568,23 @@ export type Messages = {
     tipTitle: string;
     tipText: string;
   };
+  calls: {
+    call: string;
+    incoming: string;
+    outgoing: string;
+    connecting: string;
+    active: string;
+    accept: string;
+    decline: string;
+    cancel: string;
+    hangup: string;
+    mute: string;
+    unmute: string;
+    declined: string;
+    busy: string;
+    timeout: string;
+    connection: string;
+    micError: string;
+    ended: string;
+  };
 };

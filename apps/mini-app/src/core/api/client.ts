@@ -739,6 +739,9 @@ export const api = {
       body: JSON.stringify({ address }),
     }),
 
+  rtcConfig: () =>
+    request<{ ice_servers: RTCIceServer[] }>("/api/v1/rtc/config"),
+
   translateUiCatalog: (
     targetLang: string,
     strings: Record<string, string>,
