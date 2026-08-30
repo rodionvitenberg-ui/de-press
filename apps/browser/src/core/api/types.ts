@@ -12,6 +12,17 @@ export interface Me {
   is_on_duty?: boolean;
   helper_org?: string;
   helper_badge?: string;
+  tip_wallet_address?: string;
+}
+
+export interface FundInfo {
+  treasury_address: string;
+  squads_url: string;
+}
+
+export interface TipWalletResponse {
+  ok: boolean;
+  tip_wallet_address: string;
 }
 
 export interface HelpPresence {
@@ -139,6 +150,7 @@ export interface Dialogue {
   pinned?: boolean;
   muted?: boolean;
   unread_count?: number;
+  peer_tip_wallet?: string;
 }
 
 export interface HelpRequest {

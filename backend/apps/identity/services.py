@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.http import HttpRequest
 
+from apps.fund import services as fund_services
 from apps.identity.models import Account, AnonymousSession, VoiceRetention
 
 
@@ -166,4 +167,5 @@ def set_helper_duty(actor: Actor, on: bool) -> Account:
     account = actor.account
     account.is_on_duty = bool(on)
     account.save(update_fields=["is_on_duty"])
+    fund_services.on_duty_changed(account)
     return account

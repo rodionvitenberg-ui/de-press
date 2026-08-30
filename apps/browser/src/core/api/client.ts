@@ -12,6 +12,7 @@ import type {
   DigestTestResponse,
   EmpathyResponse,
   FeedResponse,
+  FundInfo,
   HealthResponse,
   Hearer,
   HelperInvite,
@@ -36,6 +37,7 @@ import type {
   StoryThread,
   SupportCloud,
   Topic,
+  TipWalletResponse,
   UnreadCountResponse,
   AiSupportResponse,
   SendCircleOptions,
@@ -52,6 +54,7 @@ export type {
   DigestTestResponse,
   EmpathyResponse,
   FeedResponse,
+  FundInfo,
   HealthResponse,
   Hearer,
   HelpRequest,
@@ -73,6 +76,7 @@ export type {
   SendCircleOptions,
   Story,
   SupportCloud,
+  TipWalletResponse,
   Topic,
   UnreadCountResponse,
   AiSupportResponse,
@@ -499,6 +503,14 @@ export const api = {
     request<Me>("/api/v1/me/helper-duty", {
       method: "POST",
       body: JSON.stringify({ on }),
+    }),
+
+  fundInfo: () => request<FundInfo>("/api/v1/fund/info"),
+
+  setTipWallet: (address: string) =>
+    request<TipWalletResponse>("/api/v1/me/tip-wallet", {
+      method: "POST",
+      body: JSON.stringify({ address }),
     }),
 
   myDialogues: () => request<Dialogue[]>("/api/v1/me/dialogues"),

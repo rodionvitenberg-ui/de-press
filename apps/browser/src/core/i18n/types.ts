@@ -188,6 +188,23 @@ export type Messages = {
     outreachOff: string;
     loading: string;
   };
+  fund: {
+    supportTitle: string;
+    supportText: string;
+    treasuryLabel: string;
+    copy: string;
+    copied: string;
+    donate: string;
+    tipWalletTitle: string;
+    tipWalletText: string;
+    tipWalletCurrent: string;
+    tipWalletPlaceholder: string;
+    tipWalletWarn: string;
+    clear: string;
+    invalidAddress: string;
+    tipTitle: string;
+    tipText: string;
+  };
   helper: {
     title: string;
     lead: string;

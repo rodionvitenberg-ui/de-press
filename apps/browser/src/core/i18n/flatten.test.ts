@@ -35,7 +35,7 @@ describe("applyFlat", () => {
 });
 
 describe("catalog budget", () => {
-  it("stays under the backend MAX_KEYS limit (500)", () => {
-    expect(Object.keys(flattenMessages(en)).length).toBeLessThanOrEqual(499);
+  it("stays under the backend MAX_KEYS limit (560)", () => {
+    expect(Object.keys(flattenMessages(en)).length).toBeLessThanOrEqual(559);
   });
 });

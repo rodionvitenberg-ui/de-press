@@ -8,6 +8,7 @@ from uuid import UUID
 from django.db.models import QuerySet
 from django.utils import timezone
 
+from apps.fund import services as fund_services
 from apps.identity.models import Account
 from apps.identity.services import Actor
 from apps.moderation.blocks import is_blocked_between
@@ -19,6 +20,9 @@ def touch_helper(actor: Actor) -> Account:
     if actor.account is None or not actor.account.is_helper:
         raise PermissionError("Only a Helper can send a heartbeat")
     account = actor.account
+    # Duty-fund hook BEFORE refreshing helper_seen_at: it uses the previous
+    # heartbeat to detect a long gap and split the stale stretch (ADR-0020).
+    fund_services.on_heartbeat(account, prev_seen=account.helper_seen_at)
     account.helper_seen_at = timezone.now()
     account.save(update_fields=["helper_seen_at"])
     return account

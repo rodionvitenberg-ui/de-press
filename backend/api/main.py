@@ -8,6 +8,7 @@ from api.v1 import (
     ai,
     dialogue,
     empathy,
+    fund,
     health,
     help as help_api,
     helper_invite,
@@ -30,6 +31,7 @@ api = NinjaAPI(
 
 api.add_router("/v1", health.router)
 api.add_router("/v1", identity.router)
+api.add_router("/v1", fund.router)
 api.add_router("/v1", stories.router)
 api.add_router("/v1", empathy.router)
 api.add_router("/v1", support.router)

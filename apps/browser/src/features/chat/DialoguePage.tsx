@@ -25,6 +25,7 @@ import { ForwardPicker } from "./ForwardPicker";
 import { ChatMenu, type ChatMenuState } from "./ChatMenu";
 import { MessageMenu, type MessageMenuState } from "./MessageMenu";
 import { useDialogueActions } from "./useDialogueActions";
+import { TipBanner } from "@/features/fund/TipBanner";
 import styles from "./DialoguePage.module.css";
 
 function mediaUrl(path: string | null | undefined): string | null {
@@ -783,6 +784,10 @@ export function DialoguePage() {
             ) : null
           }
         />
+      ) : null}
+
+      {dialogue?.peer_tip_wallet ? (
+        <TipBanner wallet={dialogue.peer_tip_wallet} />
       ) : null}
 
       {pinMsgObj && !pinMsgObj.deleted ? (

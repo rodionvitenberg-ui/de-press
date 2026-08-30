@@ -12,7 +12,10 @@ from apps.dialogue.speech import get_translator, is_stub_translation
 
 logger = logging.getLogger(__name__)
 
-MAX_KEYS = 500
+# UI catalog cap for the AI translation proxy. Raised 500 -> 560 when the
+# non-custodial fund (ADR-0020) added its ru/en strings; keep the vitest
+# catalog-budget test (flatten.test.ts) in sync with this number.
+MAX_KEYS = 560
 CHUNK = 500
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.I | re.M)

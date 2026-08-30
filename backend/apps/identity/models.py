@@ -96,6 +96,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
         choices=VoiceRetention.choices,
         default=VoiceRetention.DELETE_ON_CLOSE,
     )
+    # Listener Tipping (ADR-0020): opt-in public Solana address for direct
+    # P2P USDC tips. The platform never custodies funds and takes no fees.
+    # Empty = tipping off. Helpers should use a dedicated wallet (on-chain
+    # tips are linkable); validated in apps.fund.services.
+    tip_wallet_address = models.CharField(max_length=44, blank=True, default="")
 
     objects = AccountManager()
 

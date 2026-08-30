@@ -5,6 +5,8 @@ import { AccountMenuContext } from "@/components/layout/Shell";
 import { ListRow } from "@/components/tg/ListRow";
 import { useI18n } from "@/core/i18n/context";
 import { usePwaInstall } from "@/core/hooks/usePwaInstall";
+import { FundCard } from "@/features/fund/FundCard";
+import { TipWalletForm } from "@/features/fund/TipWalletForm";
 import styles from "./MorePane.module.css";
 
 export function MorePane() {
@@ -39,6 +41,10 @@ export function MorePane() {
           avatarText="@"
           onClick={() => account?.open()}
         />
+        <FundCard />
+        {isHelper ? (
+          <TipWalletForm current={meQuery.data?.tip_wallet_address ?? ""} />
+        ) : null}
         {pwa.isStandalone ? (
           <ListRow asButton title={t.nav.installed} avatarText="·" muted />
         ) : pwa.canInstall ? (

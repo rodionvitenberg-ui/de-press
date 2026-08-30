@@ -42,6 +42,7 @@ class MeOut(Schema):
     is_on_duty: bool = False
     helper_org: str = ""
     helper_badge: str = ""
+    tip_wallet_address: str = ""
 
 
 def _me_from_account(account) -> MeOut:
@@ -57,6 +58,7 @@ def _me_from_account(account) -> MeOut:
         is_on_duty=bool(account.is_helper and account.is_on_duty),
         helper_org=account.helper_org or "",
         helper_badge=account.helper_badge_label if account.is_helper else "",
+        tip_wallet_address=account.tip_wallet_address or "",
     )
 
 

@@ -6,7 +6,7 @@ from ninja import File, Form, Router, Schema
 from ninja.errors import HttpError
 from ninja.files import UploadedFile as NinjaUploadedFile
 
-from apps.dialogue.models import DialogueIntent
+from apps.dialogue.models import DialogueIntent, DialogueStatus
 from apps.dialogue.realtime import serialize_message
 from apps.dialogue.services import (
     DialogueError,
@@ -47,6 +47,7 @@ from apps.dialogue.services import (
     unpin_message,
     unread_count_for,
 )
+from apps.identity.models import Account
 from apps.identity.services import require_actor
 from apps.stories.realtime import identity_key
 from apps.stories.services import StoryNotFound
@@ -88,6 +89,7 @@ class DialogueOut(Schema):
     muted: bool = False
     unread_count: int = 0
     peer_key: str = ""
+    peer_tip_wallet: str = ""
 
 
 class OutreachIn(Schema):
@@ -196,7 +198,33 @@ def _dialogue_out(d, actor=None) -> DialogueOut:
         muted=bool(_is_muted(d, actor)) if actor is not None else False,
         unread_count=unread_count_for(d, actor) if actor is not None else 0,
         peer_key=_peer_key(d, actor),
+        peer_tip_wallet=_peer_tip_wallet(d, actor),
     )
+
+
+def _peer_tip_wallet(d, actor) -> str:
+    """Opt-in Solana tip address of a helper peer, only after dialogue closed.
+
+    Shown only to the grateful side (the viewer is not the helper), only for
+    a closed dialogue, and only when the helper opted in. Never on open
+    dialogues, never on public pages (ADR-0020).
+    """
+    if actor is None or d.status != DialogueStatus.CLOSED:
+        return ""
+    is_author = False
+    if actor.account is not None and d.author_account_id == actor.account.id:
+        is_author = True
+    if actor.session is not None and d.author_session_id == actor.session.id:
+        is_author = True
+    peer_account_id = d.peer_account_id if is_author else d.author_account_id
+    if peer_account_id is None:
+        return ""
+    return (
+        Account.objects.filter(id=peer_account_id, is_helper=True)
+        .exclude(tip_wallet_address="")
+        .values_list("tip_wallet_address", flat=True)
+        .first()
+    ) or ""
 
 
 def _peer_key(d, actor) -> str:

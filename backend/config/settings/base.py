@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.support",
     "apps.dialogue",
     "apps.moderation",
+    "apps.fund",
     "apps.ai",
     "apps.notifications",
 ]
@@ -233,6 +234,17 @@ TRANSLATOR_API_KEY = os.environ.get("TRANSLATOR_API_KEY", "")
 # Per-call timeout for the dedicated translator; local CPU inference needs
 # more headroom than the previous hard-coded 30s (first call loads the model).
 TRANSLATOR_TIMEOUT = float(os.environ.get("TRANSLATOR_TIMEOUT", "60") or "60")
+
+# Non-custodial public fund (ADR-0020). The platform never moves money: the
+# treasury is a Squads Multisig vault; the backend only displays its address
+# and keeps a transparent duty-hours ledger. Empty address hides fund UI.
+TREASURY_SOLANA_ADDRESS = os.environ.get("TREASURY_SOLANA_ADDRESS", "").strip()
+TREASURY_SQUADS_URL = os.environ.get("TREASURY_SQUADS_URL", "").strip()
+# Duty accounting: a helper's open shift segment closes lazily when heartbeats
+# stop for this many minutes (credited up to the last heartbeat), and credit
+# is capped per helper per UTC day (anti "forgotten shift" / farming).
+FUND_STALE_GAP_MINUTES = int(os.environ.get("FUND_STALE_GAP_MINUTES", "15") or "15")
+FUND_MAX_MINUTES_PER_DAY = int(os.environ.get("FUND_MAX_MINUTES_PER_DAY", "600") or "600")
 
 # Local sim_kids (Ollama). Not used in production product paths.
 KIDS_BASE_URL = os.environ.get("KIDS_BASE_URL", "http://127.0.0.1:11434/v1")
