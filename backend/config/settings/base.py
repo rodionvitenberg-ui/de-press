@@ -246,6 +246,12 @@ TREASURY_SQUADS_URL = os.environ.get("TREASURY_SQUADS_URL", "").strip()
 FUND_STALE_GAP_MINUTES = int(os.environ.get("FUND_STALE_GAP_MINUTES", "15") or "15")
 FUND_MAX_MINUTES_PER_DAY = int(os.environ.get("FUND_MAX_MINUTES_PER_DAY", "600") or "600")
 
+# Live 1:1 voice (ADR 0021): self-hosted coturn TURN/STUN. Empty = ICE falls
+# back to the browser's own candidates only (LAN / permissive NATs). DEPLOY.md §8.1.
+WEBRTC_TURN_URL = os.environ.get("WEBRTC_TURN_URL", "").strip()
+WEBRTC_TURN_USERNAME = os.environ.get("WEBRTC_TURN_USERNAME", "").strip()
+WEBRTC_TURN_CREDENTIAL = os.environ.get("WEBRTC_TURN_CREDENTIAL", "").strip()
+
 # Local sim_kids (Ollama). Not used in production product paths.
 KIDS_BASE_URL = os.environ.get("KIDS_BASE_URL", "http://127.0.0.1:11434/v1")
 KIDS_MODEL = os.environ.get("KIDS_MODEL", "qwen2.5:0.5b")

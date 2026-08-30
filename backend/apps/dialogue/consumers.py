@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from apps.dialogue.models import Dialogue
+from apps.dialogue import calls
+from apps.dialogue.models import Dialogue, DialogueStatus
 from apps.dialogue.realtime import dialogue_group, serialize_message
 from apps.dialogue.services import (
     DialogueError,
@@ -26,12 +28,22 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
       client → { "type": "dialogue.close" }
       client → { "type": "typing.start" | "typing.stop" }
       client → { "type": "ping" }
+      client → { "type": "call.ring" }
+      client → { "type": "call.accept" | "call.decline" | "call.end" }
+      client → { "type": "call.offer" | "call.answer", "sdp": "..." }
+      client → { "type": "call.ice", "candidate": {...} }
       server → { "type": "message.new", "message": {...} }
       server → { "type": "dialogue.closed", "dialogue": {...} }
       server → { "type": "typing", "typing": bool, "from_me": bool, ... }
       server → { "type": "history", "messages": [...] }
       server → { "type": "error", "detail": "..." }
       server → { "type": "pong" }
+      server → { "type": "call.outgoing" | "call.incoming" | "call.accepted",
+                 "call_id": "..." }
+      server → { "type": "call.offer" | "call.answer", "call_id", "sdp" }
+      server → { "type": "call.ice", "call_id", "candidate": {...} }
+      server → { "type": "call.ended", "call_id", "reason" }
+      server → { "type": "call.busy" }
     """
 
     dialogue_id: str
@@ -43,6 +55,10 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
     # Max typing events per window (flood control)
     TYPING_WINDOW_SEC = 2.0
     TYPING_MAX_EVENTS = 6
+
+    # Max ICE candidates relayed per window (flood control)
+    ICE_WINDOW_SEC = 2.0
+    ICE_MAX_EVENTS = 100
 
     async def connect(self):
         self.dialogue_id = self.scope["url_route"]["kwargs"]["dialogue_id"]
@@ -70,6 +86,9 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
+        self._ice_events: list[float] = []
+        calls.register_channel(self.dialogue_id, self.channel_name)
+
         history = await self._history()
         await self.send_json(
             {
@@ -79,11 +98,31 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+        # Reconnect while ringing: re-deliver the incoming call to the callee.
+        redeliver = calls.rebind_channel(
+            self.dialogue_id, self._call_actor_key(), self.channel_name
+        )
+        if redeliver == "incoming":
+            st = calls.get(self.dialogue_id)
+            if st is not None:
+                await self.send_json(
+                    {"type": "call.incoming", "call_id": st["call_id"]}
+                )
+
     async def disconnect(self, code):
         if getattr(self, "_typing", False) and hasattr(self, "group_name"):
             await self._broadcast_typing(False)
         if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if hasattr(self, "dialogue_id"):
+            calls.unregister_channel(self.dialogue_id, self.channel_name)
+            st = calls.get(self.dialogue_id)
+            if st is not None and self.channel_name in (
+                st.get("caller_channel"),
+                st.get("callee_channel"),
+            ):
+                calls.end(self.dialogue_id)
+                await calls.notify_ended(self.dialogue_id, st, "connection")
 
     async def receive_json(self, content, **kwargs):
         msg_type = (content or {}).get("type")
@@ -130,6 +169,35 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
                 return
             return
 
+        if msg_type == "call.ring":
+            await self._call_ring()
+            return
+
+        if msg_type == "call.accept":
+            await self._call_accept()
+            return
+
+        if msg_type == "call.decline":
+            await self._call_decline()
+            return
+
+        if msg_type == "call.offer":
+            await self._relay_call_sdp("call.offer", content.get("sdp"))
+            return
+
+        if msg_type == "call.answer":
+            await self._relay_call_sdp("call.answer", content.get("sdp"))
+            return
+
+        if msg_type == "call.ice":
+            await self._relay_call_ice(content.get("candidate"))
+            return
+
+        if msg_type == "call.end":
+            st = calls.end(self.dialogue_id)
+            await calls.notify_ended(self.dialogue_id, st, "hangup")
+            return
+
         await self.send_json({"type": "error", "detail": "Unknown event type"})
 
     async def chat_message(self, event):
@@ -138,6 +206,10 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({"type": "message.new", "message": payload})
 
     async def dialogue_closed(self, event):
+        st = calls.get(self.dialogue_id) if hasattr(self, "dialogue_id") else None
+        if st is not None:
+            calls.end(self.dialogue_id)
+            await calls.notify_ended(self.dialogue_id, st, "closed")
         await self.send_json({"type": "dialogue.closed", "dialogue": event["payload"]})
 
     async def dialogue_reopened(self, event):
@@ -216,6 +288,148 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
         if self.actor.session and session_id == str(self.actor.session.id):
             return True
         return False
+
+    # --- Live 1:1 voice (ADR 0021): unicast signaling relay -----------------
+
+    def _call_actor_key(self) -> str:
+        return calls.actor_key(
+            str(self.actor.account.id) if self.actor.account else None,
+            str(self.actor.session.id)
+            if self.actor.session and not self.actor.account
+            else None,
+        )
+
+    async def _call_ring(self) -> None:
+        try:
+            dialogue = await self._get_dialogue()
+        except DialogueError:
+            await self.send_json({"type": "error", "detail": "Dialogue not found"})
+            return
+        if dialogue.status != DialogueStatus.OPEN:
+            await self.send_json(
+                {"type": "error", "detail": "Dialogue is not open"}
+            )
+            return
+        st = calls.start(
+            self.dialogue_id, self._call_actor_key(), self.channel_name
+        )
+        if st is None:
+            await self.send_json({"type": "call.busy"})
+            return
+        calls.set_ring_task(
+            self.dialogue_id,
+            asyncio.ensure_future(calls.ring_timeout(self.dialogue_id)),
+        )
+        await self.channel_layer.send(
+            self.channel_name,
+            {
+                "type": "call.outgoing",
+                "call_id": st["call_id"],
+                "timeout": calls.RING_TIMEOUT_SEC,
+            },
+        )
+        incoming = {"type": "call.incoming", "call_id": st["call_id"]}
+        for ch in calls.channels_for(self.dialogue_id):
+            if ch != self.channel_name:
+                await self.channel_layer.send(ch, incoming)
+
+    async def _call_accept(self) -> None:
+        st = calls.get(self.dialogue_id)
+        key = self._call_actor_key()
+        if st is None or st["state"] != "ringing" or key == st["caller_key"]:
+            await self.send_json({"type": "error", "detail": "No ringing call"})
+            return
+        if calls.find_for_actor(key) not in (None, self.dialogue_id):
+            # Callee is already in another call: auto-decline this one.
+            calls.end(self.dialogue_id)
+            await calls.notify_ended(self.dialogue_id, st, "busy")
+            return
+        calls.attach_callee(self.dialogue_id, key, self.channel_name)
+        msg = {"type": "call.accepted", "call_id": st["call_id"]}
+        await self.channel_layer.send(st["caller_channel"], msg)
+        await self.channel_layer.send(self.channel_name, msg)
+
+    async def _call_decline(self) -> None:
+        st = calls.get(self.dialogue_id)
+        if st is None:
+            return
+        if self._call_actor_key() == st["caller_key"]:
+            return
+        calls.end(self.dialogue_id)
+        await calls.notify_ended(self.dialogue_id, st, "declined")
+
+    def _call_target(self, st: dict) -> str | None:
+        """The other side of the active call for this connection."""
+        if self._call_actor_key() == st["caller_key"]:
+            return st.get("callee_channel")
+        return st.get("caller_channel")
+
+    async def _relay_call_sdp(self, event_type: str, sdp) -> None:
+        sdp = calls.clean_sdp(sdp)
+        if sdp is None:
+            await self.send_json({"type": "error", "detail": "Bad SDP"})
+            return
+        st = calls.get(self.dialogue_id)
+        if st is None or st["state"] != "active":
+            return
+        target = self._call_target(st)
+        if target:
+            await self.channel_layer.send(
+                target, {"type": event_type, "call_id": st["call_id"], "sdp": sdp}
+            )
+
+    async def _relay_call_ice(self, candidate) -> None:
+        if not self._allow_ice_event():
+            return
+        cand = calls.clean_candidate(candidate)
+        if cand is None:
+            return
+        st = calls.get(self.dialogue_id)
+        if st is None:
+            return
+        target = self._call_target(st)
+        if target:
+            await self.channel_layer.send(
+                target,
+                {"type": "call.ice", "call_id": st["call_id"], "candidate": cand},
+            )
+
+    def _allow_ice_event(self) -> bool:
+        """Sliding-window throttle for ICE floods."""
+        import time
+
+        now = time.monotonic()
+        window = self.ICE_WINDOW_SEC
+        self._ice_events = [t for t in self._ice_events if now - t < window]
+        if len(self._ice_events) >= self.ICE_MAX_EVENTS:
+            return False
+        self._ice_events.append(now)
+        return True
+
+    async def _passthrough_call(self, event: dict) -> None:
+        # Layer event name == wire event name (call.outgoing, call.ice, ...)
+        await self.send_json(event)
+
+    async def call_outgoing(self, event):
+        await self._passthrough_call(event)
+
+    async def call_incoming(self, event):
+        await self._passthrough_call(event)
+
+    async def call_accepted(self, event):
+        await self._passthrough_call(event)
+
+    async def call_offer(self, event):
+        await self._passthrough_call(event)
+
+    async def call_answer(self, event):
+        await self._passthrough_call(event)
+
+    async def call_ice(self, event):
+        await self._passthrough_call(event)
+
+    async def call_ended(self, event):
+        await self._passthrough_call(event)
 
     @database_sync_to_async
     def _get_dialogue(self) -> Dialogue:

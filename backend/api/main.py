@@ -17,6 +17,7 @@ from api.v1 import (
     moderation,
     notifications,
     profile,
+    rtc,
     stories,
     support,
 )
@@ -43,3 +44,4 @@ api.add_router("/v1", notifications.router)
 api.add_router("/v1", profile.router)
 api.add_router("/v1", ai.router)
 api.add_router("/v1", i18n.router)
+api.add_router("/v1", rtc.router)

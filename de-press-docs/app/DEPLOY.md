@@ -84,6 +84,42 @@ sudo nginx -t && sudo systemctl reload nginx
 sudo apt install -y certbot python3-certbot-nginx && sudo certbot --nginx -d <ваш-домен>
 ```
 
+## 8.1 coturn — TURN/STUN для живого голоса (ADR 0021)
+
+Живой 1:1 звонок в диалоге идёт P2P; coturn нужен только для строгих NAT.
+
+```bash
+sudo apt install -y coturn
+sudo systemctl enable --now coturn   # старые пакеты: TURNSERVER_ENABLED=1 в /etc/default/coturn
+```
+
+Минимальный `/etc/turnserver.conf` (подставьте свои значения):
+
+```
+listening-port=3478
+fingerprint
+lt-cred-mech
+user=<логин>:<пароль>
+realm=<ваш-домен>
+external-ip=<внешний-IP>   # только если VPS за NAT провайдера
+min-port=49152
+max-port=65535
+no-cli
+```
+
+Открыть порты: `3478/udp+tcp` и `49152-65535/udp` (relay-диапазон), затем
+перезапустить: `sudo systemctl restart coturn`. В `/etc/depress/depress.env`:
+
+```
+WEBRTC_TURN_URL=turn:<ваш-домен-или-IP>:3478?transport=udp
+WEBRTC_TURN_USERNAME=<логин>
+WEBRTC_TURN_CREDENTIAL=<пароль>
+```
+
+Проверка: `curl https://<ваш-домен>/api/v1/rtc/config` → `ice_servers`
+непустые. Пустые переменные = ICE только по прямым кандидатам (LAN,
+перцептивный NAT) — звонок может не соединиться на мобильных сетях.
+
 ## 9. Telegram Mini App
 
 BotFather → Menu Button URL `https://<ваш-домен>/tg/`; `TELEGRAM_BOT_TOKEN` /

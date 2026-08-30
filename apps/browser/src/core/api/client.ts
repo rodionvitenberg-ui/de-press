@@ -809,4 +809,7 @@ export const api = {
       method: "POST",
     }),
 
+  rtcConfig: () =>
+    request<{ ice_servers: RTCIceServer[] }>("/api/v1/rtc/config"),
+
 };

@@ -5,6 +5,19 @@ import { buildWsBase } from "@/core/ws/url";
 
 export type WsStatus = "connecting" | "open" | "closed" | "error";
 
+/** Relay of a server `call.*` signaling event (ADR 0021). */
+export interface CallSignalEvent {
+  type: string;
+  call_id?: string;
+  reason?: string;
+  sdp?: string;
+  candidate?: unknown;
+}
+
+export interface ChatSocketOptions {
+  onCall?: (ev: CallSignalEvent) => void;
+}
+
 interface ServerEnvelope {
   type: string;
   message?: ChatMessage & {
@@ -39,7 +52,11 @@ const RECONNECT_MAX_ATTEMPTS = 8;
 /**
  * Realtime dialogue + typing + reconnect with exponential backoff.
  */
-export function useChatSocket(dialogueId: string, enabled = true) {
+export function useChatSocket(
+  dialogueId: string,
+  enabled = true,
+  opts?: ChatSocketOptions,
+) {
   const [status, setStatus] = useState<WsStatus>("closed");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [dialogueStatus, setDialogueStatus] = useState<string>("open");
@@ -61,6 +78,9 @@ export function useChatSocket(dialogueId: string, enabled = true) {
   const enabledRef = useRef(enabled);
 
   enabledRef.current = enabled;
+
+  const optsRef = useRef(opts);
+  optsRef.current = opts;
 
   const clearPeerIdle = useCallback(() => {
     if (peerIdleTimer.current) {
@@ -179,6 +199,8 @@ export function useChatSocket(dialogueId: string, enabled = true) {
         setDeletedForEveryone(false);
       } else if (data.type === "dialogue.pinned") {
         setPinnedId(data.dialogue?.pinned_message_id ?? null);
+      } else if (data.type.startsWith("call.")) {
+        optsRef.current?.onCall?.(data as CallSignalEvent);
       } else if (data.type === "error") {
         setError(data.detail || "WebSocket error");
       }
@@ -292,6 +314,13 @@ export function useChatSocket(dialogueId: string, enabled = true) {
     ws.send(JSON.stringify({ type: "dialogue.close" }));
   }, [sendTypingRaw]);
 
+  /** Fire-and-forget signaling send for the call UI (ADR 0021). */
+  const sendCall = useCallback((msg: Record<string, unknown>) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify(msg));
+  }, []);
+
   return {
     status,
     messages,
@@ -308,6 +337,7 @@ export function useChatSocket(dialogueId: string, enabled = true) {
     error,
     send,
     closeDialogue,
+    sendCall,
     disconnect,
     killAll: killAllSockets,
   };

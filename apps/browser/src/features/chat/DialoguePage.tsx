@@ -26,6 +26,8 @@ import { ChatMenu, type ChatMenuState } from "./ChatMenu";
 import { MessageMenu, type MessageMenuState } from "./MessageMenu";
 import { useDialogueActions } from "./useDialogueActions";
 import { TipBanner } from "@/features/fund/TipBanner";
+import { CallModal } from "@/features/calls/CallModal";
+import { useCall } from "@/features/calls/useCall";
 import styles from "./DialoguePage.module.css";
 
 function mediaUrl(path: string | null | undefined): string | null {
@@ -194,6 +196,9 @@ export function DialoguePage() {
     },
   });
 
+  const sendCallRef = useRef<(msg: Record<string, unknown>) => void>(() => {});
+  const call = useCall((msg) => sendCallRef.current(msg));
+
   const {
     status: wsStatus,
     messages,
@@ -208,10 +213,19 @@ export function DialoguePage() {
     setTyping,
     error: wsError,
     send: wsSend,
+    sendCall: wsSendCall,
   } = useChatSocket(
     dialogueId,
     Boolean(dialogueId) && !useHttpFallback && !panic,
+    { onCall: call.onSignal },
   );
+
+  sendCallRef.current = wsSendCall;
+
+  // Signaling socket died (incl. Anti-Panic kill) → the call dies with it.
+  useEffect(() => {
+    if (wsStatus === "closed" || wsStatus === "error") call.onSocketDown();
+  }, [wsStatus, call.onSocketDown]);
 
   const loadMeta = useCallback(async () => {
     if (!dialogueId) return;
@@ -740,6 +754,15 @@ export function DialoguePage() {
         <div className={styles.menuWrap}>
           <button
             type="button"
+            className={styles.callBtn}
+            aria-label={t.calls.call}
+            disabled={!open}
+            onClick={() => call.start()}
+          >
+            📞
+          </button>
+          <button
+            type="button"
             className={styles.menuBtn}
             aria-label={t.chat.menuLabel}
             aria-expanded={Boolean(chatMenu)}
@@ -1091,6 +1114,8 @@ export function DialoguePage() {
           onClose={() => setForwardFor(null)}
         />
       ) : null}
+
+      <CallModal call={call} />
     </div>
   );
 }
