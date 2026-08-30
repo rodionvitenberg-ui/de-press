@@ -9,6 +9,7 @@ import { NotificationsPane } from "@/features/notifications/NotificationsPane";
 import { HelperQueue } from "@/features/helper/HelperQueue";
 import { HelperJoin, HelperInviteCreate } from "@/features/helper/HelperJoin";
 import { PatternsPane } from "@/features/patterns/PatternsPane";
+import { TherapyPane } from "@/features/therapy/TherapyPane";
 import { HelpPane } from "@/features/help/HelpPane";
 import { HelpWaitPane } from "@/features/help/HelpWaitPane";
 import { CompanionPane } from "@/features/help/CompanionPane";
@@ -50,6 +51,7 @@ function AppRoutes() {
 
         <Route path="/notifications" element={<NotificationsPane />} />
         <Route path="/patterns" element={<PatternsPane />} />
+        <Route path="/therapy" element={<TherapyPane />} />
         <Route path="/help" element={<HelpPane />} />
         <Route path="/help/wait" element={<HelpWaitPane />} />
         <Route path="/help/ai" element={<CompanionPane />} />

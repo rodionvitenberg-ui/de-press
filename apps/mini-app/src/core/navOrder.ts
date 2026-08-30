@@ -5,6 +5,7 @@ export type NavKey =
   | "chat"
   | "help"
   | "patterns"
+  | "therapy"
   | "notifications"
   | "helper";
 
@@ -13,6 +14,7 @@ export const DEFAULT_NAV_ORDER: NavKey[] = [
   "chat",
   "help",
   "patterns",
+  "therapy",
   "notifications",
   "helper",
 ];
@@ -31,6 +33,7 @@ function isNavKey(v: unknown): v is NavKey {
     v === "chat" ||
     v === "help" ||
     v === "patterns" ||
+    v === "therapy" ||
     v === "notifications" ||
     v === "helper"
   );
