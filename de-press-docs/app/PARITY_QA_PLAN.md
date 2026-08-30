@@ -9,8 +9,8 @@
 | Шаг | Что | Статус |
 |-----|-----|--------|
 | P1.1 | **Терапия в Mini App**: TherapyPane + PayModal (Solana Pay QR), api-методы и типы (`TherapistProfileOut`/`TherapySession`/`Me.is_therapist`), i18n `therapy.*` (31 ключ) + `nav.therapy`, иконка в Sidebar-рельсе, `qrcode` dep | ✅ сделано |
-| P1.2 | **Фонд в Mini App**: FundCard (закрытый диалог), TipBanner, TipWalletForm (UserMenu), `wallet.ts` + тест (решить: vitest в mini-app или общий пакет), api `fundInfo`/`setTipWallet`, i18n `fund.*` | следующий |
-| P1.3 | **Calls в Mini App**: переносим (Q2) — call.* + signaling через dialogue-WS, feature-detect `navigator.mediaDevices` | после P1.2 |
+| P1.2 | **Фонд в Mini App**: FundCard, TipBanner (DialoguePage), TipWalletForm (UserMenu), `wallet.ts` (тест остался в browser — та же логика, vitest в mini-app не добавляем), api `fundInfo`/`setTipWallet`, i18n `fund.*` (15 ключей) | ✅ сделано |
+| P1.3 | **Calls в Mini App**: переносим (Q2) — call.* + signaling через dialogue-WS, feature-detect `navigator.mediaDevices` | следующий |
 
 Приёмка: `npm run build` (tsc + vite) в mini-app зелёный; i18n синхронно ru/en/types; суммарный каталог ≤ 640 ключей (общий кап `i18n_ui.MAX_KEYS`).
 

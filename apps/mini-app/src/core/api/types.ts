@@ -12,6 +12,7 @@ export interface Me {
   is_on_duty?: boolean;
   helper_org?: string;
   helper_badge?: string;
+  tip_wallet_address?: string;
   is_therapist?: boolean;
 }
 
@@ -130,8 +131,19 @@ export interface Dialogue {
   intent: string;
   status: string;
   source?: string;
+  peer_tip_wallet?: string;
   rules: string;
   updated_at: string;
+}
+
+export interface FundInfo {
+  treasury_address: string;
+  squads_url: string;
+}
+
+export interface TipWalletResponse {
+  ok: boolean;
+  tip_wallet_address: string;
 }
 
 /** Message kinds in Initiated Dialogue. `circle` = short ephemeral video. */

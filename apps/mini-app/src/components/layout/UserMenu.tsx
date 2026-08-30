@@ -7,6 +7,8 @@ import { useHost } from "@/core/host/HostContext";
 import { useI18n } from "@/core/i18n/context";
 import { UI_LANGS, langLabel } from "@/core/i18n/uiLangs";
 import { readVoiceRetention, writeVoiceRetention } from "@/core/mediaPrefs";
+import { FundCard } from "@/features/fund/FundCard";
+import { TipWalletForm } from "@/features/fund/TipWalletForm";
 import { ThemeSwitch } from "./ThemeSwitch";
 import styles from "./UserMenu.module.css";
 
@@ -439,6 +441,11 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
               >
                 {t.helper.inviteTitle}
               </Link>
+            ) : null}
+
+            <FundCard />
+            {isAccount && me?.is_helper ? (
+              <TipWalletForm current={me.tip_wallet_address ?? ""} />
             ) : null}
 
             {isAccount ? (

@@ -42,6 +42,8 @@ import type {
   HelperInvite,
   TherapistProfileOut,
   TherapySession,
+  FundInfo,
+  TipWalletResponse,
 } from "./types";
 
 export type {
@@ -727,6 +729,14 @@ export const api = {
   therapyComplete: (id: string) =>
     request<TherapySession>(`/api/v1/therapy/sessions/${id}/complete`, {
       method: "POST",
+    }),
+
+  fundInfo: () => request<FundInfo>("/api/v1/fund/info"),
+
+  setTipWallet: (address: string) =>
+    request<TipWalletResponse>("/api/v1/me/tip-wallet", {
+      method: "POST",
+      body: JSON.stringify({ address }),
     }),
 
   translateUiCatalog: (

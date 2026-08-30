@@ -4,6 +4,7 @@ import { api, ApiError, API_URL } from "@/core/api/client";
 import type { ChatMessage, Dialogue } from "@/core/api/types";
 import { useChatSocket } from "@/core/hooks/useChatSocket";
 import { useI18n } from "@/core/i18n/context";
+import { TipBanner } from "@/features/fund/TipBanner";
 import { CircleBubble } from "./CircleBubble";
 import {
   CircleRecorder,
@@ -584,6 +585,10 @@ export function DialoguePage() {
           </div>
         ) : null}
       </div>
+
+      {dialogue?.peer_tip_wallet ? (
+        <TipBanner wallet={dialogue.peer_tip_wallet} />
+      ) : null}
 
       {open ? (
         <div className={styles.composer}>

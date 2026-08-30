@@ -627,4 +627,25 @@ export const en: Messages = {
     error: "That didn't work. Please try again",
     empty: "Nothing here yet",
   },
+  fund: {
+    supportTitle: "Support the project",
+    supportText:
+      "de-press runs on donations. The treasury is a public Squads multisig: signers spend the funds, the platform never holds keys and takes no fees.",
+    treasuryLabel: "Treasury",
+    copy: "Copy address",
+    copied: "Copied",
+    donate: "Donate",
+    tipWalletTitle: "Tip wallet",
+    tipWalletText:
+      "Publish a Solana address so grateful peers can thank you directly. The platform never touches the transfer.",
+    tipWalletCurrent: "Currently published",
+    tipWalletPlaceholder: "Solana address (base58)",
+    tipWalletWarn:
+      "Privacy: on-chain transfers are public and link addresses. Use a dedicated tip wallet — not your main one.",
+    clear: "Remove",
+    invalidAddress: "This does not look like a Solana address (base58, 32–44 chars).",
+    tipTitle: "Dialogue closed. Thanks for being there",
+    tipText:
+      "If the dialogue helped, you can thank the listener directly — completely optional.",
+  },
 };
