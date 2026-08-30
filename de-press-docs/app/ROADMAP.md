@@ -13,6 +13,8 @@
 **AI-помощник (полный продукт) — в самую последнюю очередь.**  
 В browser уже есть Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — это companion surface, не закрытый AI-помощник.
 
+**Терапия (ADR 0022, stage B) закрыта в браузере и Mini App** (Solana Pay QR + ручное подтверждение терапевта). Вопросы новой фазы — [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), план — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md).
+
 > **Решение (2026-08, уточнено):** этот репозиторий — только приложения.  
 > **Четыре App Hosts:** browser · Telegram Mini App · own desktop · own mobile — см. [`PLATFORMS.md`](./PLATFORMS.md), [ADR 0013](./adr/0013-four-app-hosts.md).  
 > Mini App — одна платформа и интересный этап, **не** замена своим mobile/desktop.  
@@ -56,6 +58,9 @@
 | **P0 ✅** | **UI Core / Browser host**: Vite + React SPA, токены/темы, 3-зонный ТГ-каркас, лента/чат, «МНЕ ХУЕВО» |
 | **P0 ✅** | **Кружочки**: `POST …/messages/circle` + ephemeral purge on close |
 | **P0 ✅** | **Голосовые с опцией удаления**: `/me/voice-retention` + per-sender purge on close |
+| **P0** | **Хвосты паритета browser ↔ Mini App**: фонд (FundCard/TipBanner/TipWalletForm), решение по calls — [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) Q2; терапия в Mini App ✅ |
+| **P0** | **Хелперский дашборд**: вкладка слева, видна только хелперам; очередь, приём → диалог, сводка — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
+| **P0** | **Подготовка репозитория + перевод документации на EN + полный ретест → ручная QA** — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
 | 🗄 снято | **Нативный динамический мультиязык** (STT → translate → TTS) — снято: без ключей адекватно не реализовать; остался перевод текста |
 | **P1** | **Telegram Mini App host (этап)**: Bot + Mini App, initData auth, theme bridge, optional bot soft-notify; диалоги остаются на de-press backend — **не** замена own mobile |
 | **P1** | **Own Mobile**: ТГ-таб-бар layout → PWA / нативная обёртка / store (отдельный host) |
@@ -94,7 +99,7 @@
 ## Фонд (ADR 0020) — готов в браузер-SPA
 
 Некастодиальный контур: публичная казна (Squads-мультисиг, `TREASURY_SOLANA_ADDRESS` — пусто = UI скрыт), opt-in кошелёк чаевых хелпера (виден только в закрытом диалоге благодарному собеседнику, с предупреждением «отдельный кошелёк»), дежурный фонд с посуточным капом и ленивым stale-close, публичный псевдонимный отчёт `GET /v1/fund/report?period=YYYY-MM` — подписанты мультисига делят казну по нему. Деньги ходят только кошелёк → кошелёк; бэкенд не трогает ключи, платежи и RPC.
-Дальше: parity в Mini App, страница публичного отчёта, верификация владения подписью (phase 2).
+Дальше: parity фонда в Mini App (терапия там ✅), страница публичного отчёта, верификация владения подписью (phase 2).
 
 ## Терапия (ADR 0022) — зачаток
 
