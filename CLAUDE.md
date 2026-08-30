@@ -34,7 +34,7 @@ Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/
 ---
 
 ## 🏛 Core Domain Terminology & Principles
-- **Anti-Panic Protocol:** A global, high-priority emergency UI mode ("Мне хуево, отвали") that instantly kills WebSocket connections, hides analytics/feeds, and activates a minimal canvas for 4-7-8 breathing and somatic grounding.
+- **Anti-Panic Protocol:** A global, high-priority emergency UI mode ("Мне хуево, отвали" — "I'm not ok, leave me alone") that instantly kills WebSocket connections, hides analytics/feeds, and activates a minimal canvas for 4-7-8 breathing and somatic grounding.
 - **Silent Empathy:** Interaction without likes, upvotes, or public counters. Users can only send "Я слышу тебя" (I hear you). Authors see a subtle pulse: "3 people read this and sat with you silently."
 - **Safe Monologue:** Stories published without public comment sections to prevent unsolicited advice and cyberbullying.
 - **Initiated Dialogue:** Anonymous 1-on-1 chat over Django Channels that can **only** be initiated by the story author.
