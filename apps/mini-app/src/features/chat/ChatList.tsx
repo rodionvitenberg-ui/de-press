@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import type { Dialogue } from "@/core/api/types";
 import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
 import { ListRow } from "@/components/tg/ListRow";
+import { BlockedUsersModal } from "./BlockedUsersModal";
 import styles from "./ChatList.module.css";
 import { useHelperHeartbeat } from "@/features/helper/useHelperHeartbeat";
 
@@ -32,6 +33,7 @@ export function ChatList() {
   const { active: panic } = useAntiPanic();
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [blockedOpen, setBlockedOpen] = useState(false);
 
   const meQuery = useQuery({
     queryKey: ["me"],
@@ -164,6 +166,15 @@ export function ChatList() {
             className={styles.searchInput}
           />
         </div>
+        <button
+          type="button"
+          className={styles.blockedBtn}
+          aria-label={t.chat.blockedTitle}
+          title={t.chat.blockedTitle}
+          onClick={() => setBlockedOpen(true)}
+        >
+          ⊘
+        </button>
       </div>
 
       <div className={styles.scroll} ref={scrollRef}>
@@ -269,6 +280,9 @@ export function ChatList() {
           dialogues.map((d) => renderDialogue(d))
         )}
       </div>
+      {blockedOpen ? (
+        <BlockedUsersModal onClose={() => setBlockedOpen(false)} />
+      ) : null}
     </div>
   );
 }

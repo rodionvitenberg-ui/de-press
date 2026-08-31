@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 from django.db import IntegrityError, models, transaction
@@ -215,3 +216,54 @@ def blocked_author_keys_for(viewer: Actor) -> set[str]:
     ):
         keys.add(f"s:{sess_id}")
     return keys
+
+
+@dataclass(frozen=True, slots=True)
+class BlockedEntry:
+    id: UUID
+    created_at: datetime
+    label: str
+    target_kind: str
+
+
+def list_blocks_for(blocker: Actor) -> list[BlockedEntry]:
+    """Blocks made by the viewer, with target pseudonyms for the UI list."""
+    blocked = Block.objects.all()
+    if blocker.account:
+        blocked = blocked.filter(blocker_account=blocker.account)
+    elif blocker.session:
+        blocked = blocked.filter(blocker_session=blocker.session)
+    else:
+        return []
+    blocked = blocked.select_related("blocked_account", "blocked_session").order_by("-created_at")
+    entries: list[BlockedEntry] = []
+    for block in blocked:
+        if block.blocked_account_id:
+            label = block.blocked_account.display_pseudonym
+            kind = "account"
+        elif block.blocked_session_id:
+            label = block.blocked_session.display_pseudonym
+            kind = "session"
+        else:
+            continue
+        entries.append(
+            BlockedEntry(
+                id=block.id,
+                created_at=block.created_at,
+                label=label,
+                target_kind=kind,
+            )
+        )
+    return entries
+
+
+def unblock_by_id(blocker: Actor, block_id: UUID) -> bool:
+    """Remove one of the viewer's blocks by row id. True when it existed."""
+    if blocker.account:
+        q = Q(blocker_account=blocker.account)
+    elif blocker.session:
+        q = Q(blocker_session=blocker.session)
+    else:
+        raise BlockError("No identity")
+    deleted, _ = Block.objects.filter(q, id=block_id).delete()
+    return deleted > 0

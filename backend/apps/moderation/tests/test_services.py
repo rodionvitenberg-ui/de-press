@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from uuid import uuid4
+
 import pytest
 
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
+from apps.moderation.blocks import block_actor, list_blocks_for, unblock_by_id
 from apps.moderation.models import Report, ReportReason, ReportStatus
 from apps.moderation.services import resolve_report, submit_message_report, submit_report
 from apps.stories.services import publish_story
@@ -96,3 +99,32 @@ def test_resolve_hidden_help_report_does_not_need_story():
     )
     assert resolved.status == ReportStatus.RESOLVED_HIDDEN
     assert resolved.story_id is None
+
+
+@pytest.mark.django_db
+def test_list_blocks_for_and_unblock_by_id():
+    me = Account.objects.create_user(email="me@ex.com", password="password123")
+    other_account = Account.objects.create_user(email="other@ex.com", password="password123")
+    other_session = AnonymousSession.objects.create()
+    actor = Actor(kind="account", account=me)
+
+    block_actor(actor, target_account_id=other_account.id)
+    block_actor(actor, target_session_id=other_session.id)
+
+    entries = list_blocks_for(actor)
+    assert {e.target_kind for e in entries} == {"account", "session"}
+    assert {e.label for e in entries} == {
+        other_account.display_pseudonym,
+        other_session.display_pseudonym,
+    }
+    assert all(e.created_at is not None for e in entries)
+
+    account_block = next(e for e in entries if e.target_kind == "account")
+    assert unblock_by_id(actor, account_block.id) is True
+    assert len(list_blocks_for(actor)) == 1
+
+    # Someone else's block row is out of reach.
+    stranger = Actor(kind="anonymous", session=AnonymousSession.objects.create())
+    assert unblock_by_id(stranger, account_block.id) is False
+
+    assert unblock_by_id(actor, uuid4()) is False

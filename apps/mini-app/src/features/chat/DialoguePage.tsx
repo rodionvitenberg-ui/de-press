@@ -146,6 +146,8 @@ export function DialoguePage() {
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const startedAt = useRef(0);
+  const voiceReleasedRef = useRef(false);
+  const voiceStartingRef = useRef(false);
   const threadRef = useRef<HTMLDivElement | null>(null);
 
   const sendCallRef = useRef<(msg: Record<string, unknown>) => void>(() => {});
@@ -326,11 +328,13 @@ export function DialoguePage() {
     }
   }
 
-  async function toggleRecord() {
-    if (recording) {
-      mediaRef.current?.stop();
-      return;
-    }
+  function stopVoice() {
+    if (mediaRef.current?.state === "recording") mediaRef.current.stop();
+  }
+
+  async function startVoice() {
+    if (voiceStartingRef.current || recording) return;
+    voiceStartingRef.current = true;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -357,9 +361,28 @@ export function DialoguePage() {
       startedAt.current = Date.now();
       recorder.start();
       setRecording(true);
+      // The finger was released while the mic permission was still pending.
+      if (voiceReleasedRef.current) stopVoice();
     } catch {
       setError(t.chat.unsupported);
+    } finally {
+      voiceStartingRef.current = false;
     }
+  }
+
+  // Hold the mic to record; releasing sends the voice immediately.
+  function beginVoiceHold() {
+    if (sending) return;
+    voiceReleasedRef.current = false;
+    void startVoice();
+    const release = () => {
+      window.removeEventListener("pointerup", release);
+      window.removeEventListener("pointercancel", release);
+      voiceReleasedRef.current = true;
+      stopVoice();
+    };
+    window.addEventListener("pointerup", release);
+    window.addEventListener("pointercancel", release);
   }
 
   async function close() {
@@ -568,7 +591,7 @@ export function DialoguePage() {
                     preload="metadata"
                   />
                 ) : null}
-                {!isCircle ? (
+                {!isCircle && !isVoice ? (
                   <div className={styles.msgBody}>{messageText(m)}</div>
                 ) : null}
                 {showMeta ? (
@@ -656,10 +679,11 @@ export function DialoguePage() {
           </div>
           <button
             type="button"
-            className={styles.composerBtn}
+            className={`${styles.composerBtn} ${recording ? styles.recBtn : ""}`}
             aria-label={recording ? t.chat.stop : t.chat.micAria}
             disabled={sending}
-            onClick={() => void toggleRecord()}
+            onPointerDown={beginVoiceHold}
+            onContextMenu={(e) => e.preventDefault()}
           >
             <MicIcon />
           </button>

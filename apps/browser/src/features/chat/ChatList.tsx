@@ -8,6 +8,7 @@ import { useAntiPanic } from "@/core/hooks/useAntiPanic";
 import { useI18n } from "@/core/i18n/context";
 import { useHelperHeartbeat } from "@/features/helper/useHelperHeartbeat";
 import { ListRow } from "@/components/tg/ListRow";
+import { BlockedUsersModal } from "./BlockedUsersModal";
 import { ChatMenu, type ChatMenuState } from "./ChatMenu";
 import { useDialogueActions } from "./useDialogueActions";
 import styles from "./ChatList.module.css";
@@ -39,6 +40,7 @@ export function ChatList() {
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");
   const [menu, setMenu] = useState<ChatMenuState | null>(null);
+  const [blockedOpen, setBlockedOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const actions = useDialogueActions();
 
@@ -229,6 +231,15 @@ export function ChatList() {
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
+        <button
+          type="button"
+          className={styles.blockedBtn}
+          aria-label={t.chat.blockedTitle}
+          title={t.chat.blockedTitle}
+          onClick={() => setBlockedOpen(true)}
+        >
+          ⊘
+        </button>
       </div>
 
       <div className={styles.scroll} ref={scrollRef}>
@@ -347,6 +358,9 @@ export function ChatList() {
           actions={actions}
           onClose={() => setMenu(null)}
         />
+      ) : null}
+      {blockedOpen ? (
+        <BlockedUsersModal onClose={() => setBlockedOpen(false)} />
       ) : null}
     </div>
   );

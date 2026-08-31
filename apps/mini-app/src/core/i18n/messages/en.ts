@@ -402,6 +402,9 @@ export const en: Messages = {
     menuHide: "Hide peer",
     sendAria: "Send message",
     micAria: "Record voice note",
+    blockedTitle: "Blocked users",
+    blockedEmpty: "You haven't blocked anyone.",
+    unblock: "Unblock",
     circleAria: "Record a video circle",
     comingSoon: "soon",
     circleTitle: "Circle",
@@ -556,6 +559,7 @@ export const en: Messages = {
     error: "Error",
     save: "Save",
     cancel: "Cancel",
+    close: "Close",
   },
   inbox: {
     title: "Private inbox",

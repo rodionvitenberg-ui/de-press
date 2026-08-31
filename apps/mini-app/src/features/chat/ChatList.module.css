@@ -14,11 +14,15 @@
 
 .searchWrap {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 0.65rem 0.35rem;
   background: var(--bg-main);
 }
 
 .search {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -27,6 +31,26 @@
   background: var(--bg-input);
   border-radius: var(--radius-pill);
   color: var(--text-muted);
+}
+
+.blockedBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tg-search-height);
+  height: var(--tg-search-height);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.blockedBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .searchIcon {

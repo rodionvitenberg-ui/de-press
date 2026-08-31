@@ -488,6 +488,9 @@ export type Messages = {
     forwardEmpty: string;
     sendAria: string;
     micAria: string;
+    blockedTitle: string;
+    blockedEmpty: string;
+    unblock: string;
     circleAria: string;
     comingSoon: string;
     circleTitle: string;

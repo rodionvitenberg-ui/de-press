@@ -6,6 +6,7 @@
 import type {
   AppNotification,
   AuthorStory,
+  BlockItem,
   ChatMessage,
   Dialogue,
   DialogueRequest,
@@ -436,6 +437,14 @@ export const api = {
     request<{ ok: boolean; created: boolean; message: string }>(
       `/api/v1/dialogues/${dialogueId}/unblock-peer`,
       { method: "POST" },
+    ),
+
+  myBlocks: () => request<BlockItem[]>("/api/v1/blocks"),
+
+  unblockById: (blockId: string) =>
+    request<{ ok: boolean; created: boolean; message: string }>(
+      `/api/v1/blocks/${blockId}`,
+      { method: "DELETE" },
     ),
 
   dialogueIntents: () => request<IntentOption[]>("/api/v1/dialogue/intents"),

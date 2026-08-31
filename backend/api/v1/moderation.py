@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
 from ninja import Router, Schema
@@ -17,6 +18,8 @@ from apps.moderation.blocks import (
     BlockError,
     block_actor,
     block_peer_in_dialogue,
+    list_blocks_for,
+    unblock_by_id,
     unblock_peer_in_dialogue,
 )
 from apps.moderation.models import (
@@ -60,6 +63,13 @@ class BlockOut(Schema):
     ok: bool
     created: bool
     message: str
+
+
+class BlockItemOut(Schema):
+    id: str
+    created_at: datetime
+    label: str
+    target_kind: str
 
 
 @router.get("/moderation/dashboard", response=DashboardOut)
@@ -244,6 +254,39 @@ def unblock_dialogue_peer(request, dialogue_id: UUID):
             "Собеседник снова виден в ленте."
             if removed
             else "Он и так не был скрыт."
+        ),
+    )
+
+
+@router.get("/blocks", response=list[BlockItemOut])
+def list_blocks(request):
+    """Blocks made by the viewer — for the chat-side blocked-users list."""
+    actor = require_actor(request)
+    return [
+        BlockItemOut(
+            id=str(entry.id),
+            created_at=entry.created_at,
+            label=entry.label,
+            target_kind=entry.target_kind,
+        )
+        for entry in list_blocks_for(actor)
+    ]
+
+
+@router.delete("/blocks/{block_id}", response=BlockOut)
+def delete_block(request, block_id: UUID):
+    actor = require_actor(request)
+    try:
+        removed = unblock_by_id(actor, block_id)
+    except BlockError as exc:
+        raise HttpError(400, str(exc)) from exc
+    return BlockOut(
+        ok=removed,
+        created=False,
+        message=(
+            "Собеседник снова виден в ленте."
+            if removed
+            else "Блокировка не найдена."
         ),
     )
 

@@ -521,6 +521,11 @@
   cursor: default;
 }
 
+.recBtn {
+  background: color-mix(in srgb, var(--accent-panic) 14%, transparent);
+  color: var(--accent-panic);
+}
+
 .sendBtn {
   background: var(--accent-hope-soft);
   color: var(--accent-hope);

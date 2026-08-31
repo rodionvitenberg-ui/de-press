@@ -381,6 +381,9 @@ export type Messages = {
     menuHide: string;
     sendAria: string;
     micAria: string;
+    blockedTitle: string;
+    blockedEmpty: string;
+    unblock: string;
     circleAria: string;
     comingSoon: string;
     circleTitle: string;
@@ -497,6 +500,7 @@ export type Messages = {
     error: string;
     save: string;
     cancel: string;
+    close: string;
   };
   topics: Record<string, string>;
   theme: {

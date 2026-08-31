@@ -358,3 +358,10 @@ export interface TherapySession {
   created_at: string;
   updated_at: string;
 }
+
+export interface BlockItem {
+  id: string;
+  created_at: string;
+  label: string;
+  target_kind: "account" | "session";
+}

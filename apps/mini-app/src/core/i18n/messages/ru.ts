@@ -405,6 +405,9 @@ export const ru: Messages = {
     menuHide: "Скрыть собеседника",
     sendAria: "Отправить сообщение",
     micAria: "Записать голосовое",
+    blockedTitle: "Заблокированные",
+    blockedEmpty: "Ты никого не блокировал.",
+    unblock: "Разблокировать",
     circleAria: "Записать кружочек",
     comingSoon: "скоро",
     circleTitle: "Кружочек",
@@ -561,6 +564,7 @@ export const ru: Messages = {
     error: "Ошибка",
     save: "Сохранить",
     cancel: "Отмена",
+    close: "Закрыть",
   },
   inbox: {
     title: "Приватный инбокс",
