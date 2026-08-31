@@ -13,6 +13,7 @@ from apps.dialogue.help import (
     accept_help_request,
     cancel_help_request,
     create_help_request,
+    helper_dashboard_metrics,
     list_help_inbox,
     my_help_request,
     skip_help_request,
@@ -66,6 +67,28 @@ class PresenceOut(Schema):
 
 class HeartbeatOut(Schema):
     ok: bool
+
+
+class HelperDashboardOut(Schema):
+    queue_length: int
+    median_wait_seconds_7d: int | None = None
+    taken_24h: int
+    closed_24h: int
+    taken_7d: int
+    closed_7d: int
+    on_duty: int
+    online: int
+
+
+@router.get("/help/dashboard", response=HelperDashboardOut)
+def get_helper_dashboard(request):
+    """Q8 ops metrics for the Helper dashboard (Helpers and staff only)."""
+    actor = resolve_actor(request)
+    if actor.account is None or not (
+        actor.account.is_helper or actor.account.is_staff
+    ):
+        raise HttpError(403, "Only Helpers and staff can access the dashboard")
+    return HelperDashboardOut(**helper_dashboard_metrics())
 
 
 @router.get("/help/presence", response=PresenceOut)

@@ -192,6 +192,18 @@ export interface HelpRequest {
   created_at: string;
 }
 
+/** Q8 ops metrics for the Helper dashboard (no per-Helper seconds/ratings). */
+export interface HelperDashboard {
+  queue_length: number;
+  median_wait_seconds_7d: number | null;
+  taken_24h: number;
+  closed_24h: number;
+  taken_7d: number;
+  closed_7d: number;
+  on_duty: number;
+  online: number;
+}
+
 /** Message kinds in Initiated Dialogue. `circle` = short ephemeral video. */
 export type ChatMessageKind = "text" | "voice" | "circle" | string;
 

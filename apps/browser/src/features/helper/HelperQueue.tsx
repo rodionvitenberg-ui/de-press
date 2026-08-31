@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { api, ApiError } from "@/core/api/client";
 import { useI18n } from "@/core/i18n/context";
+import { fmt } from "@/core/i18n/flatten";
 import { useHelperHeartbeat } from "./useHelperHeartbeat";
+import { useHelperQueue } from "./useHelperQueue";
 import styles from "./HelperQueue.module.css";
 
-type Tab = "clouds" | "summary";
+type Tab = "queue" | "clouds" | "summary";
 
 export function HelperQueue() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<Tab>("clouds");
+  const [tab, setTab] = useState<Tab>("queue");
 
   const meQuery = useQuery({
     queryKey: ["me"],
@@ -22,12 +26,25 @@ export function HelperQueue() {
   const onDuty = Boolean(meQuery.data?.is_on_duty);
   useHelperHeartbeat(isHelper);
 
+  const { queue: helpQueue, refresh: refreshQueue } = useHelperQueue(
+    isHelper && tab === "queue",
+  );
+
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!(isHelper && tab === "queue")) return;
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, [isHelper, tab]);
+
   const duty = useMutation({
     mutationFn: (next: boolean) => api.setHelperDuty(next),
     onSuccess: async (me) => {
       queryClient.setQueryData(["me"], me);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["helper-dashboard"] });
+      refreshQueue();
     },
   });
 
@@ -47,6 +64,22 @@ export function HelperQueue() {
     queryKey: ["helper-invites"],
     queryFn: () => api.listHelperInvites(),
     enabled: canHelper && tab === "summary",
+  });
+
+  const helpDashQuery = useQuery({
+    queryKey: ["helper-dashboard"],
+    queryFn: () => api.helperDashboard(),
+    enabled: canHelper && tab === "queue",
+  });
+
+  const acceptHelp = useMutation({
+    mutationFn: (requestId: string) => api.acceptHelpRequest(requestId),
+    onSuccess: async (dialogue) => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogues"] });
+      await queryClient.invalidateQueries({ queryKey: ["help-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["helper-dashboard"] });
+      navigate(`/chat/${dialogue.id}`);
+    },
   });
 
   const approve = useMutation({
@@ -70,6 +103,24 @@ export function HelperQueue() {
     if (reason === "spam") return t.helper.reasonSpam;
     if (reason === "self_harm") return t.helper.reasonSelfHarm;
     return t.helper.reasonOther;
+  }
+
+  function waitLabel(iso: string): string {
+    const mins = Math.max(
+      0,
+      Math.floor((now - new Date(iso).getTime()) / 60_000),
+    );
+    if (mins < 1) return t.helper.waitLessMin;
+    if (mins < 60) return fmt(t.helper.waitMin, { count: mins });
+    return `${fmt(t.helper.waitHour, { count: Math.floor(mins / 60) })} ${fmt(
+      t.helper.waitMin,
+      { count: mins % 60 },
+    )}`;
+  }
+
+  function medianLabel(seconds: number | null | undefined): string {
+    if (seconds == null) return "—";
+    return waitLabel(new Date(now - seconds * 1000).toISOString());
   }
 
   if (meQuery.isLoading) {
@@ -113,9 +164,22 @@ export function HelperQueue() {
           </div>
         ) : null}
         <p className={styles.lead}>
-          {tab === "clouds" ? t.helper.lead : t.helper.dashboardLead}
+          {tab === "queue"
+            ? t.helper.queueLead
+            : tab === "clouds"
+              ? t.helper.lead
+              : t.helper.dashboardLead}
         </p>
         <div className={styles.tabs} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "queue"}
+            className={tab === "queue" ? styles.tabOn : styles.tab}
+            onClick={() => setTab("queue")}
+          >
+            {t.helper.tabQueue}
+          </button>
           <button
             type="button"
             role="tab"
@@ -137,7 +201,61 @@ export function HelperQueue() {
         </div>
       </header>
 
-      {tab === "clouds" ? (
+      {tab === "queue" ? (
+        <>
+          {helpDashQuery.data ? (
+            <ul className={styles.metrics}>
+              <li>
+                {t.helper.metricQueue}: {helpDashQuery.data.queue_length}
+              </li>
+              <li>
+                {t.helper.metricMedianWait}:{" "}
+                {medianLabel(helpDashQuery.data.median_wait_seconds_7d)}
+              </li>
+              <li>
+                {t.helper.metricTaken24}: {helpDashQuery.data.taken_24h}
+              </li>
+              <li>
+                {t.helper.metricClosed24}: {helpDashQuery.data.closed_24h}
+              </li>
+              <li>
+                {t.helper.metricTaken7d}: {helpDashQuery.data.taken_7d}
+              </li>
+              <li>
+                {t.helper.metricClosed7d}: {helpDashQuery.data.closed_7d}
+              </li>
+              <li>
+                {t.helper.metricOnDuty}: {helpDashQuery.data.on_duty} ·{" "}
+                {helpDashQuery.data.online} {t.helper.metricOnline}
+              </li>
+            </ul>
+          ) : null}
+          {!onDuty ? (
+            <p className={styles.empty}>{t.helper.queueOffDuty}</p>
+          ) : helpQueue.length === 0 ? (
+            <p className={styles.empty}>{t.helper.queueEmpty}</p>
+          ) : (
+            <ul className={styles.list}>
+              {helpQueue.map((row) => (
+                <li key={row.id} className={styles.card}>
+                  <p className={styles.meta}>{waitLabel(row.created_at)}</p>
+                  {row.note ? <p className={styles.body}>{row.note}</p> : null}
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.approve}
+                      disabled={acceptHelp.isPending}
+                      onClick={() => acceptHelp.mutate(row.id)}
+                    >
+                      {t.helper.take}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : tab === "clouds" ? (
         queueQuery.isLoading ? (
           <p className={styles.empty}>{t.helper.loading}</p>
         ) : queueQuery.isError ? (

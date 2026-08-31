@@ -273,6 +273,22 @@ export type Messages = {
     dutyLead: string;
     dutyToggleOn: string;
     dutyToggleOff: string;
+    tabQueue: string;
+    queueLead: string;
+    queueEmpty: string;
+    queueOffDuty: string;
+    take: string;
+    waitLessMin: string;
+    waitMin: string;
+    waitHour: string;
+    metricQueue: string;
+    metricMedianWait: string;
+    metricTaken24: string;
+    metricClosed24: string;
+    metricTaken7d: string;
+    metricClosed7d: string;
+    metricOnDuty: string;
+    metricOnline: string;
   };
   notify: {
     title: string;

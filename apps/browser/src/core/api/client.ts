@@ -15,6 +15,7 @@ import type {
   FundInfo,
   HealthResponse,
   Hearer,
+  HelperDashboard,
   HelperInvite,
   HelpPresence,
   HelpRequest,
@@ -483,6 +484,8 @@ export const api = {
 
   helperHeartbeat: () =>
     request<{ ok: boolean }>("/api/v1/help/heartbeat", { method: "POST" }),
+
+  helperDashboard: () => request<HelperDashboard>("/api/v1/help/dashboard"),
 
   createHelperInvite: (org = "", ttlHours = 168) =>
     request<HelperInvite>("/api/v1/helper-invites", {

@@ -9,7 +9,9 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from apps.dialogue import calls
+from apps.dialogue.help import list_help_inbox
 from apps.dialogue.models import Dialogue, DialogueStatus
+from apps.dialogue.queue_realtime import HELPERS_GROUP, serialize_queue_request
 from apps.dialogue.realtime import dialogue_group, serialize_message
 from apps.dialogue.services import (
     DialogueError,
@@ -447,3 +449,69 @@ class DialogueConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def _close(self) -> Dialogue:
         return close_dialogue(self.actor, UUID(self.dialogue_id))
+
+
+class HelperQueueConsumer(AsyncJsonWebsocketConsumer):
+    """
+    Live human-help queue for the Helper dashboard (P5, Q4). Helpers only.
+
+    Protocol (JSON):
+      client → { "type": "ping" }
+      client → { "type": "queue.refresh" }
+      server → { "type": "snapshot", "queue": [...] }
+      server → { "type": "queue.new", "request": {...} }
+      server → { "type": "queue.taken", "id": "..." }
+      server → { "type": "queue.cancelled", "id": "..." }
+      server → { "type": "error", "detail": "..." }
+      server → { "type": "pong" }
+    """
+
+    actor: Actor
+    group_name: str | None
+
+    async def connect(self):
+        self.actor = self.scope.get("actor") or Actor(kind="anonymous", session=None)
+        self.group_name = None
+
+        account = self.actor.account
+        if account is None or not account.is_helper:
+            await self.close(code=4403)
+            return
+
+        self.group_name = HELPERS_GROUP
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+        await self._push_snapshot()
+
+    async def disconnect(self, code):
+        if self.group_name:
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive_json(self, content, **kwargs):
+        msg_type = (content or {}).get("type")
+        if msg_type == "ping":
+            await self.send_json({"type": "pong"})
+            return
+        if msg_type == "queue.refresh":
+            await self._push_snapshot()
+            return
+        await self.send_json({"type": "error", "detail": "Unknown event type"})
+
+    async def queue_new(self, event):
+        await self.send_json({"type": "queue.new", "request": event["payload"]})
+
+    async def queue_taken(self, event):
+        await self.send_json({"type": "queue.taken", "id": event["payload"]["id"]})
+
+    async def queue_cancelled(self, event):
+        await self.send_json({"type": "queue.cancelled", "id": event["payload"]["id"]})
+
+    async def _push_snapshot(self):
+        queue = await self._snapshot_queue()
+        await self.send_json({"type": "snapshot", "queue": queue})
+
+    @database_sync_to_async
+    def _snapshot_queue(self) -> list[dict]:
+        # Same view as the HTTP inbox: skips and own requests excluded;
+        # empty while off duty (duty gate lives in list_help_inbox).
+        return [serialize_queue_request(req) for req in list_help_inbox(self.actor)]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from statistics import median
 from uuid import UUID
 
 from django.db import IntegrityError, transaction
@@ -20,7 +21,8 @@ from apps.dialogue.models import (
     HelpRequestStatus,
     Message,
 )
-from apps.dialogue.presence import mark_matched, pick_helper_for_match
+from apps.dialogue.presence import ONLINE_WINDOW, mark_matched, pick_helper_for_match
+from apps.dialogue.queue_realtime import broadcast_queue_event, serialize_queue_request
 from apps.dialogue.services import RULES_TEXT
 from apps.identity.models import Account
 from apps.identity.services import Actor
@@ -153,6 +155,7 @@ def create_help_request(actor: Actor, *, note: str = "") -> HelpRequest:
             return req
 
     _notify_helpers(req, actor)
+    broadcast_queue_event("queue.new", serialize_queue_request(req))
     return req
 
 
@@ -196,6 +199,52 @@ def my_help_request(actor: Actor) -> HelpRequest | None:
         .order_by("-created_at")
         .first()
     )
+
+
+def helper_dashboard_metrics() -> dict:
+    """Q8 ops metrics for the Helper dashboard: queue size, median wait,
+    taken/closed per period, on-duty. No per-Helper seconds or ratings."""
+    now = timezone.now()
+    queue_length = HelpRequest.objects.filter(
+        status=HelpRequestStatus.PENDING
+    ).count()
+    accepted = list(
+        HelpRequest.objects.filter(
+            status=HelpRequestStatus.ACCEPTED,
+            updated_at__gte=now - timedelta(days=7),
+        ).values_list("created_at", "updated_at")
+    )
+    waits = [(updated - created).total_seconds() for created, updated in accepted]
+    taken_7d = len(waits)
+    taken_24h = sum(
+        1 for _, updated in accepted if updated >= now - timedelta(hours=24)
+    )
+    closed_7d = Dialogue.objects.filter(
+        source=DialogueSource.HELP,
+        status=DialogueStatus.CLOSED,
+        closed_at__gte=now - timedelta(days=7),
+    ).count()
+    closed_24h = Dialogue.objects.filter(
+        source=DialogueSource.HELP,
+        status=DialogueStatus.CLOSED,
+        closed_at__gte=now - timedelta(hours=24),
+    ).count()
+    on_duty = Account.objects.on_duty_helpers().count()
+    online = (
+        Account.objects.on_duty_helpers()
+        .filter(helper_seen_at__gte=now - ONLINE_WINDOW)
+        .count()
+    )
+    return {
+        "queue_length": queue_length,
+        "median_wait_seconds_7d": int(median(waits)) if waits else None,
+        "taken_24h": taken_24h,
+        "closed_24h": closed_24h,
+        "taken_7d": taken_7d,
+        "closed_7d": closed_7d,
+        "on_duty": on_duty,
+        "online": online,
+    }
 
 
 @transaction.atomic
@@ -263,6 +312,7 @@ def accept_help_request(actor: Actor, request_id: UUID) -> Dialogue:
         NotificationKind.HELP_ACCEPTED,
         {"request_id": str(req.id), "dialogue_id": str(dialogue.id)},
     )
+    broadcast_queue_event("queue.taken", {"id": str(req.id)})
     return dialogue
 
 
@@ -314,4 +364,5 @@ def cancel_help_request(actor: Actor, request_id: UUID) -> HelpRequest:
 
     req.status = HelpRequestStatus.CANCELLED
     req.save(update_fields=["status", "updated_at"])
+    broadcast_queue_event("queue.cancelled", {"id": str(req.id)})
     return req
