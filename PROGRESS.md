@@ -294,3 +294,9 @@ api: GET /api/v1/admin/overview
 api: GET /api/v1/admin/reports?status=open|reviewing|resolved_hidden|resolved_dismissed|all
 api: POST /api/v1/admin/reports/{report_id}/resolve {decision: hide|remove|dismiss, reason, note}
 api: GET /api/v1/admin/moderation-log
+
+## 2026-08-31  agent=human  id=migration-drift
+status: done
+branch: main
+notes: Closed the makemigrations --check drift: support/0009 (RenameIndex support_sup_thread__idx → support_sup_thread__c93351_idx — the pre-existing model/migrations mismatch) + notifications/0006 (AlterField kind — the no-op schema sync for the report_resolved choice added with the admin dashboard; choices changes still produce an AlterField). --check is clean now; migrate applied cleanly to the local Postgres dev DB (also picked up moderation.0005 and therapy.0001 it was missing). Chunk support+moderation+notifications: 55 passed (DEPRESS_USE_SQLITE). Fund public report page moved out of the app scope — the owner will show it on the promo/landing site (the ROADMAP ADR-0020 section updated; the API GET /v1/fund/report stays for the landing to consume).
+files: backend/apps/support/migrations/0009_rename_support_sup_thread__idx_support_sup_thread__c93351_idx.py, backend/apps/notifications/migrations/0006_alter_notification_kind.py, de-press-docs/app/ROADMAP.md, PROGRESS.md
