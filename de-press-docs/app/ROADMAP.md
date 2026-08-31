@@ -8,8 +8,8 @@ See also [README.md](../README.md) (the stage and priorities), [CONTEXT.md](../C
 **P1 "Soft-notify" is closed** (including the magic-token `/inbox` and `PUBLIC_BASE_URL` in settings).  
 **Browser host (UI Core v2)** — a Vite SPA with TG ergonomics: the skeleton + the P0 push are closed.  
 **Circles + voice retention on the server are closed.**  
-Next for the product: the pilot readiness (the manual QA P6 — owner = human); the AI assistant stays the very last.  
-By hosts: **Telegram Mini App ✅** (the stage is closed in code — initData auth, the theme bridge, bot soft-notify; the bot token/webhook — deploy-time config per DEPLOY.md), then/in parallel **own mobile** and **own desktop**.  
+Next for the product: the admin dashboard (moderation + reports, pre-launch) and the pilot readiness (the manual QA P6 — owner = human); the AI assistant stays the very last.  
+By hosts: **Telegram Mini App ✅** (the stage is closed in code — initData auth, the theme bridge, bot soft-notify; the bot token/webhook — deploy-time config per DEPLOY.md), then — after the launch (≈ v1.3 / ≈ v1.5) — **own mobile** and **own desktop**.  
 **The AI assistant (the full product) — the very last of all.**  
 The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — this is a companion surface, not the closed AI assistant.
 
@@ -78,15 +78,18 @@ The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/a
 | **P0 ✅** | **The docs translation into EN (the RU archive in `docs-ru-archive/`, gitignored) + the full retest → manual QA** (the automated part done; the manual smoke matrix — P6, owner = human) — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
 | 🗄 dropped | **Native dynamic multilingual** (STT → translate → TTS) — dropped: cannot be implemented adequately without keys; text translation remains |
 | **P1 ✅** | **Telegram Mini App host (a stage)**: Bot + Mini App, initData auth, the theme bridge, optional bot soft-notify; the dialogues stay on the de-press backend — **not** a replacement for own mobile |
-| **P1** | **Own Mobile**: the TG tab-bar layout → a PWA / a native wrapper / a store (a separate host) |
-| **P1** | **Own Desktop**: a UI Core wrapper (Tauri / Electron — the decision later) |
-| **P1 ✅** | **PWA bridge on the browser host** — installable standalone + phone/tablet chrome; a native store still later. The prod build is verified (manifest+icons 200, sw.js served, the install row in More, the offline shell per sw.js); a live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md) |
+| **P1 ★ (pre-launch)** | **The admin dashboard** — a separate Vite app, `apps/admin`, staff-only: the aggregate overview (the visitors, the public posts — counts only, no identities), the reports queue with the mandatory-reason resolution + the audit log, the hide/remove of the reported content, the reports panel for the helpers in `/helper` — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) P7 |
+| **P1 → after the launch (≈ v1.3)** | **Own Mobile**: the TG tab-bar layout → a PWA / a native wrapper / a store (a separate host); frozen until after the launch |
+| **P1 → after the launch (≈ v1.5)** | **Own Desktop**: a UI Core wrapper (Tauri / Electron — the decision later); frozen until after the launch |
+| **P1 ✅** | **PWA bridge on the browser host** — installable standalone + phone/tablet chrome; a native store still later. The prod build is verified (manifest+icons 200, sw.js served, the install row in More, the offline shell per sw.js); a live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md). The further polish is frozen until after the pilot |
 | 🗄 → landing | **Public pages (help, guides)** — moved to the landing repo (the guides were cut on 2026-08-30; in the app `/help` is the gate only) |
 | **P1** | Pilot ops: staging, a closed cohort, a feedback loop; the deploy kit: [`DEPLOY.md`](./DEPLOY.md) |
 | **P1** | Helper onboarding; ethical ops metrics; media/S3; secrets/backup |
 | **P2** | Geo-help v2; pre-mod / AI-assist for reports |
 | **last** | **The AI assistant** — the very last of all |
 | **after everything** | **Publishing the repository on GitHub** (license, CI, README) — the last task of the project, after all the others are closed (Q5) |
+
+The version ladder (approximate, per the owner's sketch of 2026-08-31): **1.0** — the pre-launch line: the admin dashboard + the moderation/reports workflow, the pilot (the apps are bumped 0.1.0 → 1.0.0); **1.1** — the AI assistant; then the publication (Q5); **1.3** — own mobile; **1.5** — own desktop.
 
 ## Voice
 

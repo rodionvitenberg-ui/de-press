@@ -76,3 +76,13 @@ Currently an anonymous user (without an account) can request a paid session (the
 
 **Recommendation: keep** (privacy-first, the payment is off-platform); we monitor spam in the pilot.
 Status: ✅ resolved (2026-08-30): we keep it. The principle: an anonymous user has the same capabilities as a registered one; **all history always lives in the user's browser, not with us**.
+
+## Q11. The admin panel: the tech and the place
+
+**Decision (2026-08-31, owner):** a separate Vite app (`apps/admin`), not a staff route inside the browser SPA — a foundation for several future admins; the admin code is not shipped to the regular users. The moderation actions require `is_staff`/superuser; the helpers keep the view-only reports visibility in their dashboard.
+Status: ✅ resolved.
+
+## Q12. What the admin may see (the privacy frame)
+
+**Decision (2026-08-31):** the aggregates only (the visitors/the posts — counts, never identities, no IPs/fingerprints); the moderation sees only the reported item, the removal reason is mandatory, every action lands in the `ModerationAction` audit log; the default action is a reversible hide, the removal is exceptional; no reading of the dialogues, no browsing of others' content.
+Status: ✅ resolved (the invariants for the implementation).

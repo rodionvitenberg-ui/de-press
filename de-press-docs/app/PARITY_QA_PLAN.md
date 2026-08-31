@@ -30,7 +30,7 @@ The Q5 decision: the GitHub publication is deferred until all the other project 
 
 - **Backend** (in chunks, a ~30s runner timeout): therapy, fund, identity, common+notifications, dialogue, ai (`env -u DEEPSEEK_API_KEY`), empathy+moderation, support, stories.
 - **Frontend:** browser vitest 64 + tsc + build; the mini-app build.
-- **The smoke matrix** for the manual check (P6): anti-panic · feed+clouds · quiet phrases · dialogue+voice+circles · help human/AI · helper (the queue, duty, invites) · the ZK patterns · notifications+`/inbox` · the fund (the wallet/banner/report) · therapy (invite → catalog → session → QR → "I paid" → confirmation → dialogue) · the i18n switch · all the same in the Mini App inside Telegram.
+- **The smoke matrix** for the manual check (P6): anti-panic · feed+clouds · quiet phrases · dialogue+voice+circles · help human/AI · helper (the queue, duty, invites) · the ZK patterns · notifications+`/inbox` · the fund (the wallet/banner/report) · the admin (the auth 403s, the aggregates without the content, the report resolution + the mandatory reason, the moderation log) · therapy (invite → catalog → session → QR → "I paid" → confirmation → dialogue) · the i18n switch · all the same in the Mini App inside Telegram.
 
 - ✅ The automated part is done (2026-08-30): backend 233/233 in chunks, browser vitest 64/64, both vite builds green. The smoke matrix below — P6 (manual, owner = human).
 
@@ -41,6 +41,15 @@ The Q5 decision: the GitHub publication is deferred until all the other project 
 - A user starting a conversation with a helper already works via a help request; no direct calls (Q7).
 - The design by the DESIGN_V2 tokens; backend tests for new endpoints, if any appear.
 
+## P7. The admin dashboard + the moderation/reports workflow — new (2026-08-31)
+
+- A separate Vite app `apps/admin` (staff-only; the owner's decision — Vite, Q11): the same backend session auth, 403 for everyone else, the admin code never ships to the regular users.
+- The overview: **aggregates only** — new visitors per 24h/7d (the `identity.Visitor` count; no IPs, no fingerprints, no per-visitor lists), the public stories total + per 7d, the hear-gestures, the dialogues opened/closed (counts), the therapy sessions by status, the help queue (the Q8 metrics), the pending clouds, the reports by status/reason. No content, no identifiers.
+- The reports workflow (the foundation exists: `Report` — story|message, the reasons abuse/spam/self_harm/other, the statuses, the submit endpoints): the staff queue `GET /admin/reports`, `POST /admin/reports/{id}/resolve` — the decision (hide | remove | dismiss) + the **mandatory reason** + a note; applies `Story.status` hidden/removed (the hide is the default and reversible) or hides the reported message; writes the `ModerationAction` audit log (who/what/why/when); notifies the reporter without the other party's data.
+- The moderator sees **only the reported item** (the preview + the minimal context), never the arbitrary browsing of others' content; the reporter/target identities are not exposed (Q12).
+- The helpers get the reports **visibility** in `/helper` (the recent reports from the existing `GET /moderation/dashboard`), view-only, no actions.
+- Out of scope (stays P2): the pre-mod / AI-assist for the reports; Geo-help v2.
+
 ## P6. Manual QA
 
-The readiness criteria: P1–P5 are closed, the P4 smoke matrix is done, the known limitations are recorded in PROGRESS. Next — the pilot (pilot ops in the ROADMAP).
+The readiness criteria: P1–P7 are closed, the P4 smoke matrix is done, the known limitations are recorded in PROGRESS. Next — the pilot (pilot ops in the ROADMAP).
