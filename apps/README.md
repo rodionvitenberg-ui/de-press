@@ -1,38 +1,39 @@
 # Client applications (`apps/`)
 
-> Не путать с `backend/apps/` (Django).
+> Not to be confused with `backend/apps/` (Django apps).
 
-## Главное требование
+## The main rule
 
-**Browser и Mini App — два отдельных приложения.**  
-Правки интерфейса в одном **не** попадают в другое автоматически.
+**Browser and Mini App are two separate applications.**  
+UI changes in one do **not** automatically reach the other.
 
-| App | Path | Port (dev) | Назначение |
+| App | Path | Port (dev) | Purpose |
 |-----|------|------------|------------|
-| **Browser** | [`browser/`](./browser/) | **5174** | Самостоятельный веб-клиент de-press |
-| **Mini App** | [`mini-app/`](./mini-app/) | **5175** | Telegram Mini App (mobile-first); цель — оболочка **Telegram Web A** |
+| **Browser** | [`browser/`](./browser/) | **5174** | The standalone web client of de-press (a PWA) |
+| **Mini App** | [`mini-app/`](./mini-app/) | **5175** | The Telegram Mini App host (mobile-first), built with a `/tg/` base |
 
 ```
 apps/
-  browser/                 # независимое браузерное приложение
-  mini-app/                # независимое Mini App
-    vendor/telegram-tt/    # Telegram Web A (GPLv3) — см. NOTICE.GPL.md
-    src/                   # de-press интеграция / interim SPA
+  browser/                 # the independent browser app
+  mini-app/                # the independent Mini App
+    vendor/telegram-tt/    # Telegram Web A (GPLv3) — see NOTICE.GPL.md
+    src/                   # the de-press integration
 ```
 
-## Product shell = native Telegram (не web)
+## Native feel without native forks
 
-Целевое впечатление «аддон к Телеге» реализуется **нативными** клиентами:
+The hosts doctrine is "four hosts" (ADR 0013, [PLATFORMS.md](../de-press-docs/app/PLATFORMS.md)),
+but the product shell is reached **without maintaining native forks**:
 
-- **Desktop:** [`../_archive/native/desktop/`](../_archive/native/desktop/) — fork **tdesktop** (ADR 0015) — вынесено в архив
-- **Mobile:** [`../_archive/native/android/`](../_archive/native/android/) (ADR 0016) — вынесено в архив; `native/ios` — later
-- **Mini App / Web A** — **не** product shell; optional side track only
+- **Desktop:** [`../_archive/native/desktop/`](../_archive/native/desktop/) — a **tdesktop** fork (ADR 0015) — archived; own desktop is deferred to a Tauri shell
+- **Mobile:** [`../_archive/native/android/`](../_archive/native/android/) — a Telegram Android fork (ADR 0016) — archived; `native/ios` — later; own mobile is PWA-first (ADR 0019)
+- **Mini App** — a full host inside Telegram, at v1 parity: feed, help, helper ops, fund, calls, therapy
 
-Browser остаётся отдельным веб-приложением без кода tdesktop.
+The Browser stays a separate web app with no tdesktop code.
 
 ## Backend
 
-Общий: `backend/` (Django). Диалоги/stories всегда на de-press API, не MTProto.
+Shared: `backend/` (Django). Dialogues/stories always live on the de-press API, not MTProto.
 
 ## Dev
 
@@ -40,9 +41,9 @@ Browser остаётся отдельным веб-приложением без
 # Browser only
 cd apps/browser && npm run dev    # :5174
 
-# Mini App only (interim SPA + TG bridge)
+# Mini App only
 cd apps/mini-app && npm run dev   # :5175
 
-# Fetch Web A sources (large)
+# Fetch the Telegram Web A sources (large, GPLv3) — from the repository root
 ./scripts/fetch_telegram_tt.sh
 ```
