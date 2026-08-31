@@ -308,3 +308,9 @@ notes: Chat parity batch. (1) Blocked-users management: GET /api/v1/blocks (the 
 files: backend/apps/moderation/{blocks.py,tests/test_services.py}, backend/api/v1/moderation.py, apps/browser/src/features/chat/{BlockedUsersModal.tsx,BlockedUsersModal.module.css,ChatList.tsx,ChatList.module.css,DialoguePage.tsx,DialoguePage.module.css}, apps/browser/src/core/{api/{client.ts,types.ts},i18n/{types.ts,messages/en.ts,messages/ru.ts}}, apps/mini-app/src/features/chat/{BlockedUsersModal.tsx,BlockedUsersModal.module.css,ChatList.tsx,ChatList.module.css,DialoguePage.tsx,DialoguePage.module.css}, apps/mini-app/src/core/{api/{client.ts,types.ts},i18n/{types.ts,messages/en.ts,messages/ru.ts}}, PROGRESS.md
 api: GET /api/v1/blocks
 api: DELETE /api/v1/blocks/{block_id}
+
+## 2026-08-31  agent=human  id=retest-refresh
+status: done
+branch: main
+notes: P4 automated retest refresh before the manual QA (the code moved since the 08-30 pass: the admin dashboard, the tip-wallet verification, the blocks API + modal, hold-to-record). Backend chunks (DEPRESS_USE_SQLITE): therapy 7, fund 19, identity 21, common+notifications 48, dialogue 79, ai 13 (env -u DEEPSEEK_API_KEY), empathy+moderation 19, support 22, stories 26 — 254 passed / 0 failed; makemigrations --check clean (note: --check needs the system Postgres env — DEPRESS_USE_SQLITE is pytest-only and raises outside tests). Frontend: browser tsc -b + vite build ✓, vitest 69/69 (11 files); mini-app build ✓; admin build ✓ (its first retest — the app landed after 08-30). Runner notes: pytest.ini addopts already carries -q, an extra -q on the CLI degrades to -qq (dots, no summary line); the heavy chunks (dialogue ~85s, support/stories ~35s) exceed the ~30s runner timeout — launch via setsid into a log and poll. Next per the roadmap: the manual smoke matrix (P6, owner = human; add the ⊘ blocked-users modal, hold-to-record voice, the hidden voice placeholder to the checklist), then fixes + a re-run.
+files: PROGRESS.md
