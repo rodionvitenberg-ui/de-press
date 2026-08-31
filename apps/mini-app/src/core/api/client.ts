@@ -733,10 +733,10 @@ export const api = {
 
   fundInfo: () => request<FundInfo>("/api/v1/fund/info"),
 
-  setTipWallet: (address: string) =>
+  setTipWallet: (payload: { address: string; nonce?: string; signature?: string }) =>
     request<TipWalletResponse>("/api/v1/me/tip-wallet", {
       method: "POST",
-      body: JSON.stringify({ address }),
+      body: JSON.stringify(payload),
     }),
 
   rtcConfig: () =>

@@ -5,16 +5,20 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone as dt_tz
 
 import pytest
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from django.test import Client
 from django.utils import timezone
 
 from apps.fund.models import DutySegment
 from apps.fund.services import (
     FundError,
+    challenge_message,
     close_stale_for,
     duty_report,
     on_heartbeat,
     validate_tip_wallet,
+    verify_tip_wallet_signature,
 )
 from apps.identity.models import Account
 from apps.identity.services import Actor, set_helper_duty
@@ -238,8 +242,137 @@ def test_tip_wallet_set_invalid_and_clear():
         "/api/v1/me/tip-wallet", data={"address": ""}, content_type="application/json"
     )
     assert cleared.status_code == 200
+
+
+# --- Ownership verification (ADR-0020 phase 2, off-chain) ---------------------
+
+_B58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def _b58encode(data: bytes) -> str:
+    num = int.from_bytes(data, "big")
+    out = ""
+    while num:
+        num, rem = divmod(num, 58)
+        out = _B58_ALPHABET[rem] + out
+    pad = len(data) - len(data.lstrip(b"\x00"))
+    return "1" * pad + out
+
+
+def _owned_wallet() -> tuple[Ed25519PrivateKey, str]:
+    key = Ed25519PrivateKey.generate()
+    address = _b58encode(
+        key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
+    )
+    return key, address
+
+
+def test_verify_signature_accepts_owner_message_only():
+    key, address = _owned_wallet()
+    nonce = "nonce-ok-1"
+    sig = _b58encode(key.sign(challenge_message(address, nonce).encode("utf-8")))
+    assert verify_tip_wallet_signature(address, sig, nonce) is True
+    # Same key, different message (wrong nonce) — must fail.
+    wrong = _b58encode(
+        key.sign(challenge_message(address, "other-nonce").encode("utf-8"))
+    )
+    assert verify_tip_wallet_signature(address, wrong, nonce) is False
+
+
+def test_verify_signature_rejects_foreign_key_and_junk():
+    owner, address = _owned_wallet()
+    nonce = "nonce-x"
+    challenge = challenge_message(address, nonce).encode("utf-8")
+    impostor = Ed25519PrivateKey.generate()
+    assert (
+        verify_tip_wallet_signature(address, _b58encode(impostor.sign(challenge)), nonce)
+        is False
+    )
+    tampered = bytearray(owner.sign(challenge))
+    tampered[0] ^= 0xFF
+    assert verify_tip_wallet_signature(address, _b58encode(bytes(tampered)), nonce) is False
+    # Signature must decode to exactly 64 bytes.
+    assert verify_tip_wallet_signature(address, "1" * 10, nonce) is False
+
+
+@pytest.mark.django_db
+def test_tip_wallet_http_signature_flow():
+    acc = make_helper("fund-own@ex.com")
+    key, address = _owned_wallet()
+    nonce = "nonce-http-1"
+    sig = _b58encode(key.sign(challenge_message(address, nonce).encode("utf-8")))
+    c = Client()
+    c.force_login(acc)
+
+    def post(body: dict):
+        return c.post("/api/v1/me/tip-wallet", data=body, content_type="application/json")
+
+    # Unverified publish first.
+    res = post({"address": address})
+    assert res.status_code == 200
+    assert res.json()["tip_wallet_verified"] is False
+    acc.refresh_from_db()
+    assert acc.tip_wallet_verified_at is None
+
+    # A signature without its nonce is rejected.
+    assert post({"address": address, "signature": sig}).status_code == 400
+
+    # Signing the canonical challenge proves ownership.
+    res = post({"address": address, "signature": sig, "nonce": nonce})
+    assert res.status_code == 200
+    assert res.json()["tip_wallet_verified"] is True
+    acc.refresh_from_db()
+    assert acc.tip_wallet_verified_at is not None
+
+    # Re-saving the same address without a signature keeps the proof.
+    res = post({"address": address})
+    assert res.json()["tip_wallet_verified"] is True
+
+    # A different address without proof drops the badge.
+    res = post({"address": VALID_WALLET})
+    assert res.status_code == 200
+    assert res.json()["tip_wallet_verified"] is False
+    acc.refresh_from_db()
+    assert acc.tip_wallet_verified_at is None
+
+    # A bad signature is a 400 and changes nothing.
+    assert post({"address": VALID_WALLET, "signature": "!!!"}).status_code == 400
+    acc.refresh_from_db()
+    assert acc.tip_wallet_address == VALID_WALLET
+    assert acc.tip_wallet_verified_at is None
+
+    # Clearing removes both address and proof.
+    res = post({"address": ""})
+    assert res.status_code == 200
+    assert res.json() == {
+        "ok": True,
+        "tip_wallet_address": "",
+        "tip_wallet_verified": False,
+    }
     acc.refresh_from_db()
     assert acc.tip_wallet_address == ""
+    assert acc.tip_wallet_verified_at is None
+
+
+@pytest.mark.django_db
+def test_me_reports_tip_wallet_verified():
+    acc = make_helper("fund-mev@ex.com")
+    key, address = _owned_wallet()
+    nonce = "nonce-me-1"
+    sig = _b58encode(key.sign(challenge_message(address, nonce).encode("utf-8")))
+    c = Client()
+    c.force_login(acc)
+    res = c.post(
+        "/api/v1/me/tip-wallet",
+        data={"address": address, "signature": sig, "nonce": nonce},
+        content_type="application/json",
+    )
+    assert res.status_code == 200
+    me = c.get("/api/v1/me")
+    assert me.status_code == 200
+    assert me.json()["tip_wallet_verified"] is True
+    acc.refresh_from_db()
+    assert acc.tip_wallet_address == address
 
 
 @pytest.mark.django_db

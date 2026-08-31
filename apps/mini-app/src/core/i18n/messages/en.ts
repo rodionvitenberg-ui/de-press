@@ -647,6 +647,7 @@ export const en: Messages = {
     tipTitle: "Dialogue closed. Thanks for being there",
     tipText:
       "If the dialogue helped, you can thank the listener directly — completely optional.",
+    verifiedBadge: "Verified",
   },
   calls: {
     call: "Call",

@@ -90,6 +90,7 @@ class DialogueOut(Schema):
     unread_count: int = 0
     peer_key: str = ""
     peer_tip_wallet: str = ""
+    peer_tip_wallet_verified: bool = False
 
 
 class OutreachIn(Schema):
@@ -177,6 +178,7 @@ def _req_out(req) -> RequestOut:
 
 def _dialogue_out(d, actor=None) -> DialogueOut:
     flags = dialogue_flags(d, actor) if actor is not None else {}
+    peer_wallet, peer_wallet_verified = _peer_tip_wallet(d, actor)
     return DialogueOut(
         id=str(d.id),
         story_id=str(d.story_id) if d.story_id else None,
@@ -198,19 +200,21 @@ def _dialogue_out(d, actor=None) -> DialogueOut:
         muted=bool(_is_muted(d, actor)) if actor is not None else False,
         unread_count=unread_count_for(d, actor) if actor is not None else 0,
         peer_key=_peer_key(d, actor),
-        peer_tip_wallet=_peer_tip_wallet(d, actor),
+        peer_tip_wallet=str(peer_wallet),
+        peer_tip_wallet_verified=bool(peer_wallet_verified),
     )
 
 
-def _peer_tip_wallet(d, actor) -> str:
+def _peer_tip_wallet(d, actor) -> tuple[str, bool]:
     """Opt-in Solana tip address of a helper peer, only after dialogue closed.
 
     Shown only to the grateful side (the viewer is not the helper), only for
     a closed dialogue, and only when the helper opted in. Never on open
-    dialogues, never on public pages (ADR-0020).
+    dialogues, never on public pages (ADR-0020). The second value reports
+    whether the helper proved ownership of the address by signature.
     """
     if actor is None or d.status != DialogueStatus.CLOSED:
-        return ""
+        return "", False
     is_author = False
     if actor.account is not None and d.author_account_id == actor.account.id:
         is_author = True
@@ -218,13 +222,16 @@ def _peer_tip_wallet(d, actor) -> str:
         is_author = True
     peer_account_id = d.peer_account_id if is_author else d.author_account_id
     if peer_account_id is None:
-        return ""
-    return (
+        return "", False
+    peer = (
         Account.objects.filter(id=peer_account_id, is_helper=True)
         .exclude(tip_wallet_address="")
-        .values_list("tip_wallet_address", flat=True)
+        .values("tip_wallet_address", "tip_wallet_verified_at")
         .first()
-    ) or ""
+    )
+    if peer is None:
+        return "", False
+    return peer["tip_wallet_address"], bool(peer["tip_wallet_verified_at"])
 
 
 def _peer_key(d, actor) -> str:

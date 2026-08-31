@@ -10,8 +10,11 @@ forgotten shift.
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone as dt_timezone
 
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
@@ -39,6 +42,70 @@ def validate_tip_wallet(address: str) -> str:
     if treasury and addr == treasury:
         raise FundError("Treasury address cannot be used as a tip wallet")
     return addr
+
+
+# --- Ownership verification (ADR-0020 phase 2, off-chain) --------------------
+
+# Canonical challenge signed by the injected wallet. Must stay byte-for-byte
+# identical to the frontend builder in apps/*/src/features/fund/wallet.ts.
+_CHALLENGE = (
+    "de-press: verify wallet ownership\n"
+    "This signature proves you control this Solana address.\n"
+    "It grants no access to funds and expires in 10 minutes.\n"
+    "Address: {address}\n"
+    "Nonce: {nonce}"
+)
+
+
+def challenge_message(address: str, nonce: str) -> str:
+    """Canonical message for signing; byte-identical to the frontend builder.
+
+    The nonce is generated client-side and travels together with the
+    signature, so the backend can rebuild the exact signed bytes without
+    server-side state.
+    """
+    return _CHALLENGE.format(address=(address or "").strip(), nonce=nonce)
+
+
+def tip_wallet_challenge(address: str) -> str:
+    """Human-readable message the wallet signs to prove address ownership."""
+    return challenge_message(address, secrets.token_hex(8))
+
+
+def _b58decode(value: str) -> bytes:
+    """Base58 decode without a dependency (32-byte ed25519 pubkey expected)."""
+    alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    base = len(alphabet)
+    num = 0
+    for char in value:
+        index = alphabet.find(char)
+        if index < 0:
+            raise FundError("Invalid Solana address")
+        num = num * base + index
+    raw = num.to_bytes((num.bit_length() + 7) // 8, "big")
+    # Leading '1's are leading zero bytes in the binary form.
+    pad = len(value) - len(value.lstrip("1"))
+    return b"\x00" * pad + raw
+
+
+def verify_tip_wallet_signature(
+    address: str, signature_b58: str, nonce: str = ""
+) -> bool:
+    """Check an ed25519 signature of the canonical challenge (off-chain).
+
+    Only the address-format checks + local pubkey/signature math happen here:
+    per ADR-0020 the backend never touches keys, transactions or RPC. The
+    nonce is the one the signer embedded in the challenge.
+    """
+    signature = _b58decode(signature_b58)
+    if len(signature) != 64:
+        return False
+    public_key = Ed25519PublicKey.from_public_bytes(_b58decode(address))
+    try:
+        public_key.verify(signature, challenge_message(address, nonce).encode("utf-8"))
+    except InvalidSignature:
+        return False
+    return True
 
 
 def _stale_gap() -> timedelta:

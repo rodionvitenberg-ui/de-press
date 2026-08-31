@@ -13,6 +13,7 @@ export interface Me {
   helper_org?: string;
   helper_badge?: string;
   tip_wallet_address?: string;
+  tip_wallet_verified?: boolean;
   is_therapist?: boolean;
 }
 
@@ -132,6 +133,7 @@ export interface Dialogue {
   status: string;
   source?: string;
   peer_tip_wallet?: string;
+  peer_tip_wallet_verified?: boolean;
   rules: string;
   updated_at: string;
 }
@@ -144,6 +146,7 @@ export interface FundInfo {
 export interface TipWalletResponse {
   ok: boolean;
   tip_wallet_address: string;
+  tip_wallet_verified?: boolean;
 }
 
 /** Message kinds in Initiated Dialogue. `circle` = short ephemeral video. */

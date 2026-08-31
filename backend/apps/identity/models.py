@@ -101,6 +101,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
     # Empty = tipping off. Helpers should use a dedicated wallet (on-chain
     # tips are linkable); validated in apps.fund.services.
     tip_wallet_address = models.CharField(max_length=44, blank=True, default="")
+    # ADR-0020 phase 2: when the ownership signature was verified (off-chain
+    # ed25519 over the canonical challenge). Empty address always clears it.
+    tip_wallet_verified_at = models.DateTimeField(null=True, blank=True, default=None)
 
     objects = AccountManager()
 

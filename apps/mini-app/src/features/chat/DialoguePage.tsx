@@ -617,7 +617,10 @@ export function DialoguePage() {
       </div>
 
       {dialogue?.peer_tip_wallet ? (
-        <TipBanner wallet={dialogue.peer_tip_wallet} />
+        <TipBanner
+          wallet={dialogue.peer_tip_wallet}
+          verified={dialogue.peer_tip_wallet_verified ?? false}
+        />
       ) : null}
 
       {open ? (

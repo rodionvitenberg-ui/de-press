@@ -40,7 +40,10 @@ export function MorePane() {
         />
         <FundCard />
         {isHelper ? (
-          <TipWalletForm current={meQuery.data?.tip_wallet_address ?? ""} />
+          <TipWalletForm
+            current={meQuery.data?.tip_wallet_address ?? ""}
+            verified={meQuery.data?.tip_wallet_verified ?? false}
+          />
         ) : null}
         {pwa.isStandalone ? (
           <ListRow asButton title={t.nav.installed} avatarText="·" muted />

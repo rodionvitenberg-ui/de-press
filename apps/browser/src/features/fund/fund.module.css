@@ -94,3 +94,12 @@
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+.badge {
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--accent-hope);
+  border-radius: 999px;
+  color: var(--accent-hope);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}

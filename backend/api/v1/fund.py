@@ -11,8 +11,14 @@ from django.conf import settings
 from ninja import Router, Schema
 from ninja.errors import HttpError
 
-from apps.fund.services import FundError, duty_report, validate_tip_wallet
+from apps.fund.services import (
+    FundError,
+    duty_report,
+    validate_tip_wallet,
+    verify_tip_wallet_signature,
+)
 from apps.identity.services import resolve_actor
+from django.utils import timezone
 
 router = Router(tags=["fund"])
 
@@ -33,16 +39,26 @@ def fund_info(request):
 
 class TipWalletIn(Schema):
     address: str = ""
+    # ADR-0020 phase 2: optional base58 ed25519 signature of the canonical
+    # challenge plus the nonce embedded in it (see apps.fund.services).
+    signature: str = ""
+    nonce: str = ""
 
 
 class TipWalletOut(Schema):
     ok: bool
     tip_wallet_address: str
+    tip_wallet_verified: bool
 
 
 @router.post("/me/tip-wallet", response=TipWalletOut)
 def post_tip_wallet(request, payload: TipWalletIn):
-    """Helper-only opt-in: publish (or clear) a personal Solana tip address."""
+    """Helper-only opt-in: publish (or clear) a personal Solana tip address.
+
+    Setting a new address without a signature publishes it unverified; a
+    signature over the canonical challenge proves ownership off-chain. An
+    empty address always clears both the address and its proof.
+    """
     actor = resolve_actor(request)
     account = actor.account
     if account is None or not account.is_helper:
@@ -51,9 +67,37 @@ def post_tip_wallet(request, payload: TipWalletIn):
         address = validate_tip_wallet(payload.address)
     except FundError as exc:
         raise HttpError(400, str(exc)) from exc
+    if not address:
+        account.tip_wallet_address = ""
+        account.tip_wallet_verified_at = None
+        account.save(update_fields=["tip_wallet_address", "tip_wallet_verified_at"])
+        return TipWalletOut(ok=True, tip_wallet_address="", tip_wallet_verified=False)
+    verified_at = None
+    if payload.signature:
+        if not payload.nonce:
+            raise HttpError(400, "Missing challenge nonce for the signature")
+        try:
+            signed_ok = verify_tip_wallet_signature(
+                address, payload.signature, payload.nonce
+            )
+        except FundError as exc:
+            raise HttpError(400, str(exc)) from exc
+        if not signed_ok:
+            raise HttpError(400, "Signature does not prove ownership of this address")
+        verified_at = timezone.now()
+    elif account.tip_wallet_address != address:
+        # A different address without proof: keep the old verified_at only when
+        # the address is unchanged, otherwise the badge must not survive.
+        account.tip_wallet_verified_at = None
+    if verified_at is not None:
+        account.tip_wallet_verified_at = verified_at
     account.tip_wallet_address = address
-    account.save(update_fields=["tip_wallet_address"])
-    return TipWalletOut(ok=True, tip_wallet_address=address)
+    account.save(update_fields=["tip_wallet_address", "tip_wallet_verified_at"])
+    return TipWalletOut(
+        ok=True,
+        tip_wallet_address=address,
+        tip_wallet_verified=account.tip_wallet_verified_at is not None,
+    )
 
 
 class FundReportRowOut(Schema):

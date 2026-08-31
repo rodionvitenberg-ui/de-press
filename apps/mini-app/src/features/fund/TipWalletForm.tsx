@@ -2,18 +2,30 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/core/api/client";
 import { useI18n } from "@/core/i18n/context";
-import { isValidSolanaAddress } from "./wallet";
+import { isValidSolanaAddress, signTipWalletChallenge } from "./wallet";
 import styles from "./fund.module.css";
 
+interface SavePayload {
+  address: string;
+  nonce?: string;
+  signature?: string;
+}
+
 /** Helper-only opt-in: publish (or clear) a personal Solana tip address. */
-export function TipWalletForm({ current }: { current: string }) {
+export function TipWalletForm({
+  current,
+  verified = false,
+}: {
+  current: string;
+  verified?: boolean;
+}) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const [address, setAddress] = useState("");
   const [localError, setLocalError] = useState("");
 
   const save = useMutation({
-    mutationFn: (value: string) => api.setTipWallet(value),
+    mutationFn: (payload: SavePayload) => api.setTipWallet(payload),
     onSuccess: () => {
       setAddress("");
       setLocalError("");
@@ -32,7 +44,22 @@ export function TipWalletForm({ current }: { current: string }) {
       setLocalError(t.fund.invalidAddress);
       return;
     }
-    save.mutate(value);
+    if (!value) {
+      save.mutate({ address: "" });
+      return;
+    }
+    // ADR-0020 phase 2: when an injected Solana wallet is present, attach an
+    // ownership signature; without one (no wallet / user declined) the address
+    // is saved unverified.
+    void signTipWalletChallenge(value)
+      .then((proof) =>
+        save.mutate({
+          address: value,
+          nonce: proof.nonce,
+          signature: proof.signature,
+        }),
+      )
+      .catch(() => save.mutate({ address: value }));
   };
 
   return (
@@ -47,7 +74,10 @@ export function TipWalletForm({ current }: { current: string }) {
       <p className={styles.lead}>{t.fund.tipWalletText}</p>
       {current ? (
         <p className={styles.current}>
-          {t.fund.tipWalletCurrent}: <code>{current}</code>
+          {t.fund.tipWalletCurrent}: <code>{current}</code>{" "}
+          {verified ? (
+            <span className={styles.badge}>{t.fund.verifiedBadge}</span>
+          ) : null}
         </p>
       ) : null}
       <input
@@ -72,7 +102,7 @@ export function TipWalletForm({ current }: { current: string }) {
             type="button"
             className={styles.btn}
             disabled={save.isPending}
-            onClick={() => save.mutate("")}
+            onClick={() => save.mutate({ address: "" })}
           >
             {t.fund.clear}
           </button>

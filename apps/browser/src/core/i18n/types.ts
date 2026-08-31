@@ -205,6 +205,7 @@ export type Messages = {
     invalidAddress: string;
     tipTitle: string;
     tipText: string;
+    verifiedBadge: string;
   };
   calls: {
     call: string;

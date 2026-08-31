@@ -115,7 +115,7 @@ Invariant: **no** public comments, likes, or reaction showcases on an entry page
 ## The fund (ADR 0020) — done in the browser SPA and the Mini App
 
 A non-custodial contour: a public treasury (a Squads multisig, `TREASURY_SOLANA_ADDRESS` — empty = the UI is hidden), a helper's opt-in tip wallet (visible only in a closed dialogue to the grateful peer, with the "a separate wallet" warning), the duty fund with a per-day cap and a lazy stale-close, a public pseudonymous report `GET /v1/fund/report?period=YYYY-MM` — the multisig signers split the treasury by it. Money moves only wallet → wallet; the backend never touches keys, payments, or RPC.
-Next: the public report page, the ownership verification by signature (phase 2).
+Done: the ownership verification by signature (phase 2) — an off-chain ed25519 proof of the tip-wallet ownership, surfaced as the "verified" badge. Next: the public report page.
 
 ## Therapy (ADR 0022) — a seedling
 

@@ -8,7 +8,13 @@ import styles from "./fund.module.css";
  * backend exposed the helper's opt-in `peer_tip_wallet` (closed dialogue,
  * grateful viewer) — the platform itself never touches the transfer.
  */
-export function TipBanner({ wallet }: { wallet: string }) {
+export function TipBanner({
+  wallet,
+  verified = false,
+}: {
+  wallet: string;
+  verified?: boolean;
+}) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
@@ -27,6 +33,9 @@ export function TipBanner({ wallet }: { wallet: string }) {
       <p className={styles.bannerTitle}>{t.fund.tipTitle}</p>
       <p className={styles.lead}>{t.fund.tipText}</p>
       <code className={styles.addr}>{wallet}</code>
+      {verified ? (
+        <span className={styles.badge}>{t.fund.verifiedBadge}</span>
+      ) : null}
       <div className={styles.row}>
         <button type="button" className={styles.btn} onClick={() => void copy()}>
           {copied ? t.fund.copied : t.fund.copy}

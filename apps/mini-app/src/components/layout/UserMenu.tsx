@@ -445,7 +445,10 @@ export function UserMenu({ open, onClose }: UserMenuProps) {
 
             <FundCard />
             {isAccount && me?.is_helper ? (
-              <TipWalletForm current={me.tip_wallet_address ?? ""} />
+              <TipWalletForm
+                current={me.tip_wallet_address ?? ""}
+                verified={me.tip_wallet_verified ?? false}
+              />
             ) : null}
 
             {isAccount ? (
