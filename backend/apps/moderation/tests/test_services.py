@@ -91,8 +91,8 @@ def test_resolve_hidden_help_report_does_not_need_story():
     submitted = submit_message_report(visitor, msg.id, reason=ReportReason.OTHER)
     resolved = resolve_report(
         submitted.report.id,
-        status=ReportStatus.RESOLVED_HIDDEN,
-        hide_story=True,
+        decision="hide",
+        reason=ReportReason.OTHER,
     )
     assert resolved.status == ReportStatus.RESOLVED_HIDDEN
     assert resolved.story_id is None

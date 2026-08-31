@@ -48,7 +48,7 @@ The Q5 decision: the GitHub publication is deferred until all the other project 
 - The reports workflow (the foundation exists: `Report` — story|message, the reasons abuse/spam/self_harm/other, the statuses, the submit endpoints): the staff queue `GET /admin/reports`, `POST /admin/reports/{id}/resolve` — the decision (hide | remove | dismiss) + the **mandatory reason** + a note; applies `Story.status` hidden/removed (the hide is the default and reversible) or hides the reported message; writes the `ModerationAction` audit log (who/what/why/when); notifies the reporter without the other party's data.
 - The moderator sees **only the reported item** (the preview + the minimal context), never the arbitrary browsing of others' content; the reporter/target identities are not exposed (Q12).
 - The helpers get the reports **visibility** in `/helper` (the recent reports from the existing `GET /moderation/dashboard`), view-only, no actions.
-- Out of scope (stays P2): the pre-mod / AI-assist for the reports; Geo-help v2.
+- Out of scope (moved after the launch): the pre-mod / AI-assist for the reports; Geo-help v2.
 
 ## P6. Manual QA
 

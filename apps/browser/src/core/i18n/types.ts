@@ -565,6 +565,7 @@ export type Messages = {
       help_requested: string;
       help_accepted: string;
       dialogue_request_review: string;
+      report_resolved: string;
     };
   };
   inbox: {

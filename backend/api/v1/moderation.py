@@ -19,8 +19,13 @@ from apps.moderation.blocks import (
     block_peer_in_dialogue,
     unblock_peer_in_dialogue,
 )
-from apps.moderation.models import ReportReason
-from apps.moderation.services import ReportError, submit_message_report, submit_report
+from apps.moderation.models import (
+    ModerationAction,
+    Report,
+    ReportReason,
+    ReportStatus,
+)
+from apps.moderation.services import ReportError, resolve_report, submit_message_report, submit_report
 from apps.stories.services import StoryNotFound
 
 router = Router(tags=["moderation"])
@@ -241,3 +246,176 @@ def unblock_dialogue_peer(request, dialogue_id: UUID):
             else "Он и так не был скрыт."
         ),
     )
+
+
+# --- Admin (staff) -----------------------------------------------------------------
+
+
+class AdminOverviewOut(Schema):
+    sessions_24h: int
+    sessions_7d: int
+    sessions_total: int
+    stories_total: int
+    stories_7d: int
+    hears_total: int
+    dialogues_open: int
+    dialogues_closed: int
+    therapy_by_status: dict[str, int]
+    pending_clouds: int
+    reports_open: int
+    reports_reviewing: int
+    reports_7d: int
+    reports_by_reason: dict[str, int]
+
+
+class AdminReportOut(Schema):
+    id: str
+    status: str
+    reason: str
+    details: str
+    target_kind: str
+    target_text: str
+    target_hidden: bool
+    created_at: str
+    resolved_note: str
+
+
+class AdminResolveIn(Schema):
+    decision: str
+    reason: str = ""
+    note: str = ""
+
+
+class AdminResolveOut(Schema):
+    ok: bool
+    report: AdminReportOut
+
+
+class AdminActionOut(Schema):
+    id: str
+    action: str
+    reason: str
+    note: str
+    actor_email: str
+    report_id: str | None
+    story_id: str | None
+    message_id: str | None
+    created_at: str
+
+
+def _require_staff_only(actor) -> None:
+    acc = actor.account
+    if acc is None or not (acc.is_staff or acc.is_superuser):
+        raise HttpError(403, "Нужен staff-доступ")
+
+
+def _admin_report_out(report: Report) -> AdminReportOut:
+    """Модератор видит только сам контент жалобы (Q12), не личность репортера."""
+    if report.story_id and report.story is not None:
+        target_kind = "story"
+        target_text = report.story.body or ""
+        target_hidden = report.story.status in ("hidden", "removed", "draft")
+    else:
+        target_kind = "message"
+        target_text = ""
+        target_hidden = False
+        if report.message is not None:
+            target_text = report.message.body or report.message.transcript or ""
+            target_hidden = bool(report.message.deleted_at)
+    return AdminReportOut(
+        id=str(report.id),
+        status=report.status,
+        reason=report.reason,
+        details=(report.details or "")[:500],
+        target_kind=target_kind,
+        target_text=target_text[:600],
+        target_hidden=target_hidden,
+        created_at=report.created_at.isoformat(),
+        resolved_note=report.resolved_note or "",
+    )
+
+
+@router.get("/admin/overview", response=AdminOverviewOut)
+def admin_overview(request):
+    """Стартовая сводка для staff: только счётчики, без содержимого."""
+    actor = require_actor(request)
+    _require_staff_only(actor)
+    from apps.moderation.dashboard import build_admin_overview
+
+    view = build_admin_overview()
+    return AdminOverviewOut(
+        sessions_24h=view.sessions_24h,
+        sessions_7d=view.sessions_7d,
+        sessions_total=view.sessions_total,
+        stories_total=view.stories_total,
+        stories_7d=view.stories_7d,
+        hears_total=view.hears_total,
+        dialogues_open=view.dialogues_open,
+        dialogues_closed=view.dialogues_closed,
+        therapy_by_status=dict(view.therapy_by_status),
+        pending_clouds=view.pending_clouds,
+        reports_open=view.reports_open,
+        reports_reviewing=view.reports_reviewing,
+        reports_7d=view.reports_7d,
+        reports_by_reason=dict(view.reports_by_reason),
+    )
+
+
+@router.get("/admin/reports", response=list[AdminReportOut])
+def admin_reports(request, status: str = "open", limit: int = 50):
+    """Очередь жалоб для staff: фильтр по статусу, без личностей репортеров."""
+    actor = require_actor(request)
+    _require_staff_only(actor)
+    if status != "all" and status not in ReportStatus.values:
+        raise HttpError(
+            400,
+            f"Invalid status. Allowed: all, {', '.join(ReportStatus.values)}",
+        )
+    limit = max(1, min(limit, 100))
+    qs = Report.objects.order_by("-created_at").select_related("story", "message")
+    if status != "all":
+        qs = qs.filter(status=status)
+    return [_admin_report_out(r) for r in qs[:limit]]
+
+
+@router.post("/admin/reports/{report_id}/resolve", response=AdminResolveOut)
+def admin_resolve_report(request, report_id: UUID, payload: AdminResolveIn):
+    """Решение по жалобе: hide|remove|dismiss + обязательная причина (Q12)."""
+    actor = require_actor(request)
+    _require_staff_only(actor)
+    try:
+        report = resolve_report(
+            report_id,
+            actor=actor.account,
+            decision=payload.decision,
+            reason=payload.reason,
+            note=payload.note,
+        )
+    except ReportError as exc:
+        msg = str(exc)
+        raise HttpError(404 if "not found" in msg else 400, msg) from exc
+    fresh = Report.objects.select_related("story", "message").get(pk=report.id)
+    return AdminResolveOut(ok=True, report=_admin_report_out(fresh))
+
+
+@router.get("/admin/moderation-log", response=list[AdminActionOut])
+def admin_moderation_log(request, limit: int = 100):
+    """Журнал действий модерации: кто, что, почему."""
+    actor = require_actor(request)
+    _require_staff_only(actor)
+    limit = max(1, min(limit, 200))
+    rows = ModerationAction.objects.select_related("actor")[:limit]
+    return [
+        AdminActionOut(
+            id=str(a.id),
+            action=a.action,
+            reason=a.reason,
+            note=a.note,
+            actor_email=(a.actor.email if a.actor else ""),
+            report_id=str(a.report_id) if a.report_id else None,
+            story_id=str(a.story_id) if a.story_id else None,
+            message_id=str(a.message_id) if a.message_id else None,
+            created_at=a.created_at.isoformat(),
+        )
+        for a in rows
+    ]

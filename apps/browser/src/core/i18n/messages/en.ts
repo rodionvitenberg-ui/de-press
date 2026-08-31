@@ -603,6 +603,7 @@ export const en: Messages = {
       help_requested: "Someone is asking for a person nearby",
       help_accepted: "A Helper accepted your request",
       dialogue_request_review: "A dialogue request is waiting for review",
+      report_resolved: "Your report was reviewed — thank you for keeping this place safe",
     },
   },
   common: {

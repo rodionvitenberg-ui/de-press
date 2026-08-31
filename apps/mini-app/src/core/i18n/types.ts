@@ -481,6 +481,7 @@ export type Messages = {
       outreach_intro: string;
       message: string;
       dialogue_request_review: string;
+      report_resolved: string;
     };
   };
   inbox: {

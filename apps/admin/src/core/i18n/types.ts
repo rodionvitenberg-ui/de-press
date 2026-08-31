@@ -1,0 +1,83 @@
+export type Lang = "en" | "ru";
+
+/** Каноническая форма локали; en/ru аннотированы этим типом (см. messages/). */
+export interface Messages {
+  common: {
+    loading: string;
+    error: string;
+    retry: string;
+    cancel: string;
+  };
+  app: {
+    title: string;
+    tabOverview: string;
+    tabReports: string;
+    tabLog: string;
+    accessDenied: string;
+    accessDeniedHint: string;
+    openMainApp: string;
+  };
+  overview: {
+    visitors24: string;
+    visitors7: string;
+    visitorsTotal: string;
+    visitorsNote: string;
+    storiesTotal: string;
+    stories7: string;
+    hears: string;
+    dialoguesOpen: string;
+    dialoguesClosed: string;
+    therapy: string;
+    pendingClouds: string;
+    reportsOpen: string;
+    reportsReviewing: string;
+    reports7: string;
+    reportsByReason: string;
+  };
+  reasons: {
+    abuse: string;
+    spam: string;
+    self_harm: string;
+    other: string;
+  };
+  statuses: {
+    open: string;
+    reviewing: string;
+    resolved_hidden: string;
+    resolved_dismissed: string;
+  };
+  actions: {
+    reviewing: string;
+    hidden: string;
+    removed: string;
+    dismissed: string;
+  };
+  reports: {
+    queue: string;
+    filterAll: string;
+    empty: string;
+    targetStory: string;
+    targetMessage: string;
+    alreadyHidden: string;
+    details: string;
+    resolve: string;
+    resolving: string;
+    decision: string;
+    decisionHide: string;
+    decisionRemove: string;
+    decisionDismiss: string;
+    reason: string;
+    reasonPlaceholder: string;
+    note: string;
+    resolvedNote: string;
+    reasonRequired: string;
+  };
+  log: {
+    empty: string;
+    actor: string;
+    when: string;
+    action: string;
+    reason: string;
+    note: string;
+  };
+}

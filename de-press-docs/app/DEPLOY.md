@@ -1,7 +1,8 @@
 # DEPLOY — staging/prod on a single VPS (systemd + nginx, no docker)
 
 The scheme: one origin `https://app.depress.co` (replace with your domain). nginx serves
-the static files (the browser SPA — `/`, the Telegram Mini App — `/tg/`, the admin static — `/static/`,
+the static files (the browser SPA — `/`, the Telegram Mini App — `/tg/`, the staff admin
+console — `/console/`, the Django admin — `/admin/`, the static — `/static/`,
 the media — `/media/`) and proxies `/api` `/admin` `/docs` `/openapi.json` `/ws` to
 daphne `127.0.0.1:8000`. Postgres and Redis — system packages. The Celery worker + beat —
 systemd units. The backups — a systemd timer (`pg_dump -Fc`, a 14-day retention).
@@ -69,9 +70,16 @@ sudo systemctl enable --now depress-api depress-celery depress-celery-beat depre
 ```bash
 cd apps/browser && npm ci && npx vite build
 cd ../mini-app && npm ci && npx vite build   # base=/tg/
+cd ../admin && npm ci && npx vite build      # base=/console/
 rsync -a --delete apps/browser/dist/  deploy@app.depress.co:/opt/de-press/apps/browser/dist/
 rsync -a --delete apps/mini-app/dist/ deploy@app.depress.co:/opt/de-press/apps/mini-app/dist/
+rsync -a --delete apps/admin/dist/    deploy@app.depress.co:/opt/de-press/apps/admin/dist/
 ```
+
+Note: the staff admin console (the new Vite app `apps/admin`) is served from
+`/console/` on the same origin — the code never ships to regular users, and every
+API under `/api/v1/admin/*` requires a staff session (403 otherwise). The Django
+admin stays at `/admin/` as the fallback tool.
 
 ## 8. nginx + TLS
 

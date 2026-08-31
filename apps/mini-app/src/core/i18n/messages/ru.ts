@@ -553,6 +553,7 @@ export const ru: Messages = {
       outreach_intro: "Автор написал тебе (outreach)",
       message: "Новое сообщение в диалоге",
       dialogue_request_review: "Запрос диалога ждёт проверки",
+      report_resolved: "Ваша жалоба рассмотрена — спасибо, что помогаете держать место безопасным",
     },
   },
   common: {

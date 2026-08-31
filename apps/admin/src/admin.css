@@ -1,0 +1,273 @@
+/* de-press admin — внутренний инструмент: спокойный светлый интерфейс. */
+
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --ink: #2a2723;
+  --muted: #7a736a;
+  --line: #e4ded4;
+  --accent-hope: #4e7d64;
+  --accent-warn: #b4552d;
+  --danger: #a63d2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    "Inter",
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.screen {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 20px 48px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.top h1 {
+  font-size: 17px;
+  margin: 0 auto 0 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tab-on {
+  background: var(--accent-hope);
+  border-color: var(--accent-hope);
+  color: #fff;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.card h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+
+.num {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.warn {
+  border-color: var(--accent-warn);
+}
+
+.sub {
+  font-size: 14px;
+  margin: 22px 0 8px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kv {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.kv li {
+  display: flex;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 12px;
+}
+
+.num-inline {
+  font-weight: 600;
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.preview {
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.body {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.badge {
+  display: inline-block;
+  background: color-mix(in srgb, var(--accent-hope) 14%, transparent);
+  color: var(--accent-hope);
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 2px 10px;
+  margin: 0 0 6px;
+}
+
+.err {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 6px 0;
+}
+
+.resolve-form {
+  display: grid;
+  gap: 8px;
+  border-top: 1px dashed var(--line);
+  padding-top: 10px;
+  margin-top: 8px;
+}
+
+.resolve-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.resolve-form select,
+.resolve-form textarea {
+  font: inherit;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: var(--surface);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  border: none;
+  background: var(--accent-hope);
+  color: #fff;
+  border-radius: 10px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn.ghost {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.log {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.log th,
+.log td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  vertical-align: top;
+}
+
+.log th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.denied {
+  max-width: 420px;
+  margin: 80px auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+}
+
+.empty {
+  color: var(--muted);
+}

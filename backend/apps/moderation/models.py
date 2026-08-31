@@ -200,3 +200,69 @@ class Block(models.Model):
 
     def __str__(self) -> str:
         return f"block:{self.id}"
+
+
+class ModerationActionKind(models.TextChoices):
+    REVIEWING = "reviewing", "Marked reviewing"
+    HIDDEN = "hidden", "Content hidden"
+    REMOVED = "removed", "Content removed"
+    DISMISSED = "dismissed", "Report dismissed"
+
+
+class ModerationAction(models.Model):
+    """Audit log (Q12): каждое решение модератора — в журнале.
+
+    Хранит решение, обязательную причину, примечание и staff-актора.
+    Никаких данных репортера: только что сделано и почему.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    report = models.ForeignKey(
+        Report,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="moderation_actions",
+    )
+    story = models.ForeignKey(
+        "stories.Story",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="moderation_actions",
+    )
+    message = models.ForeignKey(
+        "dialogue.Message",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="moderation_actions",
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="moderation_actions_made",
+    )
+    action = models.CharField(max_length=32, choices=ModerationActionKind.choices)
+    reason = models.CharField(
+        max_length=32,
+        choices=ReportReason.choices,
+        blank=True,
+        default="",
+        help_text="Обязателен для терминальных решений (hide/remove/dismiss).",
+    )
+    note = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Moderation action"
+        verbose_name_plural = "Moderation actions"
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=["action", "-created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"mod:{self.action}:{self.report_id}"

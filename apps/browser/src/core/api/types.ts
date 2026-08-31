@@ -314,7 +314,8 @@ export type NotificationKind =
   | "silent_empathy"
   | "help_requested"
   | "help_accepted"
-  | "dialogue_request_review";
+  | "dialogue_request_review"
+  | "report_resolved";
 
 export interface AppNotification {
   id: string;

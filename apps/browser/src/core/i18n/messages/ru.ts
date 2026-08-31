@@ -606,6 +606,7 @@ export const ru: Messages = {
       help_requested: "Кто-то просит человека рядом",
       help_accepted: "Helper принял запрос",
       dialogue_request_review: "Запрос диалога ждёт проверки",
+      report_resolved: "Ваша жалоба рассмотрена — спасибо, что помогаете держать место безопасным",
     },
   },
   common: {

@@ -548,6 +548,7 @@ export const en: Messages = {
       outreach_intro: "The author wrote to you (outreach)",
       message: "New message in the dialogue",
       dialogue_request_review: "A dialogue request is waiting for review",
+      report_resolved: "Your report was reviewed — thank you for keeping this place safe",
     },
   },
   common: {

@@ -703,6 +703,30 @@ def delete_message_for_everyone(actor: Actor, message_id: UUID) -> Message:
 
 
 @transaction.atomic
+def moderator_scrub_message(message_id: UUID) -> Message | None:
+    """Moderator (staff) removes a reported message for everyone (Q12).
+
+    Same scrub path as `delete_message_for_everyone`, but without the
+    participant check — только для staff-модерации репортов.
+    """
+    try:
+        msg = Message.objects.select_related("dialogue").get(pk=message_id)
+    except Message.DoesNotExist:
+        return None
+    if msg.deleted_at:
+        return msg
+    _scrub_message(msg)
+    d = msg.dialogue
+    if d.pinned_message_id == msg.id:
+        d.pinned_message = None
+        d.save(update_fields=["pinned_message"])
+    from apps.dialogue.realtime import broadcast_message_deleted
+
+    transaction.on_commit(lambda: broadcast_message_deleted(d.id, msg))
+    return msg
+
+
+@transaction.atomic
 def hide_message_for_me(actor: Actor, message_id: UUID) -> None:
     msg, _d = _get_live_message(actor, message_id)
     defaults = {

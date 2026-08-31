@@ -6,11 +6,20 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.common.rate_limit import RateLimitExceeded, assert_under_limit
+from apps.identity.models import Account
 from apps.identity.services import Actor
-from apps.moderation.models import Report, ReportReason, ReportStatus
+from apps.moderation.models import (
+    ModerationAction,
+    Report,
+    ReportReason,
+    ReportStatus,
+)
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import NotificationError, notify
 from apps.stories.models import StoryStatus
 from apps.stories.services import StoryNotFound, get_story, moderate_story
 
@@ -199,32 +208,132 @@ def submit_message_report(
     )
 
 
+_DECISION_STATUS = {
+    "reviewing": ReportStatus.REVIEWING,
+    "hide": ReportStatus.RESOLVED_HIDDEN,
+    "remove": ReportStatus.RESOLVED_HIDDEN,
+    "dismiss": ReportStatus.RESOLVED_DISMISSED,
+}
+_TERMINAL_DECISIONS = ("hide", "remove", "dismiss")
+
+
 @transaction.atomic
 def resolve_report(
     report_id: UUID,
     *,
-    status: str,
+    actor: Account | None = None,
+    decision: str,
+    reason: str = "",
     note: str = "",
-    hide_story: bool = False,
 ) -> Report:
-    if status not in (
-        ReportStatus.RESOLVED_HIDDEN,
-        ReportStatus.RESOLVED_DISMISSED,
-        ReportStatus.REVIEWING,
-    ):
-        raise ReportError("Invalid resolution status")
+    """Модераторское решение (Q12): причина обязательна, каждое действие — в лог.
+
+    `hide` — дефолт и обратимо: история скрывается из ленты,
+    сообщение стирается у всех (тот же scrub-путь, что и удаление).
+    `remove` — исключительное жёсткое удаление истории.
+    `dismiss` — контент не трогаем.
+    Смежные открытые жалобы на тот же контент закрываются тем же решением,
+    автор каждой жалобы получает уведомление без данных второй стороны.
+    """
+    if decision not in _DECISION_STATUS:
+        raise ReportError("Invalid decision")
+    status = _DECISION_STATUS[decision]
+    reason = (reason or "").strip()
+    if decision in _TERMINAL_DECISIONS and reason not in ReportReason.values:
+        raise ReportError("Resolution reason is required")
+    note = (note or "").strip()[:2000]
 
     try:
         report = Report.objects.select_for_update().get(pk=report_id)
     except Report.DoesNotExist as exc:
         raise ReportError("Report not found") from exc
+    if report.status not in (ReportStatus.OPEN, ReportStatus.REVIEWING):
+        raise ReportError("Report already resolved")
 
+    _apply_decision(
+        report, actor=actor, decision=decision, status=status, reason=reason, note=note
+    )
+
+    if report.story_id:
+        siblings_q = Q(story_id=report.story_id)
+    else:
+        siblings_q = Q(message_id=report.message_id)
+    siblings = (
+        Report.objects.filter(
+            siblings_q, status__in=(ReportStatus.OPEN, ReportStatus.REVIEWING)
+        )
+        .exclude(pk=report.pk)
+        .select_related("story", "message")
+    )
+    for sibling in siblings:
+        _apply_decision(
+            sibling,
+            actor=actor,
+            decision=decision,
+            status=status,
+            reason=reason,
+            note=note,
+        )
+    return report
+
+
+def _apply_decision(
+    report: Report,
+    *,
+    actor: Account | None,
+    decision: str,
+    status: str,
+    reason: str,
+    note: str,
+) -> None:
+    story = report.story
+    message = report.message
     report.status = status
-    report.resolved_note = (note or "").strip()[:2000]
+    report.resolved_note = note
     report.updated_at = timezone.now()
     report.save(update_fields=["status", "resolved_note", "updated_at"])
 
-    if report.story_id and (hide_story or status == ReportStatus.RESOLVED_HIDDEN):
-        moderate_story(report.story_id, StoryStatus.HIDDEN)
+    if decision in ("hide", "remove"):
+        if story is not None:
+            new_status = (
+                StoryStatus.REMOVED if decision == "remove" else StoryStatus.HIDDEN
+            )
+            try:
+                moderate_story(story.id, new_status)
+            except StoryNotFound:
+                pass  # история уже удалена — фиксируем только решение
+        if message is not None:
+            from apps.dialogue.services import moderator_scrub_message
 
-    return report
+            moderator_scrub_message(message.id)
+
+    ModerationAction.objects.create(
+        report=report,
+        story=story,
+        message=message,
+        actor=actor,
+        action=decision,
+        reason=reason,
+        note=note,
+    )
+
+    if decision in _TERMINAL_DECISIONS:
+        _notify_reporter(report, decision)
+
+
+def _notify_reporter(report: Report, decision: str) -> None:
+    """Уведомить автора жалобы о решении — без данных второй стороны."""
+    if report.from_account is not None:
+        recipient = Actor(kind="account", account=report.from_account)
+    elif report.from_session is not None:
+        recipient = Actor(kind="anonymous", session=report.from_session)
+    else:
+        return
+    try:
+        notify(
+            recipient,
+            NotificationKind.REPORT_RESOLVED,
+            {"report_id": str(report.id), "decision": decision},
+        )
+    except NotificationError:
+        pass

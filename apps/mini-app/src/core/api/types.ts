@@ -243,7 +243,8 @@ export type NotificationKind =
   | "cloud_approved"
   | "dialogue_opened"
   | "outreach_intro"
-  | "message";
+  | "message"
+  | "report_resolved";
 
 export interface AppNotification {
   id: string;

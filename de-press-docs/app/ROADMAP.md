@@ -8,9 +8,9 @@ See also [README.md](../README.md) (the stage and priorities), [CONTEXT.md](../C
 **P1 "Soft-notify" is closed** (including the magic-token `/inbox` and `PUBLIC_BASE_URL` in settings).  
 **Browser host (UI Core v2)** — a Vite SPA with TG ergonomics: the skeleton + the P0 push are closed.  
 **Circles + voice retention on the server are closed.**  
-Next for the product: the admin dashboard (moderation + reports, pre-launch) and the pilot readiness (the manual QA P6 — owner = human); the AI assistant stays the very last.  
+Next for the product: the admin dashboard (moderation + reports, pre-launch) and the pilot readiness (the manual QA P6 — owner = human); the AI assistant and Geo-help v2 move after the launch (the owner's decision of 2026-08-31).  
 By hosts: **Telegram Mini App ✅** (the stage is closed in code — initData auth, the theme bridge, bot soft-notify; the bot token/webhook — deploy-time config per DEPLOY.md), then — after the launch (≈ v1.3 / ≈ v1.5) — **own mobile** and **own desktop**.  
-**The AI assistant (the full product) — the very last of all.**  
+**The AI assistant and Geo-help v2 — moved after the launch (≈ v1.1 / ≈ v1.2).**  
 The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — this is a companion surface, not the closed AI assistant.
 
 **Therapy (ADR 0022, stage B) is closed in the browser and the Mini App** (Solana Pay QR + manual confirmation by the therapist). The questions of the new phase — [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), the plan — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md).
@@ -85,11 +85,11 @@ The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/a
 | 🗄 → landing | **Public pages (help, guides)** — moved to the landing repo (the guides were cut on 2026-08-30; in the app `/help` is the gate only) |
 | **P1** | Pilot ops: staging, a closed cohort, a feedback loop; the deploy kit: [`DEPLOY.md`](./DEPLOY.md) |
 | **P1** | Helper onboarding; ethical ops metrics; media/S3; secrets/backup |
-| **P2** | Geo-help v2; pre-mod / AI-assist for reports |
-| **last** | **The AI assistant** — the very last of all |
+| **→ after the launch (≈ v1.2)** | Geo-help v2; pre-mod / AI-assist for reports |
+| **→ after the launch (≈ v1.1)** | **The AI assistant** — right after the launch; the publication (Q5) happens without it |
 | **after everything** | **Publishing the repository on GitHub** (license, CI, README) — the last task of the project, after all the others are closed (Q5) |
 
-The version ladder (approximate, per the owner's sketch of 2026-08-31): **1.0** — the pre-launch line: the admin dashboard + the moderation/reports workflow, the pilot (the apps are bumped 0.1.0 → 1.0.0); **1.1** — the AI assistant; then the publication (Q5); **1.3** — own mobile; **1.5** — own desktop.
+The version ladder (approximate, per the owner's sketch of 2026-08-31): **1.0** — the launch line: the admin dashboard + the moderation/reports workflow, the pilot, then the publication (Q5 — the AI assistant is no longer a blocker; the apps are bumped 0.1.0 → 1.0.0); **1.1** — the AI assistant; **1.2** — Geo-help v2 + pre-mod/AI-assist for the reports; **1.3** — own mobile; **1.5** — own desktop.
 
 ## Voice
 
