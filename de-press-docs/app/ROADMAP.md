@@ -8,8 +8,8 @@ See also [README.md](../README.md) (the stage and priorities), [CONTEXT.md](../C
 **P1 "Soft-notify" is closed** (including the magic-token `/inbox` and `PUBLIC_BASE_URL` in settings).  
 **Browser host (UI Core v2)** — a Vite SPA with TG ergonomics: the skeleton + the P0 push are closed.  
 **Circles + voice retention on the server are closed.**  
-Next for the product: **native dynamic multilingual** (P1).  
-By hosts: **Telegram Mini App** (a stage), then/in parallel **own mobile** and **own desktop**.  
+Next for the product: the pilot readiness (the manual QA P6 — owner = human); the AI assistant stays the very last.  
+By hosts: **Telegram Mini App ✅** (the stage is closed in code — initData auth, the theme bridge, bot soft-notify; the bot token/webhook — deploy-time config per DEPLOY.md), then/in parallel **own mobile** and **own desktop**.  
 **The AI assistant (the full product) — the very last of all.**  
 The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/ai` CompanionPane) — this is a companion surface, not the closed AI assistant.
 
@@ -73,11 +73,11 @@ The browser already has the Help human/AI paths (`/help`, `/help/wait`, `/help/a
 | **P0 ✅** | **UI Core / Browser host**: Vite + React SPA, tokens/themes, the 3-zone TG skeleton, feed/chat, "I'M NOT OK" |
 | **P0 ✅** | **Circles**: `POST …/messages/circle` + an ephemeral purge on close |
 | **P0 ✅** | **Voice notes with a delete option**: `/me/voice-retention` + a per-sender purge on close |
-| **P0** | **The browser ↔ Mini App parity tails**: the fund (FundCard/TipBanner/TipWalletForm), calls in the Mini App (Q2: we port them); therapy in the Mini App ✅ |
-| **P0** | **The helper dashboard**: a left tab, visible to helpers only; the queue over a WS channel from the start (Q4), take → dialogue, the summary — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
-| **P0** | **The docs translation into EN (the RU archive in `docs-ru-archive/`, gitignored) + the full retest → manual QA** — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
+| **P0 ✅** | **The browser ↔ Mini App parity tails**: the fund (FundCard/TipBanner/TipWalletForm), calls in the Mini App (Q2: we port them); therapy in the Mini App ✅ |
+| **P0 ✅** | **The helper dashboard**: a left tab, visible to helpers only; the queue over a WS channel from the start (Q4), take → dialogue, the summary — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
+| **P0 ✅** | **The docs translation into EN (the RU archive in `docs-ru-archive/`, gitignored) + the full retest → manual QA** (the automated part done; the manual smoke matrix — P6, owner = human) — [PARITY_QA_PLAN.md](./PARITY_QA_PLAN.md) |
 | 🗄 dropped | **Native dynamic multilingual** (STT → translate → TTS) — dropped: cannot be implemented adequately without keys; text translation remains |
-| **P1** | **Telegram Mini App host (a stage)**: Bot + Mini App, initData auth, the theme bridge, optional bot soft-notify; the dialogues stay on the de-press backend — **not** a replacement for own mobile |
+| **P1 ✅** | **Telegram Mini App host (a stage)**: Bot + Mini App, initData auth, the theme bridge, optional bot soft-notify; the dialogues stay on the de-press backend — **not** a replacement for own mobile |
 | **P1** | **Own Mobile**: the TG tab-bar layout → a PWA / a native wrapper / a store (a separate host) |
 | **P1** | **Own Desktop**: a UI Core wrapper (Tauri / Electron — the decision later) |
 | **P1 ✅** | **PWA bridge on the browser host** — installable standalone + phone/tablet chrome; a native store still later. The prod build is verified (manifest+icons 200, sw.js served, the install row in More, the offline shell per sw.js); a live phone install — pilot QA. See [`MOBILE_PWA.md`](./MOBILE_PWA.md) |

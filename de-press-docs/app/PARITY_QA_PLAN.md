@@ -32,7 +32,9 @@ The Q5 decision: the GitHub publication is deferred until all the other project 
 - **Frontend:** browser vitest 64 + tsc + build; the mini-app build.
 - **The smoke matrix** for the manual check (P6): anti-panic · feed+clouds · quiet phrases · dialogue+voice+circles · help human/AI · helper (the queue, duty, invites) · the ZK patterns · notifications+`/inbox` · the fund (the wallet/banner/report) · therapy (invite → catalog → session → QR → "I paid" → confirmation → dialogue) · the i18n switch · all the same in the Mini App inside Telegram.
 
-## P5. The helper dashboard
+- ✅ The automated part is done (2026-08-30): backend 233/233 in chunks, browser vitest 64/64, both vite builds green. The smoke matrix below — P6 (manual, owner = human).
+
+## P5. The helper dashboard — ✅ done (2026-08-30)
 
 - A left tab (browser), visible to `is_helper` only; the existing `/helper` (HelperQueue) evolves into the dashboard.
 - The v1 composition: a live request queue over a WS channel from the start (Q4; the notifications-WS pattern), "take" → opening the dialogue (the call button is already in the dialogue), the duty status (the existing toggle), the summary (the existing one), the metrics from Q8.
