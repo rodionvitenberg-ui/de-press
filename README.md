@@ -7,6 +7,7 @@ A non-profit, empathetic "quiet harbor" platform for people having a hard time:
 | Document | Purpose |
 |----------|---------|
 | [`de-press-docs/`](./de-press-docs/) | **Single documentation** (app + site) |
+| [`de-press-docs/HISTORY.md`](./de-press-docs/HISTORY.md) | **Development history** — how it was built, every rollback, v1.0.0 |
 | [`CONTEXT.md`](./CONTEXT.md) | Domain vocabulary (terms) |
 | [`de-press-docs/app/PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md) | **4 hosts**: browser · Mini App · desktop · mobile |
 | [`de-press-docs/app/`](./de-press-docs/app/) | Design, roadmap, ADR, pilot |
@@ -30,10 +31,10 @@ A non-profit, empathetic "quiet harbor" platform for people having a hard time:
 | **Native Android** | `_archive/native/android/` | 🗄 archived (fork Telegram Android, ADR 0016) |
 | **Native Desktop** | `_archive/native/desktop/` | 🗄 archived (tdesktop on pause) |
 | **Native iOS** | later | after Android |
-| **Mini App** | `apps/mini-app/` | not the product shell |
+| **Mini App** | `apps/mini-app/` | parity host inside Telegram (feed, help, helper ops, fund, calls, therapy) |
 
 ```
-[ product core ✅ ]  [ soft-notify ✅ ]  [ browser UI core ✅ ]  [ circles/voice ✅ ]  [ ★ Mini App ]  [ multilingual ]  [ own mobile/desktop ]
+[ product core ✅ ]  [ soft-notify ✅ ]  [ browser UI core ✅ ]  [ circles/voice ✅ ]  [ Mini App ✅ ]  [ multilingual ✅ ]  [ own mobile/desktop ⏳ ]
 ```
 
 | Layer | Status | Comment |
@@ -49,8 +50,8 @@ A non-profit, empathetic "quiet harbor" platform for people having a hard time:
 | **Native multilingual (STT/TTS)** | 🗄 | dropped: not feasible without keys; text translation remains ("Translate") |
 | **Pilot / prod ops** | ⏳ | staging, secrets, backup, CDN media |
 
-**Bottom line:** the backend MVP is done; circles and voice retention live on the server; the browser UI core is pushed to v2.0.  
-Next: the Mini App host.
+**Bottom line:** the backend MVP is done; circles and voice retention live on the server; the Mini App is at full parity; the tree is frozen as **v1.0.0** (one branch, tagged).  
+Next: deploy to the live VPS and the closed pilot cohort.
 
 ---
 
@@ -112,7 +113,7 @@ de-press/
     └── smoke_api.sh
 ```
 
-**Browser and Mini App share one code** (`apps/web/`), different hosts. Not two frontend projects.
+**Browser and Mini App share one UI Core** (each app under `apps/`), different hosts. Not two frontend projects.
 
 ### Stack
 
@@ -209,7 +210,7 @@ Logs: `/tmp/depress_daphne.log`, `/tmp/depress_vite.log`.
 | Password | `seedseed12` |
 
 In the UI: avatar in the left rail → **Log in**.  
-After login: the feed, chat, notifications (soft badge), helper (if you have the role).
+After login: the feed, chat, the email inbox, helper (if you have the role).
 
 ### Optional env (AI / soft-notify)
 
@@ -230,7 +231,7 @@ cd _archive/legacy/next-frontend && npm install && npm run dev   # :3005, archiv
 
 ---
 
-## UI routes (`apps/web/`)
+## UI routes (`apps/browser/`)
 
 | Path | Purpose |
 |------|---------|
@@ -238,8 +239,7 @@ cd _archive/legacy/next-frontend && npm install && npm run dev   # :3005, archiv
 | `/feed/new` | Publishing a thought |
 | `/feed/:id` | Thought card + quiet phrases |
 | `/chat` | Dialogues + Dialogue Requests |
-| `/chat/:id` | 1-on-1 chat (WS, voice, circles UI) |
-| `/notifications` | Private notifications |
+| `/chat/:id` | 1-on-1 chat (WS, voice, calls, circles UI) |
 | `/patterns` | ZK mood notes (IndexedDB) |
 | `/help` | Help / safety / guides |
 | `/help/wait` | Waiting for a Helper (the human path) |
@@ -264,7 +264,7 @@ Shell: **icon rail 72px** · **resizable list** · **main** (see `TG_SHELL_SPEC.
 | Help presence | `GET /api/v1/help/presence`; `POST /api/v1/help/heartbeat` |
 | Docs | `http://127.0.0.1:8005/api/docs` |
 
-The app client: `apps/web/src/core/api/client.ts`.
+The app client: `apps/browser/src/core/api/client.ts` (mini-app mirror: `apps/mini-app/src/core/api/client.ts`).
 
 ---
 
@@ -282,11 +282,18 @@ DEPRESS_USE_SQLITE=1 CHANNEL_LAYER=memory pytest -q
 
 ## Priorities next
 
-1. **Telegram Mini App host** (a stage) — auth, theme bridge, optional bot notify; not the only mobile.  
-2. **Own mobile** (tab-bar + PWA/native) and **own desktop** (a shell over the core).  
-3. Pilot ops · production media.
+1. **Deploy** — the live VPS by [`DEPLOY.md`](./de-press-docs/app/DEPLOY.md): systemd + nginx, secrets, backups.
+2. **Pilot** — a closed cohort; bug reports (`POST /api/v1/bugs`) and the admin console are the feedback loop.
+3. **Own desktop** (Tauri over the UI Core) and **own mobile** (PWA-first, ADR 0019).
 
 We do not do: public likes/comments, open matching, a server-side trauma map, AI as a hidden peer; we do **not** count the Mini App as a replacement for our own mobile/desktop.
+
+---
+
+## License
+
+**AGPL-3.0-or-later** — see [`LICENSE`](./LICENSE).  
+The vendored Telegram Web A sources in `apps/mini-app/vendor/telegram-tt/` remain **GPLv3** — third-party code, kept as-is and separable.
 
 ---
 
@@ -310,6 +317,7 @@ We do not do: public likes/comments, open matching, a server-side trauma map, AI
 ## Development documentation
 
 - Terms → [`CONTEXT.md`](./CONTEXT.md)  
+- **History (how it was built) → [`de-press-docs/HISTORY.md`](./de-press-docs/HISTORY.md)**  
 - **Platforms (4 hosts)** → [`de-press-docs/app/PLATFORMS.md`](./de-press-docs/app/PLATFORMS.md)  
 - UI design → [`de-press-docs/app/DESIGN_V2.md`](./de-press-docs/app/DESIGN_V2.md)  
 - TG geometry → [`de-press-docs/app/TG_SHELL_SPEC.md`](./de-press-docs/app/TG_SHELL_SPEC.md)  
