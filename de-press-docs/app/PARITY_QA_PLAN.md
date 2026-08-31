@@ -1,8 +1,8 @@
 # Plan: parity, the helper dashboard, the translation, the retest (August 2026)
 
-Related: [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) (the questions Q1–Q10), [ROADMAP.md](./ROADMAP.md), [VOICE_THERAPY_PLAN.md](./VOICE_THERAPY_PLAN.md) (closed).
+Related: [ROADMAP.md](./ROADMAP.md), [VOICE_THERAPY_PLAN.md](./VOICE_THERAPY_PLAN.md) (closed). The questions Q1–Q10 were resolved 2026-08-30 and recorded in the "Phase decisions" of ROADMAP.md — the OPEN_QUESTIONS.md file is retired.
 
-Principles: minimal diffs; parity = porting the existing, not new features; every step ends with green checks and a commit. All questions are resolved 2026-08-30 — the summary in [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) and the "Phase decisions" of [ROADMAP.md](./ROADMAP.md).
+Principles: minimal diffs; parity = porting the existing, not new features; every step ends with green checks and a commit. All questions are resolved 2026-08-30 — see the "Phase decisions" of [ROADMAP.md](./ROADMAP.md).
 
 ## P1. The browser ↔ Mini App parity tails
 
