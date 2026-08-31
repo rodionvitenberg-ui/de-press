@@ -41,6 +41,15 @@ export type Messages = {
     installIos: string;
     installed: string;
   };
+  more: {
+    reportBug: string;
+    reportBugHint: string;
+    reportBugPlaceholder: string;
+    reportBugSend: string;
+    reportBugCancel: string;
+    reportBugSent: string;
+    reportBugError: string;
+  };
   footer: {
     tagline: string;
     safety: string;

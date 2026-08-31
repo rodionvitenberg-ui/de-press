@@ -34,6 +34,15 @@ export const en: Messages = {
     installIos: "Share → Add to Home Screen",
     installed: "Already installed",
   },
+  more: {
+    reportBug: "Report a bug",
+    reportBugHint: "Something broke? Tell us what happened.",
+    reportBugPlaceholder: "What happened? What did you expect instead?",
+    reportBugSend: "Send report",
+    reportBugCancel: "Cancel",
+    reportBugSent: "Thanks — the report is in.",
+    reportBugError: "Could not send the report. Try again later.",
+  },
   footer: {
     tagline: "Not medicine. Not commerce. Just a place to sit with you.",
     safety: "Safety",

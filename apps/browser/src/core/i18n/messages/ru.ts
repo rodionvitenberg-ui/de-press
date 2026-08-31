@@ -34,6 +34,15 @@ export const ru: Messages = {
     installIos: "Поделиться → На экран «Домой»",
     installed: "Уже как приложение",
   },
+  more: {
+    reportBug: "Сообщить о баге",
+    reportBugHint: "Что-то сломалось? Расскажите, что произошло.",
+    reportBugPlaceholder: "Что случилось? Что ожидали вместо этого?",
+    reportBugSend: "Отправить репорт",
+    reportBugCancel: "Отмена",
+    reportBugSent: "Спасибо — репорт доставлен.",
+    reportBugError: "Не получилось отправить. Попробуйте позже.",
+  },
   footer: {
     tagline: "Не медицина. Не коммерция. Просто место посидеть рядом.",
     safety: "Безопасность",

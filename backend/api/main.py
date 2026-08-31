@@ -6,6 +6,7 @@ from ninja import NinjaAPI
 
 from api.v1 import (
     ai,
+    bugs,
     dialogue,
     empathy,
     fund,
@@ -33,6 +34,7 @@ api = NinjaAPI(
 
 api.add_router("/v1", health.router)
 api.add_router("/v1", identity.router)
+api.add_router("/v1", bugs.router)
 api.add_router("/v1", fund.router)
 api.add_router("/v1", stories.router)
 api.add_router("/v1", empathy.router)

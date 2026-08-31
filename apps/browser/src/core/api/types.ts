@@ -398,3 +398,8 @@ export interface BlockItem {
   label: string;
   target_kind: "account" | "session";
 }
+
+export interface BugReportOut {
+  ok: boolean;
+  id: string;
+}

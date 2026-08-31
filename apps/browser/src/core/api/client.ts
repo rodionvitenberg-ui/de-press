@@ -6,6 +6,7 @@
 import type {
   AuthorStory,
   BlockItem,
+  BugReportOut,
   ChatMessage,
   Dialogue,
   DialogueRequest,
@@ -47,6 +48,7 @@ import type {
 export type {
   AppNotification,
   AuthorStory,
+  BugReportOut,
   ChatMessage,
   ChatMessageKind,
   Dialogue,
@@ -434,6 +436,12 @@ export const api = {
       `/api/v1/dialogues/${dialogueId}/unblock-peer`,
       { method: "POST" },
     ),
+
+  reportBug: (text: string, page: string) =>
+    request<BugReportOut>("/api/v1/bugs", {
+      method: "POST",
+      body: JSON.stringify({ text, page }),
+    }),
 
   myBlocks: () => request<BlockItem[]>("/api/v1/blocks"),
 
