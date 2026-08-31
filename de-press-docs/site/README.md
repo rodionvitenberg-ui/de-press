@@ -1,33 +1,33 @@
-# Сайт / лендинг de-press — документация
+# The de-press site / landing — documentation
 
-> Репозиторий: **отдельный** (лендинг не входит в репозиторий приложения).
-> Этот раздел описывает лендинг документально; рабочий код живёт в своём собственном репозитории с собственным стеком и визуальным движком.
+> Repository: **separate** (the landing is not part of the app repository).
+> This section documents the landing; the working code lives in its own repository with its own stack and visual engine.
 
-## Роль лендинга
+## The landing's role
 
-- Внешняя, демонстративная поверхность: идея проекта, правила пользования, «о проекте», ответы на вопросы, сторителлинг.
-- **НЕ** интерфейс приложения. Никакой ТГ-эргономики — это не приложение.
-- Экономит приложение от «витринных» страниц: вся публичная информация подаётся через лендинг, а не через интерфейс.
+- The outer, presentational surface: the project's idea, the rules of use, "about the project," FAQ answers, storytelling.
+- **NOT** the app's interface. No TG ergonomics — this is not the app.
+- It keeps the app free of "showcase" pages: all public information is served through the landing, not through the interface.
 
-## Единственная связь с приложением
+## The only connection to the app
 
-**Ссылка-переход** на браузерное приложение, например:
+**A transition link** to the browser app, for example:
 
 ```
 https://depress.co → https://app.depress.co
 ```
 
-Больше ничего общего. Свои стеки, свои деплои, свои визуальные движки.
+Nothing else in common. Their own stacks, their own deploys, their own visual engines.
 
-## Что подаётся через приложение, а не через лендинг
+## What is served through the app, not through the landing
 
-> Решение (2026-08): **все** публичные/литерационные страницы уезжают на лендинг: идея, хелп, гайды, «о проекте» и т.п.
-> Информацию о проекте мы будем подавать **через само приложение** — через его функции и интерфейс. Это отдельная работа (см. `../app/DESIGN_V2.md`).
+> Decision (2026-08): **all** public/literary pages move to the landing: the idea, help, guides, "about the project," etc.
+> Information about the project will be served **through the app itself** — through its features and interface. That is separate work (see `../app/DESIGN_V2.md`).
 
-## Документы лендинга (плейсхолдеры)
+## Landing documents (placeholders)
 
-Здесь появятся брифы лендинга: контент, страницы, точка входа, стиль. Пока — каркас:
+The landing briefs will appear here: content, pages, the entry point, style. For now — a skeleton:
 
-- [ ] Бриф лендинга (цели, аудитория, структура страниц)
-- [ ] Содержание: идея, правила, «о проекте», FAQ
-- [ ] Ссылка-переход в приложение (URL, CTA, правила перехода)
+- [ ] Landing brief (goals, audience, page structure)
+- [ ] Contents: the idea, the rules, "about the project," FAQ
+- [ ] The transition link into the app (URL, CTA, transition rules)

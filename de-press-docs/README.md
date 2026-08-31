@@ -1,43 +1,43 @@
-# de-press — единая документация проекта
+# de-press — unified project documentation
 
-> Эта папка — **общая документация для всех репозиториев проекта de-press**.
-> Проект состоит из двух независимых частей, каждая со своим репозиторием:
+> This folder is the **shared documentation for all repositories of the de-press project**.
+> The project consists of two independent parts, each with its own repository:
 
-| Часть | Репозиторий | Документация |
+| Part | Repository | Documentation |
 |-------|-------------|--------------|
-| **Приложение** (4 hosts: browser · Mini App · own desktop · own mobile) | `de-press` (этот репозиторий) | [`de-press-docs/app/`](./app/) |
-| **Сайт / лендинг** (маркетинг, правила, «о проекте») | отдельный репозиторий (лендинг) | [`de-press-docs/site/`](./site/) |
+| **The app** (4 hosts: browser · Mini App · own desktop · own mobile) | `de-press` (this repository) | [`de-press-docs/app/`](./app/) |
+| **The site / landing** (marketing, rules, "about the project") | a separate repository (the landing) | [`de-press-docs/site/`](./site/) |
 
-## Правило
+## The rule
 
-- **Лендинг и приложение — разделены полностью**: свои репозитории, свои стеки, свои визуальные движки.
-- **Единственная связь** между ними — ссылка-переход (с лендинга в приложение по прямой ссылке).
-- **Документация — общая**: эта папка живёт в репозитории приложения, но описывает оба репозитория и обновляется из обоих.
+- **The landing and the app are fully separated**: their own repositories, their own stacks, their own visual engines.
+- **The only connection** between them is a single transition link (from the landing into the app by a direct URL).
+- **The documentation is shared**: this folder lives in the app repository but describes both repositories and is updated from both.
 
-## Оглавление
+## Table of contents
 
-| Раздел | Содержание |
+| Section | Contents |
 |--------|------------|
-| [`CONTEXT.md`](./CONTEXT.md) | Доменный словарь (термины) — общий для сайта и приложения |
-| [`HISTORY.md`](./HISTORY.md) | История разработки: с чего начинался, все откаты и отменённые решения, текущая стадия |
-| [`app/`](./app/) | Документация продукта: **4 hosts** ([`PLATFORMS.md`](./app/PLATFORMS.md)), дизайн, роадмап, ADR, пилот |
-| [`site/`](./site/) | Всё о лендинге: содержание, страницы, ссылка-переход |
+| [`CONTEXT.md`](./CONTEXT.md) | Domain vocabulary (terms) — shared by the site and the app |
+| [`HISTORY.md`](./HISTORY.md) | Development history: how it started, every rollback and cancelled decision, the current stage |
+| [`app/`](./app/) | Product documentation: **4 hosts** ([`PLATFORMS.md`](./app/PLATFORMS.md)), design, roadmap, ADR, pilot |
+| [`site/`](./site/) | Everything about the landing: content, pages, the transition link |
 
-## Связанные документы
+## Related documents
 
-- `CONTEXT.md` — глоссарий домена (общий).
-- Платформы (4 hosts): [`app/PLATFORMS.md`](./app/PLATFORMS.md)
-- Дизайн: [`app/DESIGN_V2.md`](./app/DESIGN_V2.md)
-- Роадмап: [`app/ROADMAP.md`](./app/ROADMAP.md)
-- Инженерный план фронта: [`app/FRONTEND_PLAN.md`](./app/FRONTEND_PLAN.md)
-- Пилот: [`app/PILOT.md`](./app/PILOT.md)
-- ADR: [`app/adr/`](./app/adr/) (в т.ч. [0013 four hosts](./app/adr/0013-four-app-hosts.md))
+- `CONTEXT.md` — the domain glossary (shared).
+- Platforms (4 hosts): [`app/PLATFORMS.md`](./app/PLATFORMS.md)
+- Design: [`app/DESIGN_V2.md`](./app/DESIGN_V2.md)
+- Roadmap: [`app/ROADMAP.md`](./app/ROADMAP.md)
+- Frontend engineering plan: [`app/FRONTEND_PLAN.md`](./app/FRONTEND_PLAN.md)
+- Pilot: [`app/PILOT.md`](./app/PILOT.md)
+- ADR: [`app/adr/`](./app/adr/) (including [0013 four hosts](./app/adr/0013-four-app-hosts.md))
 
-## Как обновлять
+## How to update
 
-1. Новый термин → `CONTEXT.md` (без implementation details).
-2. Сложное архитектурное решение → `app/adr/<NNNN>-*.md`.
-3. Изменения продукта → `app/ROADMAP.md`.
-4. Дизайн и UX → `app/DESIGN_V2.md`.
-5. Лендинг (контент/страницы/переход) → `site/`.
-6. Приложение и лендинг описываются здесь вместе, хотя код — в разных репозиториях.
+1. A new term → `CONTEXT.md` (no implementation details).
+2. A non-trivial architectural decision → `app/adr/<NNNN>-*.md`.
+3. Product changes → `app/ROADMAP.md`.
+4. Design and UX → `app/DESIGN_V2.md`.
+5. The landing (content/pages/transition) → `site/`.
+6. The app and the landing are described together here, even though the code lives in different repositories.
