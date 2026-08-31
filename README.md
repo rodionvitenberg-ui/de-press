@@ -102,7 +102,7 @@ de-press/
 │   ├── apps/                 # Django domain apps (identity, stories, …)
 │   ├── api/v1/
 │   └── …
-├── _archive/                 # 🗄 moved out of the active zone (to .gitignore later)
+├── _archive/                 # 🗄 local archive (legacy Next, native forks) — gitignored, not published
 │   ├── legacy/next-frontend/ # old Next.js — not the main UI
 │   ├── native/               # fork of Telegram Android / tdesktop (ADR 0015/0016)
 │   └── AngelSlim/            # third-party LLM toolkit (clone)

@@ -27,10 +27,6 @@ node_modules/
 apps/browser/dist/
 apps/mini-app/dist/
 apps/admin/dist/
-_archive/legacy/next-frontend/.next/
-_archive/legacy/next-frontend/out/
-_archive/legacy/next-frontend/build/
-_archive/legacy/next-frontend/coverage/
 *.tsbuildinfo
 next-env.d.ts
 
@@ -54,18 +50,13 @@ Thumbs.db
 # Telegram Web A vendor (clone via scripts/fetch_telegram_tt.sh) — GPLv3, large
 apps/mini-app/vendor/telegram-tt/
 
-# Native Telegram upstream clones (android / desktop — now under _archive/)
-_archive/native/desktop/tdesktop/
-_archive/native/desktop/.env
-_archive/native/android/Telegram/
-_archive/native/android/.env
+# The local archive (the legacy Next frontend, the native forks, AngelSlim) —
+# kept on the dev disk only, not part of the published tree
+_archive/
 
 # SDD / worktrees
 .superpowers/
 .worktrees/
-
-# Embedded clone, not part of this product
-_archive/AngelSlim/
 
 # RU docs archive (kept locally only, EN is canon — decision Q6 2026-08-30)
 docs-ru-archive/

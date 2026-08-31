@@ -25,8 +25,8 @@ apps/
 The hosts doctrine is "four hosts" (ADR 0013, [PLATFORMS.md](../de-press-docs/app/PLATFORMS.md)),
 but the product shell is reached **without maintaining native forks**:
 
-- **Desktop:** [`../_archive/native/desktop/`](../_archive/native/desktop/) — a **tdesktop** fork (ADR 0015) — archived; own desktop is deferred to a Tauri shell
-- **Mobile:** [`../_archive/native/android/`](../_archive/native/android/) — a Telegram Android fork (ADR 0016) — archived; `native/ios` — later; own mobile is PWA-first (ADR 0019)
+- **Desktop:** a **tdesktop** fork (ADR 0015) — archived under `_archive/native/desktop/` (kept on the dev disk only, gitignored); own desktop is deferred to a Tauri shell
+- **Mobile:** a Telegram Android fork (ADR 0016) — archived under `_archive/native/android/` (kept on the dev disk only, gitignored); `native/ios` — later; own mobile is PWA-first (ADR 0019)
 - **Mini App** — a full host inside Telegram, at v1 parity: feed, help, helper ops, fund, calls, therapy
 
 The Browser stays a separate web app with no tdesktop code.
