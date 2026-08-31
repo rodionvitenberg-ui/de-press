@@ -5,6 +5,11 @@ from django.urls import path
 
 from api.main import api
 
+# Admin chrome in English regardless of user-facing locale.
+admin.site.site_header = "de-press admin"
+admin.site.site_title = "de-press admin"
+admin.site.index_title = "Operations"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),

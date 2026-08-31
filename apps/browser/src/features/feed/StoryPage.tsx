@@ -236,8 +236,6 @@ export function StoryPage() {
             s.id === id ? { ...s, cloud_unread: 0 } : s,
           ),
         );
-        void queryClient.invalidateQueries({ queryKey: ["notifications"] });
-        void queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
       })
       .catch(() => {
         markedReadFor.current = null;

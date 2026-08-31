@@ -12,20 +12,18 @@ import { NavIcon, type NavIconName } from "./NavIcons";
 import styles from "./TabBar.module.css";
 
 const TABS: {
-  key: "feed" | "chat" | "notifications" | "more";
+  key: "feed" | "chat" | "more";
   to: string;
   icon: NavIconName;
 }[] = [
   { key: "feed", to: "/feed", icon: "feed" },
   { key: "chat", to: "/chat", icon: "chat" },
-  { key: "notifications", to: "/notifications", icon: "bell" },
   { key: "more", to: "/more", icon: "more" },
 ];
 
 function tabActive(key: (typeof TABS)[number]["key"], pathname: string): boolean {
   if (key === "feed") return pathname.startsWith("/feed");
   if (key === "chat") return pathname.startsWith("/chat");
-  if (key === "notifications") return pathname.startsWith("/notifications");
   return isMoreSectionPath(pathname);
 }
 
@@ -35,12 +33,6 @@ export function TabBar() {
   const { t } = useI18n();
   const { enter } = useAntiPanic();
 
-  const unreadQuery = useQuery({
-    queryKey: ["notifications-unread"],
-    queryFn: () => api.notificationsUnreadCount(),
-    staleTime: 15_000,
-    refetchInterval: 90_000,
-  });
   const requestsQuery = useQuery({
     queryKey: ["dialogue-requests"],
     queryFn: () => api.dialogueInbox(),
@@ -56,7 +48,6 @@ export function TabBar() {
   if (mode === "desktop") return null;
   if (mode === "phone" && isPhoneNestedChromePath(pathname)) return null;
 
-  const unread = unreadQuery.data?.count ?? 0;
   const pendingRequests = (requestsQuery.data ?? []).filter(
     (r) => r.status === "pending" || r.status === "approved" || !r.status,
   ).length;
@@ -68,14 +59,12 @@ export function TabBar() {
   const labels = {
     feed: t.nav.feed,
     chat: t.nav.me,
-    notifications: t.notifications.title,
     more: t.nav.more,
   };
 
   function softFor(key: (typeof TABS)[number]["key"]): number | undefined {
     if (key === "chat" && chatUnread + pendingRequests > 0)
       return chatUnread + pendingRequests;
-    if (key === "notifications" && unread > 0) return unread;
     return undefined;
   }
 

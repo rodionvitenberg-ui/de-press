@@ -18,7 +18,6 @@ const KEY_TO_ICON: Record<NavKey, NavIconName> = {
   help: "help",
   patterns: "patterns",
   therapy: "therapy",
-  notifications: "bell",
   helper: "shield",
 };
 
@@ -28,7 +27,6 @@ const KEY_TO_PATH: Record<NavKey, string> = {
   help: "/help",
   patterns: "/patterns",
   therapy: "/therapy",
-  notifications: "/notifications",
   helper: "/helper",
 };
 
@@ -45,13 +43,6 @@ export function Sidebar() {
     staleTime: 60_000,
   });
 
-  const unreadQuery = useQuery({
-    queryKey: ["notifications-unread"],
-    queryFn: () => api.notificationsUnreadCount(),
-    staleTime: 15_000,
-    refetchInterval: 90_000,
-  });
-
   const requestsQuery = useQuery({
     queryKey: ["dialogue-requests"],
     queryFn: () => api.dialogueInbox(),
@@ -59,7 +50,6 @@ export function Sidebar() {
   });
 
   const isHelper = Boolean(meQuery.data?.is_helper);
-  const unread = unreadQuery.data?.count ?? 0;
   const pendingRequests = (requestsQuery.data ?? []).filter(
     (r) => r.status === "pending" || r.status === "approved" || !r.status,
   ).length;
@@ -71,7 +61,6 @@ export function Sidebar() {
       help: t.nav.help,
       patterns: t.nav.patterns,
       therapy: t.nav.therapy,
-      notifications: t.notifications.title,
       helper: t.nav.helper,
     }),
     [t],
@@ -87,7 +76,6 @@ export function Sidebar() {
 
   function softFor(key: NavKey): number | undefined {
     if (key === "chat" && pendingRequests > 0) return pendingRequests;
-    if (key === "notifications" && unread > 0) return unread;
     return undefined;
   }
 

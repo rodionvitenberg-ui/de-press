@@ -21,10 +21,8 @@ export function InboxPage() {
   const open = useMutation({
     mutationFn: () => api.openInbox(token ?? ""),
     onSuccess: () => {
-      // Actor identity changed server-side — refresh who-am-i and badges.
+      // Actor identity changed server-side — refresh who-am-i.
       void queryClient.invalidateQueries({ queryKey: ["me"] });
-      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      void queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
     },
   });
 

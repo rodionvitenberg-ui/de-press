@@ -1,10 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
-import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { recordRouteMs } from "@/core/perf";
-import { useViewportMode } from "@/core/hooks/useViewportMode";
-import type { ViewportMode } from "@/core/viewport";
 import { Shell } from "@/components/layout/Shell";
-import { AntiPanicOverlay } from "@/features/anti-panic/AntiPanicOverlay";
 import { FeedLayout } from "@/features/feed/FeedLayout";
 import { StoryPage } from "@/features/feed/StoryPage";
 import { ChatLayout } from "@/features/chat/ChatLayout";
@@ -19,11 +16,6 @@ const StoryComposer = lazy(() =>
 const DialoguePage = lazy(() =>
   import("@/features/chat/DialoguePage").then((m) => ({
     default: m.DialoguePage,
-  })),
-);
-const NotificationsPane = lazy(() =>
-  import("@/features/notifications/NotificationsPane").then((m) => ({
-    default: m.NotificationsPane,
   })),
 );
 const HelperQueue = lazy(() =>
@@ -82,21 +74,6 @@ function EmptyPane({ text }: { text: string }) {
   );
 }
 
-/**
- * Help journey runs full-bleed on desktop (no rail, whole page) while
- * phone/tablet keep the regular Shell with the TabBar. Anti-Panic overlay
- * stays available in both cases.
- */
-function HelpChrome({ mode }: { mode: ViewportMode }) {
-  if (mode !== "desktop") return <Shell />;
-  return (
-    <main id="main" className={styles.bare}>
-      <Outlet />
-      <AntiPanicOverlay />
-    </main>
-  );
-}
-
 function RoutePerf() {
   const location = useLocation();
   const started = useRef(performance.now());
@@ -117,17 +94,12 @@ function RoutePerf() {
   return null;
 }
 
-function AppRoutes({ mode }: { mode: ViewportMode }) {
+function AppRoutes() {
   const { t } = useI18n();
 
   return (
     <Suspense fallback={<EmptyPane text={t.common.loading} />}>
       <Routes>
-        <Route element={<HelpChrome mode={mode} />}>
-          <Route path="/help" element={<HelpPane />} />
-          <Route path="/help/wait" element={<HelpWaitPane />} />
-          <Route path="/help/ai" element={<CompanionPane />} />
-        </Route>
         <Route element={<Shell />}>
           <Route path="/" element={<Navigate to="/feed" replace />} />
           <Route path="/feed" element={<FeedLayout />}>
@@ -140,7 +112,9 @@ function AppRoutes({ mode }: { mode: ViewportMode }) {
             <Route index element={<EmptyPane text={t.shell.pickChat} />} />
             <Route path=":id" element={<DialoguePage />} />
           </Route>
-          <Route path="/notifications" element={<NotificationsPane />} />
+          <Route path="/help" element={<HelpPane />} />
+          <Route path="/help/wait" element={<HelpWaitPane />} />
+          <Route path="/help/ai" element={<CompanionPane />} />
           <Route path="/patterns" element={<PatternsPane />} />
           <Route path="/therapy" element={<TherapyPane />} />
           <Route path="/helper" element={<HelperQueue />} />
@@ -156,11 +130,10 @@ function AppRoutes({ mode }: { mode: ViewportMode }) {
 }
 
 export function App() {
-  const mode = useViewportMode();
   return (
     <>
       <RoutePerf />
-      <AppRoutes mode={mode} />
+      <AppRoutes />
     </>
   );
 }

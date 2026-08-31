@@ -5,7 +5,6 @@ import { StoryPage } from "@/features/feed/StoryPage";
 import { StoryComposer } from "@/features/feed/StoryComposer";
 import { ChatLayout } from "@/features/chat/ChatLayout";
 import { DialoguePage } from "@/features/chat/DialoguePage";
-import { NotificationsPane } from "@/features/notifications/NotificationsPane";
 import { HelperQueue } from "@/features/helper/HelperQueue";
 import { HelperJoin, HelperInviteCreate } from "@/features/helper/HelperJoin";
 import { PatternsPane } from "@/features/patterns/PatternsPane";
@@ -49,7 +48,6 @@ function AppRoutes() {
           <Route path=":id" element={<DialoguePage />} />
         </Route>
 
-        <Route path="/notifications" element={<NotificationsPane />} />
         <Route path="/patterns" element={<PatternsPane />} />
         <Route path="/therapy" element={<TherapyPane />} />
         <Route path="/help" element={<HelpPane />} />

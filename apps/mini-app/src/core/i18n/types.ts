@@ -470,23 +470,6 @@ export type Messages = {
     points: string[];
     footer: string;
   };
-  notifications: {
-    title: string;
-    empty: string;
-    markAllRead: string;
-    ariaOpen: string;
-    unreadAria: (count: number) => string;
-    kind: {
-      dialogue_request: string;
-      support_cloud: string;
-      cloud_approved: string;
-      dialogue_opened: string;
-      outreach_intro: string;
-      message: string;
-      dialogue_request_review: string;
-      report_resolved: string;
-    };
-  };
   inbox: {
     title: string;
     opening: string;

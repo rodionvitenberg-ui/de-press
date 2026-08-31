@@ -4,7 +4,6 @@
  */
 
 import type {
-  AppNotification,
   AuthorStory,
   BlockItem,
   ChatMessage,
@@ -22,8 +21,6 @@ import type {
   HelpRequest,
   InboxOpenResponse,
   IntentOption,
-  MarkAllNotificationsReadResponse,
-  MarkNotificationReadResponse,
   Me,
   ModerationActionResponse,
   ModerationDashboard,
@@ -42,7 +39,6 @@ import type {
   TherapySession,
   Topic,
   TipWalletResponse,
-  UnreadCountResponse,
   AiSupportResponse,
   SendCircleOptions,
   VoiceRetentionSettings,
@@ -794,24 +790,6 @@ export const api = {
 
   moderationDashboard: () =>
     request<ModerationDashboard>("/api/v1/moderation/dashboard"),
-
-  notifications: (limit = 30) =>
-    request<AppNotification[]>(`/api/v1/me/notifications?limit=${limit}`),
-
-  notificationsUnreadCount: () =>
-    request<UnreadCountResponse>("/api/v1/me/notifications/unread-count"),
-
-  markNotificationRead: (notificationId: string) =>
-    request<MarkNotificationReadResponse>(
-      `/api/v1/me/notifications/${notificationId}/read`,
-      { method: "POST" },
-    ),
-
-  markAllNotificationsRead: () =>
-    request<MarkAllNotificationsReadResponse>(
-      "/api/v1/me/notifications/read-all",
-      { method: "POST" },
-    ),
 
   notifySettings: () => request<NotifySettings>("/api/v1/me/notify-settings"),
 

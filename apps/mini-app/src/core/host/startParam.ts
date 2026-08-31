@@ -81,7 +81,8 @@ function normalizeUuid(raw: string): string | null {
  *   story_<uuid> | s_<uuid>  → /feed/<uuid>
  *   chat | chats | dialogues → /chat
  *   chat_<uuid> | d_<uuid> | dialogue_<uuid> → /chat/<uuid>
- *   notifications | notify | inbox → /notifications
+ *   notifications | notify | inbox | n → /feed
+ *     (notifications tab removed; generic nudges land on the feed)
  *   patterns | mood          → /patterns
  *   help | safety | crisis   → /help
  *   help_wait | wait         → /help/wait
@@ -135,7 +136,7 @@ export function resolveStartParam(param: string): StartTarget | null {
     case "notify":
     case "inbox":
     case "n":
-      return { path: "/notifications", param: raw };
+      return { path: "/feed", param: raw };
     case "patterns":
     case "mood":
     case "zk":

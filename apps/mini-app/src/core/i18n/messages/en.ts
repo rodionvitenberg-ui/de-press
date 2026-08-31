@@ -536,24 +536,6 @@ export const en: Messages = {
     ],
     footer: "An account is optional. You can stay anonymous.",
   },
-  notifications: {
-    title: "Notifications",
-    empty: "Quiet for now. Nothing new.",
-    markAllRead: "Mark all read",
-    ariaOpen: "Open notifications",
-    unreadAria: (count: number) =>
-      count === 1 ? "1 unread notification" : `${count} unread notifications`,
-    kind: {
-      dialogue_request: "Someone wants a dialogue with you",
-      support_cloud: "You received a quiet cloud",
-      cloud_approved: "Your cloud is approved and visible to the author",
-      dialogue_opened: "The author opened a dialogue",
-      outreach_intro: "The author wrote to you (outreach)",
-      message: "New message in the dialogue",
-      dialogue_request_review: "A dialogue request is waiting for review",
-      report_resolved: "Your report was reviewed — thank you for keeping this place safe",
-    },
-  },
   common: {
     loading: "Loading…",
     error: "Error",

@@ -5,7 +5,6 @@ export type NavKey =
   | "chat"
   | "help"
   | "patterns"
-  | "notifications"
   | "helper";
 
 export const DEFAULT_NAV_ORDER: NavKey[] = [
@@ -13,7 +12,6 @@ export const DEFAULT_NAV_ORDER: NavKey[] = [
   "chat",
   "help",
   "patterns",
-  "notifications",
   "helper",
 ];
 

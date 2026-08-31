@@ -590,12 +590,6 @@ export const ru: Messages = {
     footer: "Аккаунт необязателен. Можно оставаться анонимным.",
   },
   notifications: {
-    title: "Уведомления",
-    empty: "Пока тихо. Ничего нового.",
-    markAllRead: "Прочитать всё",
-    ariaOpen: "Открыть уведомления",
-    unreadAria: "{count} непрочитанных",
-    justNow: "только что",
     openNotice: "Открыть",
     kind: {
       dialogue_request: "Кто-то хочет диалог с тобой",
@@ -604,12 +598,6 @@ export const ru: Messages = {
       dialogue_opened: "Автор открыл диалог",
       outreach_intro: "Автор написал тебе (outreach)",
       message: "Новое сообщение в диалоге",
-      dialogue_deleted: "Собеседник удалил диалог",
-      silent_empathy: "Тебе послали лучи поддержки",
-      help_requested: "Кто-то просит человека рядом",
-      help_accepted: "Helper принял запрос",
-      dialogue_request_review: "Запрос диалога ждёт проверки",
-      report_resolved: "Ваша жалоба рассмотрена — спасибо, что помогаете держать место безопасным",
     },
   },
   common: {

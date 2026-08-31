@@ -1,5 +1,7 @@
 export type Locale = string;
 
+import type { NotificationKind } from "@/core/api/types";
+
 export const HANDWRITTEN_LOCALES = ["ru", "en"] as const;
 export const LOCALES: Locale[] = ["ru", "en"];
 export const DEFAULT_LOCALE: Locale = "ru";
@@ -549,27 +551,8 @@ export type Messages = {
     footer: string;
   };
   notifications: {
-    title: string;
-    empty: string;
-    markAllRead: string;
-    ariaOpen: string;
-    unreadAria: string;
-    justNow: string;
     openNotice: string;
-    kind: {
-      dialogue_request: string;
-      support_cloud: string;
-      cloud_approved: string;
-      dialogue_opened: string;
-      outreach_intro: string;
-      message: string;
-      dialogue_deleted: string;
-      silent_empathy: string;
-      help_requested: string;
-      help_accepted: string;
-      dialogue_request_review: string;
-      report_resolved: string;
-    };
+    kind: Partial<Record<NotificationKind, string>>;
   };
   inbox: {
     title: string;

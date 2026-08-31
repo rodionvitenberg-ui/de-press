@@ -1,6 +1,13 @@
 from django.contrib import admin, messages
 
-from apps.moderation.models import Block, Report, ReportReason, ReportStatus
+from apps.common.admin import ReadOnlyAdmin
+from apps.moderation.models import (
+    Block,
+    ModerationAction,
+    Report,
+    ReportReason,
+    ReportStatus,
+)
 from apps.moderation.services import resolve_report
 
 
@@ -93,3 +100,32 @@ class BlockAdmin(admin.ModelAdmin):
         "blocked_session",
     )
     readonly_fields = ("id", "created_at")
+
+
+@admin.register(ModerationAction)
+class ModerationActionAdmin(ReadOnlyAdmin):
+    """Audit log (Q12) — view only, rows are written by resolve_report."""
+
+    list_display = (
+        "id",
+        "action",
+        "reason",
+        "story",
+        "message",
+        "report",
+        "actor",
+        "created_at",
+    )
+    list_filter = ("action", "reason")
+    date_hierarchy = "created_at"
+    readonly_fields = (
+        "id",
+        "report",
+        "story",
+        "message",
+        "actor",
+        "action",
+        "reason",
+        "note",
+        "created_at",
+    )

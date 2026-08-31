@@ -7,7 +7,6 @@ const SECTION_ROOTS = new Set([
   "/",
   "/feed",
   "/chat",
-  "/notifications",
   "/patterns",
   "/help",
   "/helper",

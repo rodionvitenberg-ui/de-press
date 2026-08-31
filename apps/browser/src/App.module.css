@@ -38,12 +38,3 @@
   color: var(--text-muted);
 }
 
-/* Full-bleed surface for the help journey on desktop (no rail/tab chrome). */
-.bare {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--bg-main);
-}
