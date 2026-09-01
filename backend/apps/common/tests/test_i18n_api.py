@@ -8,6 +8,7 @@ import pytest
 from django.core.cache import cache
 from django.test import Client
 
+from api.v1.i18n import RATE_LIMIT
 from apps.identity.models import Account
 
 
@@ -128,3 +129,21 @@ def test_ui_catalog_dedicated_garbage_keeps_source(monkeypatch, settings):
     resp = _post_catalog(client)
     assert resp.status_code == 200
     assert resp.json()["strings"] == {"nav.feed": "Feed"}  # source kept, no garbage
+
+@pytest.mark.django_db
+def test_ui_catalog_rate_limit_caps_language_loads(monkeypatch, settings):
+    """RATE_LIMIT distinct catalog loads pass; the next one gets 429."""
+    cache.clear()
+    settings.TRANSLATOR_BASE_URL = ""  # env may set it; force the JSON-blob path
+    acc = Account.objects.create_user(email="i18n-rl@ex.com", password="password123")
+    client = Client()
+    client.force_login(acc)
+    monkeypatch.setattr("apps.common.i18n_ui.get_translator", lambda: _CountingEcho())
+
+    statuses = []
+    for i in range(RATE_LIMIT + 1):
+        # Unique payload per call: catalog-cache hits bypass the rate limit.
+        statuses.append(_post_catalog(client, {"nav.feed": f"Feed #{i}"}).status_code)
+
+    assert statuses[:RATE_LIMIT] == [200] * RATE_LIMIT
+    assert statuses[RATE_LIMIT] == 429

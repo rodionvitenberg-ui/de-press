@@ -123,6 +123,8 @@ def test_stream_gateway_failure_surfaces_as_aierror(monkeypatch):
     from apps.ai import services as ai_services
 
     class ExplodingGateway:
+        is_offline = False
+
         def complete(self, messages: list) -> str:
             return "ok"
 

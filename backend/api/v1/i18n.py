@@ -46,16 +46,15 @@ def _rate_key(request) -> str:
 
 def _assert_rate(request) -> None:
     key = _rate_key(request)
-    n = cache.get(key)
-    if n is None:
-        cache.set(key, 1, RATE_WINDOW)
-        return
-    if int(n) >= RATE_LIMIT:
-        raise HttpError(429, "Too many language loads")
-    try:
-        cache.incr(key)
-    except ValueError:
-        cache.set(key, 1, RATE_WINDOW)
+    # cache.add is atomic set-if-absent: two concurrent first loads can't both
+    # miss the counter (check-then-act with cache.get would undercount).
+    if not cache.add(key, 1, RATE_WINDOW):
+        if int(cache.get(key) or 0) >= RATE_LIMIT:
+            raise HttpError(429, "Too many language loads")
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, RATE_WINDOW)
 
 
 def _catalog_key(target_lang: str, source_lang: str, strings: dict[str, str]) -> str:

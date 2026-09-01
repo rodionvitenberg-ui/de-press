@@ -8,7 +8,7 @@ import { useHelperHeartbeat } from "./useHelperHeartbeat";
 import { useHelperQueue } from "./useHelperQueue";
 import styles from "./HelperQueue.module.css";
 
-type Tab = "queue" | "clouds" | "summary";
+type Tab = "queue" | "clouds" | "requests" | "summary";
 
 export function HelperQueue() {
   const { t } = useI18n();
@@ -52,6 +52,12 @@ export function HelperQueue() {
     queryKey: ["moderation-queue"],
     queryFn: () => api.moderationQueue(),
     enabled: canHelper && tab === "clouds",
+  });
+
+  const reviewQuery = useQuery({
+    queryKey: ["dialogue-review"],
+    queryFn: () => api.reviewDialogueRequests(),
+    enabled: canHelper && tab === "requests",
   });
 
   const dashQuery = useQuery({
@@ -98,6 +104,20 @@ export function HelperQueue() {
     },
   });
 
+  const approveReq = useMutation({
+    mutationFn: (id: string) => api.approveDialogueRequestReview(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+  });
+
+  const rejectReq = useMutation({
+    mutationFn: (id: string) => api.rejectDialogueRequestReview(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dialogue-review"] });
+    },
+  });
+
   function reasonLabel(reason: string): string {
     if (reason === "abuse") return t.helper.reasonAbuse;
     if (reason === "spam") return t.helper.reasonSpam;
@@ -139,6 +159,7 @@ export function HelperQueue() {
   const items = queueQuery.data ?? [];
   const dash = dashQuery.data;
   const invites = invitesQuery.data ?? [];
+  const reviewItems = reviewQuery.data ?? [];
 
   return (
     <div className={styles.pane}>
@@ -168,7 +189,9 @@ export function HelperQueue() {
             ? t.helper.queueLead
             : tab === "clouds"
               ? t.helper.lead
-              : t.helper.dashboardLead}
+              : tab === "requests"
+                ? t.helper.reviewPlaque
+                : t.helper.dashboardLead}
         </p>
         <div className={styles.tabs} role="tablist">
           <button
@@ -188,6 +211,15 @@ export function HelperQueue() {
             onClick={() => setTab("clouds")}
           >
             {t.helper.tabClouds}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "requests"}
+            className={tab === "requests" ? styles.tabOn : styles.tab}
+            onClick={() => setTab("requests")}
+          >
+            {t.helper.tabRequests}
           </button>
           <button
             type="button"
@@ -292,6 +324,49 @@ export function HelperQueue() {
                     onClick={() => reject.mutate(cloud.id)}
                   >
                     {t.helper.reject}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : tab === "requests" ? (
+        !onDuty ? (
+          <p className={styles.empty}>{t.helper.queueOffDuty}</p>
+        ) : reviewQuery.isLoading ? (
+          <p className={styles.empty}>{t.helper.loading}</p>
+        ) : reviewQuery.isError ? (
+          <p className={styles.empty}>
+            {reviewQuery.error instanceof ApiError
+              ? reviewQuery.error.message
+              : t.common.error}
+          </p>
+        ) : reviewItems.length === 0 ? (
+          <p className={styles.empty}>{t.helper.empty}</p>
+        ) : (
+          <ul className={styles.list}>
+            {reviewItems.map((req) => (
+              <li key={req.id} className={styles.card}>
+                <p className={styles.meta}>
+                  {req.intent} · {waitLabel(req.created_at)}
+                </p>
+                {req.note ? <p className={styles.body}>{req.note}</p> : null}
+                <div className={styles.actions}>
+                  <button
+                    type="button"
+                    className={styles.approve}
+                    disabled={approveReq.isPending || rejectReq.isPending}
+                    onClick={() => approveReq.mutate(req.id)}
+                  >
+                    {t.helper.reviewApprove}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.reject}
+                    disabled={approveReq.isPending || rejectReq.isPending}
+                    onClick={() => rejectReq.mutate(req.id)}
+                  >
+                    {t.helper.reviewReject}
                   </button>
                 </div>
               </li>

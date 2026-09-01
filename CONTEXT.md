@@ -28,6 +28,12 @@ _Avoid_: anonymous user, guest session (ambiguous with HTTP session alone)
 A text monologue published without public comments. Authored by an Account or an AnonymousSession.
 _Avoid_: post, tweet, entry, article
 
+> Naming note: API routes under `/stories/{id}/comments…` and the `post_id`
+> key implement the author-only continuation of a Story (support replies /
+> initiated dialogue), not a public comment feed. The `comments`/`post_id`
+> names are kept for API stability; renaming is a breaking API change
+> (deferred). Never use *post* in UI copy.
+
 **Feed**:
 The public, time-ordered list of published Stories (Safe Monologues) a Visitor sees on `/feed`, filterable by Story Topic. A monologue-only surface: no comments, likes, or engagement counters. Distinct from the private Inbox and from any author-private aggregate.
 _Avoid_: timeline (as a social-media feed with engagement), newsfeed

@@ -287,6 +287,7 @@ export const en: Messages = {
     joinDone: "Done. You are a Helper.",
     tabClouds: "Clouds",
     tabSummary: "Overview",
+    tabRequests: "Dialogue requests",
     unusedInvites: "Your invites",
     inviteUsed: "used",
     dutyOn: "On duty",

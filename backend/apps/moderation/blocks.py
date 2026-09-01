@@ -173,7 +173,7 @@ def unblock_peer_in_dialogue(actor: Actor, dialogue_id: UUID) -> int:
 
 
 def blocked_author_q_for_viewer(viewer: Actor) -> Q:
-    """Q object matching Story rows whose author the viewer blocked (or who blocked viewer — hide mutual)."""
+    """Q object matching Story rows whose author the viewer blocked (one-way: authors who blocked the viewer stay visible)."""
     # Stories by people viewer blocked
     blocked = Block.objects.all()
     if viewer.account:

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
@@ -15,6 +15,11 @@ export default defineConfig(({ command }) => ({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
+  },
+  test: {
+    environment: "node",
+    // vendor/telegram-tt ships its own tests — not part of this app's suite.
+    exclude: [...configDefaults.exclude, "**/vendor/**"],
   },
   server: {
     port: 5175,

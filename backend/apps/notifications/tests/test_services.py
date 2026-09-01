@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from django.contrib.auth import get_user_model
 
+from apps.identity.cookies import resolve_anon_session_id
 from apps.identity.models import AnonymousSession
 from apps.identity.services import Actor
 from apps.notifications.models import EmailDigest, Notification
@@ -170,7 +171,7 @@ def test_open_inbox_anonymous_binds_session(settings):
     assert notif.is_read is True
     cookie = response.cookies.get(settings.ANON_SESSION_COOKIE_NAME)
     assert cookie is not None
-    assert cookie.value == str(sess.id)
+    assert resolve_anon_session_id(cookie.value) == sess.id
 
 
 @pytest.mark.django_db(transaction=True)
@@ -187,3 +188,44 @@ def test_open_inbox_invalid_token(settings):
         content_type="application/json",
     )
     assert response.status_code == 400
+
+
+@pytest.mark.django_db(transaction=True)
+def test_open_inbox_expired_token(settings):
+    from datetime import timedelta
+
+    from django.test import Client
+    from django.utils import timezone
+
+    from apps.notifications.softnotify import MAGIC_LINK_TTL_DAYS
+
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+    }
+    account = Account.objects.create_user(
+        email="stale@ex.com", password="password123"
+    )
+    actor = Actor(kind="account", account=account)
+    notif = notify(actor, "support_cloud", {"story_id": "x"})
+    digest = EmailDigest.objects.create(
+        recipient_account=account,
+        to_email=account.email,
+        token="tok-stale",
+        status="sent",
+        payload={"notification_ids": [str(notif.id)]},
+    )
+    # .update() bypasses auto_now_add and backdates the digest.
+    EmailDigest.objects.filter(pk=digest.pk).update(
+        created_at=timezone.now() - timedelta(days=MAGIC_LINK_TTL_DAYS + 1)
+    )
+
+    client = Client()
+    response = client.post(
+        "/api/v1/auth/inbox",
+        data={"token": digest.token},
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+    notif.refresh_from_db()
+    assert notif.is_read is False

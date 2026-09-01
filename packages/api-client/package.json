@@ -1,0 +1,17 @@
+{
+  "name": "@de-press/api-client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared API client for @de-press/browser and @de-press/mini-app (audit Q3). Ships TS source; apps compile it.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "gen:api": "openapi-typescript http://127.0.0.1:8005/api/openapi.json -o src/schema.gen.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.10.1"
+  }
+}

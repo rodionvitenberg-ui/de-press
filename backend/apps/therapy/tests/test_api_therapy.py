@@ -6,6 +6,7 @@ import pytest
 from django.test import Client
 from django.conf import settings
 
+from apps.identity.cookies import sign_anon_session_id
 from apps.identity.models import AnonymousSession
 from apps.therapy.models import TherapySessionStatus
 from apps.therapy.tests.test_therapy import SOL_ADDR, make_profile
@@ -13,7 +14,9 @@ from apps.therapy.tests.test_therapy import SOL_ADDR, make_profile
 
 def anon_client(session_id: str) -> Client:
     client = Client()
-    client.cookies[settings.ANON_SESSION_COOKIE_NAME] = session_id
+    client.cookies[settings.ANON_SESSION_COOKIE_NAME] = sign_anon_session_id(
+        session_id
+    )
     return client
 
 

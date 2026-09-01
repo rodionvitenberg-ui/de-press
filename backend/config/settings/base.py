@@ -270,3 +270,27 @@ CACHES = {
         "LOCATION": "depress-local",
     }
 }
+
+# Minimal server observability: errors reach stderr without request bodies or
+# any user content (audit Q7). runserver request lines stay via django.server.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "plain": {"format": "{levelname} {name} {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+    },
+    "root": {"handlers": ["console"], "level": "WARNING"},
+    "loggers": {
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # 4xx stay quiet; 5xx surface as ERROR — message only, never payloads.
+        "django.request": {"level": "ERROR"},
+        "apps": {"level": "ERROR"},
+    },
+}

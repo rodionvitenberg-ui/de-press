@@ -55,11 +55,17 @@ async def _connect_account(author, dialogue_id: str) -> WebsocketCommunicator:
 
 async def _connect_anon(session, dialogue_id: str) -> WebsocketCommunicator:
     from django.conf import settings as dj_settings
+    from apps.identity.cookies import sign_anon_session_id
 
     cookie = dj_settings.ANON_SESSION_COOKIE_NAME
     return await _connect(
         f"/ws/dialogues/{dialogue_id}/",
-        [(b"cookie", f"{cookie}={session.id}".encode())],
+        [
+            (
+                b"cookie",
+                f"{cookie}={sign_anon_session_id(str(session.id))}".encode(),
+            )
+        ],
     )
 
 

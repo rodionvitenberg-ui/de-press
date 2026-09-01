@@ -4,20 +4,21 @@
 `de-press.co` is an empathetic, non-commercial mental health platform and safe haven
 (quiet monologues, silent empathy, Anti-Panic, zero-knowledge local patterns).
 
-**Two independent frontends + one backend:**
+**Three independent frontends + one backend (all Vite + React SPA; no Next.js):**
 - `apps/browser/` — browser only (no Telegram Web A / no Mini App bridge)
 - `apps/mini-app/` — Mini App; target shell = Telegram Web A (`vendor/telegram-tt`, GPLv3)
+- `apps/admin/` — staff/admin panel
+- `packages/api-client/` — shared API client (`@de-press/api-client`), re-exported by both frontends (ADR 0023); regen types: `npm run gen:api`
 Never import mini-app vendor into browser. See `apps/README.md`, ADR 0014.
 Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/`.
 
 ---
 
 ## 🛠 Tech Stack
-- **Frontend:** Next.js (App Router, TypeScript)
-- **Backend:** Python / Django (Django REST Framework / Ninja + Django Channels for WebSockets)
-- **Database & Cache:** PostgreSQL + Redis (for real-time chat channels & session management)
-- **3D & Animation:** React Three Fiber (`@react-three/fiber`, `@react-three/drei`), GSAP (`ScrollTrigger`)
-- **Styling:** CSS Modules (`*.module.css`) + Native CSS Custom Properties (Design Tokens in `globals.css`). **STRICTLY NO TAILWIND CSS.**
+- **Frontend:** Vite + React (TypeScript) — three independent SPAs. No Next.js (archived legacy only).
+- **Backend:** Python / Django (Django Ninja for REST + Django Channels for WebSockets)
+- **Database & Cache:** PostgreSQL (primary DB) + Redis (cache, rate limits, Channels layer; optional in dev)
+- **Styling:** CSS Modules (`*.module.css`) + Native CSS Custom Properties (Design Tokens in `<app>/src/styles/tokens.css`). **STRICTLY NO TAILWIND CSS.**
 - **Local Storage:** IndexedDB (for Zero-Knowledge personal emotional patterns)
 - **AI Integration:** DeepSeek API (proxied via Django API Gateway)
 
@@ -26,7 +27,7 @@ Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/
 ## 🎨 Styling Rules & Design Tokens
 1. **Strictly No Utility CSS Frameworks:** Do not use Tailwind, UnoCSS, or inline utility styles.
 2. **CSS Modules:** Every component must have a dedicated `.module.css` file (e.g., `Button.module.css`).
-3. **Design Tokens:** Always reference semantic CSS variables from `apps/web/src/styles/tokens.css` (and legacy notes in docs):
+3. **Design Tokens:** Always reference semantic CSS variables from the app's `src/styles/tokens.css` (`apps/browser`, `apps/mini-app`; admin styles live in `apps/admin/src/admin.css`):
    - Colors: `var(--bg-main)`, `var(--bg-surface)`, `var(--text-primary)`, `var(--text-muted)`, `var(--accent-hope)`
    - Spacing & Radii: `var(--space-2)`, `var(--space-4)`, `var(--radius-md)`, `var(--btn-padding)`
 4. **Naming Convention:** Use camelCase for CSS module classes (e.g., `styles.btnPrimary`, `styles.cardContainer`).
@@ -52,11 +53,10 @@ When writing system prompts or AI integrations with DeepSeek:
 ## 💻 Code Style & Architecture
 - **TypeScript:** Strict mode enabled on Frontend. Define explicit interfaces for all Props, API responses, and Domain models.
 - **Python / Django:** PEP8 compliant, type hints, clean serializers/schemas, decoupled ASGI WebSocket consumers.
-- **Component Architecture:** Keep TSX files clean. Separate presentation from heavy logic via custom hooks (`useAntiPanic`, `useLocalMemory`, `use3DScroll`, `useChatSocket`).
-- **3D Performance:** All WebGL/R3F components must use dynamic imports (`next/dynamic` with `ssr: false`).
+- **Component Architecture:** Keep TSX files clean. Separate presentation from heavy logic via custom hooks (`useAntiPanic`, `useLocalMemory`, `useChatSocket`).
 - **Imports Order (Frontend):**
-  1. React / Next.js core
-  2. Third-party libraries (R3F, GSAP, etc.)
+  1. React / React Router core
+  2. Third-party libraries (react-query, etc.)
   3. API services & custom hooks
   4. Internal components
   5. Styles (`import styles from './Component.module.css'`)
@@ -65,11 +65,12 @@ When writing system prompts or AI integrations with DeepSeek:
 
 ## 🚀 Development Commands
 ```bash
-# Frontend (Next.js)
-npm run dev      # Run local dev server
-npm run build    # Production build check
-npm run lint     # ESLint validation
+# Frontend — per app (apps/browser, apps/mini-app, apps/admin)
+cd apps/browser && npm run dev   # local dev server
+npm run build                    # production build check (tsc -b && vite build)
+npm test                         # vitest (apps/browser, apps/mini-app)
 
-# Backend (Django)
+# Backend (Django, from backend/)
 python manage.py runserver     # Run Django API & ASGI WebSocket server
 python manage.py migrate       # Apply database migrations
+```

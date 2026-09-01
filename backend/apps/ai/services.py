@@ -105,7 +105,7 @@ def support_chat(
 
     system = SYSTEM_ANTI_PANIC if surface == "anti_panic" else SYSTEM_COMPANION
     gateway = get_gateway()
-    offline = gateway.__class__.__name__ == "OfflineGateway"
+    offline = gateway.is_offline
 
     full = [ChatMessage(role="system", content=system), *cleaned]
     try:
@@ -137,7 +137,7 @@ def stream_support_chat(
 
     system = SYSTEM_ANTI_PANIC if surface == "anti_panic" else SYSTEM_COMPANION
     gateway = get_gateway()
-    offline = gateway.__class__.__name__ == "OfflineGateway"
+    offline = gateway.is_offline
     full = [ChatMessage(role="system", content=system), *cleaned]
 
     def _chunks() -> Iterator[str]:

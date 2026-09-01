@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Shell } from "@/components/layout/Shell";
 import { FeedLayout } from "@/features/feed/FeedLayout";
@@ -5,17 +6,51 @@ import { StoryPage } from "@/features/feed/StoryPage";
 import { StoryComposer } from "@/features/feed/StoryComposer";
 import { ChatLayout } from "@/features/chat/ChatLayout";
 import { DialoguePage } from "@/features/chat/DialoguePage";
-import { HelperQueue } from "@/features/helper/HelperQueue";
-import { HelperJoin, HelperInviteCreate } from "@/features/helper/HelperJoin";
-import { PatternsPane } from "@/features/patterns/PatternsPane";
-import { TherapyPane } from "@/features/therapy/TherapyPane";
-import { HelpPane } from "@/features/help/HelpPane";
-import { HelpWaitPane } from "@/features/help/HelpWaitPane";
-import { CompanionPane } from "@/features/help/CompanionPane";
 import { StartParamNavigator } from "@/core/host/StartParamNavigator";
 import { TelegramBackButton } from "@/core/host/TelegramBackButton";
 import { useI18n } from "@/core/i18n/context";
 import styles from "./App.module.css";
+
+// Heavy, non-first-paint panes load on demand (audit Q4); feed and chat stay
+// eager — they are the entry surfaces. Named exports need the default mapping.
+const PatternsPane = lazy(() =>
+  import("@/features/patterns/PatternsPane").then((m) => ({
+    default: m.PatternsPane,
+  })),
+);
+const TherapyPane = lazy(() =>
+  import("@/features/therapy/TherapyPane").then((m) => ({
+    default: m.TherapyPane,
+  })),
+);
+const HelpPane = lazy(() =>
+  import("@/features/help/HelpPane").then((m) => ({ default: m.HelpPane })),
+);
+const HelpWaitPane = lazy(() =>
+  import("@/features/help/HelpWaitPane").then((m) => ({
+    default: m.HelpWaitPane,
+  })),
+);
+const CompanionPane = lazy(() =>
+  import("@/features/help/CompanionPane").then((m) => ({
+    default: m.CompanionPane,
+  })),
+);
+const HelperQueue = lazy(() =>
+  import("@/features/helper/HelperQueue").then((m) => ({
+    default: m.HelperQueue,
+  })),
+);
+const HelperJoin = lazy(() =>
+  import("@/features/helper/HelperJoin").then((m) => ({
+    default: m.HelperJoin,
+  })),
+);
+const HelperInviteCreate = lazy(() =>
+  import("@/features/helper/HelperJoin").then((m) => ({
+    default: m.HelperInviteCreate,
+  })),
+);
 
 function EmptyPane({ text }: { text: string }) {
   return (
@@ -32,7 +67,8 @@ function AppRoutes() {
   const { t } = useI18n();
 
   return (
-    <Routes>
+    <Suspense fallback={<EmptyPane text="…" />}>
+      <Routes>
       <Route element={<Shell />}>
         <Route path="/" element={<Navigate to="/feed" replace />} />
 
@@ -59,7 +95,8 @@ function AppRoutes() {
 
         <Route path="*" element={<EmptyPane text={t.shell.notFound} />} />
       </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

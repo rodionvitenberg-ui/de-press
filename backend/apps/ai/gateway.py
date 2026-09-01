@@ -16,6 +16,8 @@ class ChatMessage:
 
 
 class AIGateway(Protocol):
+    is_offline: bool
+
     def complete(self, messages: list[ChatMessage]) -> str: ...
 
     def stream(self, messages: list[ChatMessage]) -> Iterator[str]: ...
@@ -23,6 +25,8 @@ class AIGateway(Protocol):
 
 class OfflineGateway:
     """Deterministic fallback when no API key — still useful for dev/tests."""
+
+    is_offline = True
 
     def complete(self, messages: list[ChatMessage]) -> str:
         last_user = ""
@@ -44,6 +48,8 @@ class OfflineGateway:
 
 
 class OpenAICompatibleGateway:
+    is_offline = False
+
     def __init__(self, *, api_key: str, base_url: str, model: str):
         from openai import OpenAI
 

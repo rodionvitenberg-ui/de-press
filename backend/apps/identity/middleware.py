@@ -1,22 +1,19 @@
-"""Attach AnonymousSession from cookie; set cookie when newly minted."""
+"""Attach AnonymousSession from signed cookie; set cookie when newly minted."""
 
 from __future__ import annotations
-
-from uuid import UUID
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
+from apps.identity.cookies import resolve_anon_session_id, sign_anon_session_id
 from apps.identity.models import AnonymousSession
 
 
 def _load_anon_session(request: HttpRequest) -> AnonymousSession | None:
-    raw = request.COOKIES.get(settings.ANON_SESSION_COOKIE_NAME)
-    if not raw:
-        return None
-    try:
-        session_id = UUID(raw)
-    except (ValueError, TypeError):
+    session_id = resolve_anon_session_id(
+        request.COOKIES.get(settings.ANON_SESSION_COOKIE_NAME)
+    )
+    if session_id is None:
         return None
     return AnonymousSession.objects.filter(pk=session_id).first()
 
@@ -36,7 +33,7 @@ class AnonymousSessionMiddleware:
             if session is not None:
                 response.set_cookie(
                     settings.ANON_SESSION_COOKIE_NAME,
-                    str(session.id),
+                    sign_anon_session_id(str(session.id)),
                     max_age=settings.ANON_SESSION_COOKIE_MAX_AGE,
                     httponly=True,
                     samesite="Lax",

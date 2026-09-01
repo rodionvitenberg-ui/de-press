@@ -278,6 +278,7 @@ export type Messages = {
     joinDone: string;
     tabClouds: string;
     tabSummary: string;
+    tabRequests: string;
     unusedInvites: string;
     inviteUsed: string;
     dutyOn: string;

@@ -288,6 +288,7 @@ export const ru: Messages = {
     joinDone: "Готово. Ты Helper.",
     tabClouds: "Облачка",
     tabSummary: "Сводка",
+    tabRequests: "Запросы диалога",
     unusedInvites: "Твои инвайты",
     inviteUsed: "использован",
     dutyOn: "На смене",

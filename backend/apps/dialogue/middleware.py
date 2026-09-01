@@ -1,4 +1,4 @@
-"""ASGI middleware: attach Actor from session cookie + anonymous cookie."""
+"""ASGI middleware: attach Actor from signed session cookie + anon cookie."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from channels.middleware import BaseMiddleware
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 
+from apps.identity.cookies import resolve_anon_session_id
 from apps.identity.models import Account, AnonymousSession
 from apps.identity.services import Actor
 
@@ -22,21 +23,17 @@ def _load_account(user_id) -> Account | None:
 
 
 @database_sync_to_async
-def _load_anon(session_id: str | None) -> AnonymousSession | None:
-    if not session_id:
+def _load_anon(session_id: UUID | None) -> AnonymousSession | None:
+    if session_id is None:
         return None
-    try:
-        uid = UUID(session_id)
-    except (ValueError, TypeError):
-        return None
-    return AnonymousSession.objects.filter(pk=uid).first()
+    return AnonymousSession.objects.filter(pk=session_id).first()
 
 
 class ActorAuthMiddleware(BaseMiddleware):
     """
     After AuthMiddlewareStack: scope['user'] may be Account.
-    Also reads depress_anon cookie (or ?anon= query for tools).
-    Sets scope['actor'] = Actor.
+    Also reads the signed depress_anon cookie (or a signed ?anon= query for
+    tools). Sets scope['actor'] = Actor.
     """
 
     async def __call__(self, scope, receive, send):
@@ -54,7 +51,7 @@ class ActorAuthMiddleware(BaseMiddleware):
             qs = parse_qs(scope.get("query_string", b"").decode())
             anon_raw = (qs.get("anon") or [None])[0]
 
-        session = await _load_anon(anon_raw)
+        session = await _load_anon(resolve_anon_session_id(anon_raw))
 
         if account is not None:
             scope["actor"] = Actor(kind="account", account=account, session=session)

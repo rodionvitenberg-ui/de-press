@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import secrets
+from datetime import timedelta
 from typing import Any
 from uuid import UUID
 
@@ -23,6 +24,11 @@ from apps.notifications.models import EmailDigest, EmailDigestStatus, Notificati
 
 class SoftNotifyError(Exception):
     pass
+
+
+# A magic-link token is a login credential: open_inbox() logs accounts in
+# with it, so a leaked link must not stay valid forever.
+MAGIC_LINK_TTL_DAYS = 14
 
 
 def _recipient_contact(actor: Actor) -> str:
@@ -158,11 +164,14 @@ def send_soft_notify(
 
 
 def resolve_digest(token: str) -> EmailDigest:
-    """Find digest by magic token."""
+    """Find digest by magic token; raise SoftNotifyError if it is expired."""
     try:
-        return EmailDigest.objects.get(token=(token or "").strip())
+        digest = EmailDigest.objects.get(token=(token or "").strip())
     except EmailDigest.DoesNotExist as exc:
         raise SoftNotifyError("Неверная ссылка") from exc
+    if timezone.now() - digest.created_at > timedelta(days=MAGIC_LINK_TTL_DAYS):
+        raise SoftNotifyError("Ссылка устарела")
+    return digest
 
 
 def open_inbox(request, token: str) -> tuple[EmailDigest, Actor]:
