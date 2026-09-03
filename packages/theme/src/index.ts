@@ -4,6 +4,7 @@ export {
   isThemeId,
   themeById,
   autoTheme,
+  parseStoredMode,
 } from "./registry";
 export type {
   ThemeId,

@@ -1,8 +1,8 @@
 import { useT } from "@/core/i18n/context";
-import { useTheme, type ThemeMode } from "@/core/theme";
+import { THEME_IDS, useTheme, type ThemeMode } from "@/core/theme";
 import styles from "./ThemeSwitch.module.css";
 
-const modes: ThemeMode[] = ["auto", "dark", "light"];
+const modes: ThemeMode[] = ["auto", ...THEME_IDS];
 
 export function ThemeSwitch() {
   const { mode, setMode } = useTheme();
@@ -11,6 +11,7 @@ export function ThemeSwitch() {
     auto: t.theme.auto,
     dark: t.theme.dark,
     light: t.theme.light,
+    aurora: t.theme.aurora,
   };
 
   return (

@@ -491,6 +491,7 @@ export type Messages = {
     auto: string;
     dark: string;
     light: string;
+    aurora: string;
   };
   composer: {
     title: string;

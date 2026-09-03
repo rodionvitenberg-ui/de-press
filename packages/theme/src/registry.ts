@@ -28,3 +28,8 @@ export function themeById(id: ThemeId): ThemeDef {
 export function autoTheme(appearance: ColorScheme): ThemeId {
   return THEMES.find((t) => t.autoAppearance === appearance)?.id ?? "dark";
 }
+
+export function parseStoredMode(raw: string | null): ThemeMode {
+  if (raw === "auto" || (raw !== null && isThemeId(raw))) return raw;
+  return "auto";
+}

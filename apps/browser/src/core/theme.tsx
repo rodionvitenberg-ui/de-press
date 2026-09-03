@@ -7,21 +7,30 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  autoTheme,
+  parseStoredMode,
+  themeById,
+  type ColorScheme,
+  type ThemeId,
+  type ThemeMode,
+} from "@de-press/theme";
 
-export type ThemeMode = "auto" | "dark" | "light";
-export type ResolvedTheme = "dark" | "light";
+export type { ThemeId, ThemeMode } from "@de-press/theme";
+export { THEME_IDS } from "@de-press/theme";
+export type ResolvedTheme = ThemeId;
 
 const STORAGE_KEY = "depress:theme-mode";
 
 interface ThemeContextValue {
   mode: ThemeMode;
-  theme: ResolvedTheme;
+  theme: ThemeId;
   setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function resolveSystemTheme(): ResolvedTheme {
+function resolveSystemAppearance(): ColorScheme {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: light)").matches
     ? "light"
@@ -30,33 +39,33 @@ function resolveSystemTheme(): ResolvedTheme {
 
 function readStoredMode(): ThemeMode {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === "auto" || raw === "dark" || raw === "light") return raw;
+    return parseStoredMode(localStorage.getItem(STORAGE_KEY));
   } catch {
-    /* ignore */
+    return "auto";
   }
-  return "auto";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(readStoredMode);
-  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(resolveSystemTheme);
+  const [systemAppearance, setSystemAppearance] = useState<ColorScheme>(
+    resolveSystemAppearance,
+  );
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: light)");
-    const sync = () => setSystemTheme(resolveSystemTheme());
+    const sync = () => setSystemAppearance(resolveSystemAppearance());
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
 
-  const theme: ResolvedTheme = mode === "auto" ? systemTheme : mode;
+  const theme: ThemeId = mode === "auto" ? autoTheme(systemAppearance) : mode;
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.host = "browser";
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", theme === "dark" ? "#0c0e12" : "#f3efe9");
+      meta.setAttribute("content", themeById(theme).themeColor);
     }
   }, [theme]);
 

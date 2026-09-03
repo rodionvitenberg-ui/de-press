@@ -7,22 +7,35 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { telegramPreferredTheme } from "@/core/host/telegram";
+import {
+  autoTheme,
+  parseStoredMode,
+  themeById,
+  type ColorScheme,
+  type ThemeId,
+  type ThemeMode,
+} from "@de-press/theme";
+import {
+  applyTelegramTheme,
+  getTelegramWebApp,
+  telegramPreferredTheme,
+} from "@/core/host/telegram";
 
-export type ThemeMode = "auto" | "dark" | "light";
-export type ResolvedTheme = "dark" | "light";
+export type { ThemeId, ThemeMode } from "@de-press/theme";
+export { THEME_IDS } from "@de-press/theme";
+export type ResolvedTheme = ThemeId;
 
 const STORAGE_KEY = "depress:theme-mode";
 
 interface ThemeContextValue {
   mode: ThemeMode;
-  theme: ResolvedTheme;
+  theme: ThemeId;
   setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function resolveSystemTheme(): ResolvedTheme {
+function resolveSystemAppearance(): ColorScheme {
   if (typeof window === "undefined") return "dark";
   // Mini App host: follow Telegram color scheme when available.
   const tg = telegramPreferredTheme();
@@ -34,21 +47,33 @@ function resolveSystemTheme(): ResolvedTheme {
 
 function readStoredMode(): ThemeMode {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === "auto" || raw === "dark" || raw === "light") return raw;
+    return parseStoredMode(localStorage.getItem(STORAGE_KEY));
   } catch {
-    /* ignore */
+    return "auto";
   }
-  return "auto";
+}
+
+function applyTelegramChrome(color: string): void {
+  const wa = getTelegramWebApp();
+  if (!wa) return;
+  try {
+    wa.setHeaderColor?.(color);
+    wa.setBackgroundColor?.(color);
+    wa.setBottomBarColor?.(color);
+  } catch {
+    /* older clients */
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(readStoredMode);
-  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(resolveSystemTheme);
+  const [systemAppearance, setSystemAppearance] = useState<ColorScheme>(
+    resolveSystemAppearance,
+  );
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: light)");
-    const sync = () => setSystemTheme(resolveSystemTheme());
+    const sync = () => setSystemAppearance(resolveSystemAppearance());
     media.addEventListener("change", sync);
     const wa = window.Telegram?.WebApp;
     if (wa) {
@@ -70,15 +95,38 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const theme: ResolvedTheme = mode === "auto" ? systemTheme : mode;
+  const theme: ThemeId = mode === "auto" ? autoTheme(systemAppearance) : mode;
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    const color = themeById(theme).themeColor;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", theme === "dark" ? "#0c0e12" : "#f3efe9");
+      meta.setAttribute("content", color);
     }
-  }, [theme]);
+    if (mode === "auto") {
+      const wa = getTelegramWebApp();
+      if (wa) applyTelegramTheme(wa);
+      if (meta) meta.setAttribute("content", color);
+      return;
+    }
+    applyTelegramChrome(color);
+    const wa = getTelegramWebApp();
+    if (!wa) return;
+    const keepExplicitChrome = () => applyTelegramChrome(color);
+    try {
+      wa.onEvent("themeChanged", keepExplicitChrome);
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      try {
+        wa.offEvent("themeChanged", keepExplicitChrome);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [theme, mode]);
 
   const setMode = useCallback((next: ThemeMode) => {
     setModeState(next);

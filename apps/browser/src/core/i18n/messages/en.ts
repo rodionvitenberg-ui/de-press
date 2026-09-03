@@ -671,6 +671,7 @@ export const en: Messages = {
     auto: "Auto",
     dark: "Dark",
     light: "Light",
+    aurora: "Aurora",
   },
   composer: {
     title: "Add a note",

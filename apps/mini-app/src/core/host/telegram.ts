@@ -3,6 +3,8 @@
  * Docs: https://core.telegram.org/bots/webapps
  */
 
+import { themeById } from "@de-press/theme";
+
 export type TelegramColorScheme = "light" | "dark";
 
 export interface TelegramThemeParams {
@@ -138,7 +140,9 @@ export function applyTelegramTheme(wa: TelegramWebApp = getTelegramWebApp()!): v
 
   const bg =
     wa.themeParams.bg_color ||
-    (scheme === "dark" ? "#0c0e12" : "#f3efe9");
+    (scheme === "dark"
+      ? themeById("dark").themeColor
+      : themeById("light").themeColor);
   try {
     wa.setHeaderColor?.(bg);
     wa.setBackgroundColor?.(bg);

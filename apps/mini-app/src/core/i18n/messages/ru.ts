@@ -569,6 +569,7 @@ export const ru: Messages = {
     auto: "Авто",
     dark: "Тёмная",
     light: "Светлая",
+    aurora: "Аврора",
   },
   composer: {
     title: "Добавить запись",
