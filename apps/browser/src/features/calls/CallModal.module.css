@@ -61,13 +61,13 @@
 }
 
 .ok {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--accent-hope);
+  color: var(--on-accent-hope);
 }
 
 .danger {
-  background: #c62828;
-  color: #fff;
+  background: var(--accent-panic);
+  color: var(--on-accent-panic);
 }
 
 .neutral {

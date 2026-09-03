@@ -95,8 +95,8 @@
 }
 
 .primary {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--accent-hope);
+  color: var(--on-accent-hope);
 }
 
 .input {
@@ -163,13 +163,13 @@
 .claimed {
   margin: 0;
   font-size: 0.85rem;
-  color: #2e7d32;
+  color: var(--accent-hope);
 }
 
 .error {
   margin: 0;
   font-size: 0.8rem;
-  color: #c62828;
+  color: var(--accent-panic);
 }
 
 .linkish {
