@@ -18,7 +18,7 @@ Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/
 - **Frontend:** Vite + React (TypeScript) — three independent SPAs. No Next.js (archived legacy only).
 - **Backend:** Python / Django (Django Ninja for REST + Django Channels for WebSockets)
 - **Database & Cache:** PostgreSQL (primary DB) + Redis (cache, rate limits, Channels layer; optional in dev)
-- **Styling:** CSS Modules (`*.module.css`) + Native CSS Custom Properties (Design Tokens in `<app>/src/styles/tokens.css`). **STRICTLY NO TAILWIND CSS.**
+- **Styling:** CSS Modules (`*.module.css`) + Native CSS Custom Properties (Design Tokens in `@de-press/theme` / `packages/theme/src/tokens.css`). **STRICTLY NO TAILWIND CSS.**
 - **Local Storage:** IndexedDB (for Zero-Knowledge personal emotional patterns)
 - **AI Integration:** DeepSeek API (proxied via Django API Gateway)
 
@@ -27,7 +27,7 @@ Legacy Next: `_archive/legacy/next-frontend/` (archived). Django: `backend/apps/
 ## 🎨 Styling Rules & Design Tokens
 1. **Strictly No Utility CSS Frameworks:** Do not use Tailwind, UnoCSS, or inline utility styles.
 2. **CSS Modules:** Every component must have a dedicated `.module.css` file (e.g., `Button.module.css`).
-3. **Design Tokens:** Always reference semantic CSS variables from the app's `src/styles/tokens.css` (`apps/browser`, `apps/mini-app`; admin styles live in `apps/admin/src/admin.css`):
+3. **Design Tokens:** Always reference semantic CSS variables from `@de-press/theme` (`packages/theme/src/tokens.css`; admin styles live in `apps/admin/src/admin.css`):
    - Colors: `var(--bg-main)`, `var(--bg-surface)`, `var(--text-primary)`, `var(--text-muted)`, `var(--accent-hope)`
    - Spacing & Radii: `var(--space-2)`, `var(--space-4)`, `var(--radius-md)`, `var(--btn-padding)`
 4. **Naming Convention:** Use camelCase for CSS module classes (e.g., `styles.btnPrimary`, `styles.cardContainer`).
