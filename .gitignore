@@ -60,3 +60,6 @@ _archive/
 
 # RU docs archive (kept locally only, EN is canon — decision Q6 2026-08-30)
 docs-ru-archive/
+
+# Local agent skill library (published by mistake; not part of the product)
+skills/
