@@ -17,8 +17,8 @@
 3. **Multi-theming — an imperative.**
    - The dark theme is the base one (current);
    - the light theme ("dawn") is mandatory in v2.0;
-   - the token architecture must support further themes without a refactor;
-   - a theme switcher is needed (auto / dark / light), no hardcoded colors in the components.
+   - named themes live in `@de-press/theme`; the token architecture must support further themes without a refactor;
+   - a theme switcher is needed: Auto plus every named id from the registry (not only auto / dark / light); no hardcoded colors in the components.
 4. **The colors are ours.** The form is TG, the color/light/vibe is de-press (the mint `hope`, calm dark/light palettes).
 5. **The user's screenshot is the source of truth for the screen layout** (see §5). The image is temporarily unavailable to the agent — the layout is fixed as text below and requires a confirmation.
 
@@ -70,7 +70,7 @@ Telegram gives the skeleton: three zones, lists, bubbles, search, a tab bar. de-
 
 - **Silence instead of pressure.** No showcase counters, no pulsing suffering badges, no "online". "Typing…" — we take it as in TG (§10.4), softening the text tone if needed at the implementation stage.
 - **Breathing instead of haste.** Slow smooth transitions, soft entrances, no sharp animations on high-frequency actions.
-- **The mint accent is the only one.** `--accent-hope` for an action. `--accent-panic` — only crisis/destructive (`I'M NOT OK`).
+- **The mint/hope accent is the only one for action.** `--accent-hope` for an action; `--accent-panic` — only crisis/destructive (`I'M NOT OK`). In `aurora` hope is `#5fc4aa` (island teal), not white: a white chrome accent from the landing would collapse action vs surface in the messenger.
 - **No Tailwind.** CSS Modules + design tokens (a project rule).
 
 ---
@@ -79,10 +79,11 @@ Telegram gives the skeleton: three zones, lists, bubbles, search, a tab bar. de-
 
 ### 4.1 The requirements (an imperative)
 
-- All colors — only through CSS tokens (`:root` + `[data-theme="..."]`), not a single hardcode in the modules.
-- Themes: `dark` (current), `light` ("dawn") in v2.0; the scheme allows adding `sepia/dim/contrast` later.
-- The switcher: `Auto (system)` / `Dark` / `Light` — in the sidebar (the user modal, see §5.2) and on the settings page.
-- Every theme overrides the **entire** token set (the background, surface, text, borders, shadows, bubbles, input/composer).
+- All colors — only through CSS tokens (`:root` + `[data-theme="..."]`), not a single hardcode in the modules. Source of truth: `@de-press/theme` (`packages/theme` — registry + `tokens.css`); both hosts import it ([ADR 0024](./adr/0024-theme-registry.md)).
+- Themes in v2.0: `dark` (current, default), `light` ("dawn"), `aurora` (opt-in). Further palettes (`sepia` / `dim` / `contrast`) are added through the registry, not a refactor.
+- The switcher: Auto plus every named id from the registry (today: Auto / Dark / Light / Aurora) — in the sidebar (the user modal, see §5.2) and on the settings page.
+- Auto resolves only to `dark` or `light` (OS `prefers-color-scheme` / Telegram `colorScheme`). `aurora` is never chosen by Auto.
+- Every theme overrides the **entire** color token set (the background, surface, text, borders, shadows, bubbles, input/composer, on-accent). Geometry, radii, font, durations stay on `:root`.
 - `media (prefers-color-scheme)` — the base auto logic; `data-theme` overrides it.
 - `color-scheme: dark/light` — sync with the scrollbars/native controls.
 
@@ -94,6 +95,7 @@ Telegram gives the skeleton: three zones, lists, bubbles, search, a tab bar. de-
 --bg-bubble-me / --bg-bubble-them
 --text-primary / --text-muted / --text-bubble / --text-bubble-muted
 --accent-hope (+ soft/mid) / --accent-panic
+--on-accent-hope / --on-accent-panic
 --border-subtle / --border-soft
 --shadow-elev-1/2, --shadow-cloud
 --radius-* (concentric, see better-ui: outer = inner + padding)
@@ -103,6 +105,10 @@ Telegram gives the skeleton: three zones, lists, bubbles, search, a tab bar. de-
 ### 4.3 The light theme — candidate values
 
 A calm "dawn": a warm grey-beige background, a dark graphite text, bubble-me = mint (dark) on light, bubble-them = light grey. The exact values — at the implementation stage + a vibe confirmation. IMPORTANT: for mental health the light mode is often more critical than the dark one (less contrast stimulation during the day).
+
+### 4.4 Aurora
+
+Cinematic navy, not graphite Telegram-night: page `#0c101b`, muted text in periwinkle, hope `#5fc4aa`. Opt-in only; no light twin; Auto never selects it. Full token values live in `packages/theme/src/tokens.css` (`:root[data-theme="aurora"]`) — do not duplicate the table here.
 
 ---
 
@@ -203,7 +209,7 @@ At the bottom — the **always visible stop button `I'M NOT OK`** (Anti-Panic). 
 | The right zone | The `main` content of pages | A header + content + bottom actions (chat/rays/…) | P0 |
 | Chat | `DialogueClient` is already TG-styled (bubbles, composer) | Push to the TG details: time, 1:1 radii, states | P0 |
 | Dialogue Requests | Cards on `/me` | Grey items in the yellow zone of the chat + a system banner | P0 |
-| Themes | Dark only, `color-scheme: dark` | Dark + Light + auto + a choice, all colors through tokens | P0 |
+| Themes | Dark only, `color-scheme: dark` | Dark + Light + Aurora + Auto (Auto → dark\|light); registry in `@de-press/theme` | P0 |
 | Tokens | A base in `globals.css` | The full set (backgrounds/surfaces/bubbles/shadows), concentric radii | P0 |
 | Icons | Inline SVG 1.5px in `Sidebar` | A full set, recognizable glyphs, 1.5/2px by the text weight | P1 |
 | Mobile | `BottomNav` with 4 items | A TG tab bar + "I'M NOT OK", nested screens | P1 |
@@ -263,7 +269,7 @@ For every sidebar button — a clear, recognizable glyph (by the better-ui princ
 
 **The tone = de-press.** A "thought" card for the monologue, quiet gestures without a showcase, soft badges, calm transitions, the single `hope` accent.
 
-**Themes = mandatory multi-theming.** dark + light ("dawn") in v2.0, an architecture for future themes, an auto/dark/light switcher.
+**Themes = mandatory multi-theming.** dark + light ("dawn") + opt-in `aurora` in v2.0, a registry for further themes (`@de-press/theme`), a switcher of Auto plus every named id (Auto never picks aurora).
 
 **Safety = manual.** The Dialogue Request passes the Helper's check (a human), moderation is always manual.
 
