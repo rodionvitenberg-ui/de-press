@@ -31,6 +31,8 @@
   --accent-hope-soft: rgba(126, 184, 162, 0.14);
   --accent-hope-mid: rgba(126, 184, 162, 0.28);
   --accent-panic: #c47a7a;
+  --on-accent-hope: #0c0e12;
+  --on-accent-panic: #0c0e12;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.07);
@@ -52,6 +54,8 @@
   --tg-header-height: 3.5rem; /* 56px */
   --tg-composer-height: 3.25rem; /* 52px */
   --tg-search-height: 2.625rem; /* 42px */
+  --tg-tabbar-height: 3.5rem; /* 56px + safe-area in CSS */
+  --hit-touch: 2.75rem; /* 44px */
   --tg-bubble-max: 70%;
   --sidebar-width-desktop: var(--tg-rail-width);
 
@@ -116,6 +120,8 @@
   --accent-hope-soft: rgba(47, 125, 99, 0.12);
   --accent-hope-mid: rgba(47, 125, 99, 0.24);
   --accent-panic: #b35858;
+  --on-accent-hope: #ffffff;
+  --on-accent-panic: #ffffff;
 
   /* Borders */
   --border-subtle: rgba(0, 0, 0, 0.08);
@@ -131,6 +137,66 @@
   --chat-pattern-a: rgba(47, 125, 99, 0.08);
   --chat-pattern-b: rgba(0, 0, 0, 0.04);
   --chat-pattern-c: rgba(47, 125, 99, 0.05);
+  --chat-wallpaper:
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-a) 1.1px, transparent 0),
+    radial-gradient(circle at 1px 1px, var(--chat-pattern-b) 1px, transparent 0),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--chat-pattern-c) 0.8px,
+      transparent 0.9px
+    ),
+    var(--bg-chat);
+  --chat-wallpaper-size: 14px 14px, 22px 22px, 9px 9px, auto;
+  --chat-wallpaper-pos: 0 0, 7px 11px, 4px 2px, 0 0;
+}
+
+:root[data-theme="aurora"] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg-main: #0c101b;
+  --bg-sidebar: #0e101a;
+  --bg-chat: #0c101b;
+  --bg-surface: #141824;
+  --bg-elevated: #1a1f2e;
+  --bg-input: #161b28;
+  --bg-hover: rgba(187, 194, 229, 0.06);
+  --bg-active: rgba(95, 196, 170, 0.16);
+
+  /* Bubbles */
+  --bg-bubble-me: #164a44;
+  --bg-bubble-them: #1a1f2e;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-muted: #9aa3d0;
+  --text-bubble: #ffffff;
+  --text-bubble-muted: rgba(255, 255, 255, 0.62);
+
+  /* Accents */
+  --accent-hope: #5fc4aa;
+  --accent-hope-soft: rgba(95, 196, 170, 0.14);
+  --accent-hope-mid: rgba(95, 196, 170, 0.28);
+  --accent-panic: #c47a8a;
+  --on-accent-hope: #0c101b;
+  --on-accent-panic: #0c101b;
+
+  /* Borders */
+  --border-subtle: rgba(187, 194, 229, 0.12);
+  --border-soft: rgba(95, 196, 170, 0.22);
+
+  /* Elevation */
+  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-elev-2: 0 8px 24px rgba(0, 0, 0, 0.38);
+  --shadow-cloud: 0 10px 28px rgba(0, 0, 0, 0.34);
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--accent-hope-mid);
+
+  /* Dense chat wallpaper (TG-like abstract mesh, our palette) */
+  --chat-pattern-a: rgba(95, 196, 170, 0.07);
+  --chat-pattern-b: rgba(187, 194, 229, 0.05);
+  --chat-pattern-c: rgba(95, 196, 170, 0.04);
   --chat-wallpaper:
     radial-gradient(circle at 1px 1px, var(--chat-pattern-a) 1.1px, transparent 0),
     radial-gradient(circle at 1px 1px, var(--chat-pattern-b) 1px, transparent 0),

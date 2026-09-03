@@ -7,7 +7,7 @@ import { AntiPanicProvider } from "@/core/hooks/useAntiPanic";
 import { ThemeProvider } from "@/core/theme";
 import { LocaleProvider } from "@/core/i18n/context";
 import { ToastProvider } from "@/core/toast";
-import "./styles/tokens.css";
+import "@de-press/theme/tokens.css";
 import "./styles/base.css";
 
 const queryClient = new QueryClient({
