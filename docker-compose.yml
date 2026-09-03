@@ -1,0 +1,132 @@
+# de-press self-host stack (one command).
+#   docker compose up --build -d
+#
+# Serves: browser SPA at http://localhost:8080, Mini App at /tg/,
+# admin console at /console/, API/WS on :8005 (also proxied by nginx).
+# Works out of the box with NO external services: no AI key, no Telegram bot,
+# no TURN (ICE falls back to LAN/direct candidates).
+#
+# Frontend dist/ are mounted from the host — build them first:
+#   cd apps/browser && npm ci && npm run build
+#   cd ../mini-app && npm ci && npm run build     # base=/tg/
+#   cd ../admin && npm ci && npm run build        # base=/console/
+# Set SEED=1 in your .env (or `docker compose run --rm backend ...`) to run
+# `manage.py seed_local` on the first start.
+name: de-press
+
+x-backend-env: &backend-env
+  DJANGO_SETTINGS_MODULE: config.settings
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-docker-local-change-me}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+  DJANGO_CORS_ALLOWED_ORIGINS: ${DJANGO_CORS_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175}
+  POSTGRES_DB: ${POSTGRES_DB:-depress}
+  POSTGRES_USER: ${POSTGRES_USER:-depress}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-depress}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/1
+  CELERY_RESULT_BACKEND: redis://redis:6379/2
+  CHANNEL_LAYER: redis
+  # AI / Telegram / TURN stay empty = offline/direct modes (see .env.example).
+  AI_API_KEY: ${AI_API_KEY:-}
+  TRANSLATOR_BASE_URL: ${TRANSLATOR_BASE_URL:-}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+  WEBRTC_TURN_URL: ${WEBRTC_TURN_URL:-}
+  SEED: ${SEED:-0}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-depress}
+      POSTGRES_USER: ${POSTGRES_USER:-depress}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-depress}
+    ports:
+      - "127.0.0.1:5433:5432"   # avoid clash with a system Postgres on 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-depress} -d ${POSTGRES_DB:-depress}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: de-press-backend:local
+    command: daphne -b 0.0.0.0 -p 8005 config.asgi:application
+    environment: *backend-env
+    volumes:
+      - backend_media:/srv/backend/media
+    ports:
+      - "127.0.0.1:8005:8005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8005/api/v1/health', timeout=5).status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  celery:
+    image: de-press-backend:local
+    entrypoint: []
+    command: celery -A config worker -l info --concurrency=2
+    environment: *backend-env
+    depends_on:
+      backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  beat:
+    image: de-press-backend:local
+    entrypoint: []
+    command: celery -A config beat -l info --schedule /var/lib/celerybeat/schedule
+    environment: *backend-env
+    volumes:
+      - celerybeat_data:/var/lib/celerybeat
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./apps/browser/dist:/usr/share/nginx/html/browser:ro
+      - ./apps/mini-app/dist:/usr/share/nginx/html/mini-app:ro
+      - ./apps/admin/dist:/usr/share/nginx/html/admin:ro
+      - backend_media:/usr/share/nginx/html/media:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_media:
+  celerybeat_data:

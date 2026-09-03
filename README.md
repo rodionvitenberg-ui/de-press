@@ -134,6 +134,33 @@ de-press/
 
 ## Running the project (locally)
 
+### Option A — Docker Compose (one command)
+
+Builds the full stack: postgres, redis, backend (daphne :8005), Celery worker +
+beat, and an nginx that serves all three SPAs on `http://localhost:8080`.
+No AI key, no Telegram bot, no TURN server required — everything runs in its
+offline/direct mode (see `.env.example`).
+
+```bash
+# build the frontends once — compose nginx serves their dist/
+(cd apps/browser && npm ci && npm run build)
+(cd apps/mini-app && npm ci && npm run build)   # base=/tg/
+(cd apps/admin && npm ci && npm run build)      # base=/console/
+
+docker compose up --build -d
+# UI:      http://localhost:8080  (Mini App /tg/, admin /console/)
+# API/WS:  http://127.0.0.1:8005  (docs: /api/docs)
+```
+
+Demo data on the first start — either set `SEED=1` in your `.env` before
+`up`, or run after the stack is up:
+
+```bash
+docker compose exec backend python manage.py seed_local   # login: seed@de-press.local / seedseed12
+```
+
+### Option B — bare metal
+
 You need: **Python 3.12+**, **Node 20+**, **PostgreSQL 5432**, **Redis** (for Channels).
 
 ### 1. Once — Postgres
