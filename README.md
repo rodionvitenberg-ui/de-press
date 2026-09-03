@@ -111,10 +111,14 @@ de-press/
 │   ├── legacy/next-frontend/ # old Next.js — not the main UI
 │   ├── native/               # fork of Telegram Android / tdesktop (ADR 0015/0016)
 │   └── AngelSlim/            # third-party LLM toolkit (clone)
+├── deploy/                   # systemd/nginx templates + render.sh (bare-VPS path)
+├── docker-compose.yml        # one-command Docker stack — README "Option A"
+├── docker/                   # nginx conf for the compose stack
 ├── de-press-docs/            # product documentation (app + site)
 │   └── app/                  # DESIGN_V2, PLATFORMS, ROADMAP, MINI_APP, ADR
 └── scripts/
     ├── dev_local.sh
+    ├── fetch_telegram_tt.sh
     └── smoke_api.sh
 ```
 
