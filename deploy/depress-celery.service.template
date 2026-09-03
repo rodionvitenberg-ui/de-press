@@ -1,0 +1,18 @@
+[Unit]
+Description=de-press Celery worker
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=${DEPRESS_USER}
+Group=${DEPRESS_GROUP}
+WorkingDirectory=${DEPRESS_APP_ROOT}/backend
+EnvironmentFile=${DEPRESS_ENV_FILE}
+Environment=DJANGO_SETTINGS_MODULE=config.settings.production
+ExecStart=${DEPRESS_APP_ROOT}/backend/.venv/bin/celery -A config worker -l info --concurrency=2
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

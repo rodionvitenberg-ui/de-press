@@ -5,12 +5,12 @@ Wants=postgresql.service redis-server.service
 
 [Service]
 Type=simple
-User=depress
-Group=depress
-WorkingDirectory=/opt/de-press/backend
-EnvironmentFile=/etc/depress/depress.env
+User=${DEPRESS_USER}
+Group=${DEPRESS_GROUP}
+WorkingDirectory=${DEPRESS_APP_ROOT}/backend
+EnvironmentFile=${DEPRESS_ENV_FILE}
 Environment=DJANGO_SETTINGS_MODULE=config.settings.production
-ExecStart=/opt/de-press/backend/.venv/bin/daphne -b 127.0.0.1 -p 8000 config.asgi:application
+ExecStart=${DEPRESS_APP_ROOT}/backend/.venv/bin/daphne -b 127.0.0.1 -p ${DEPRESS_API_PORT} config.asgi:application
 Restart=always
 RestartSec=3
 

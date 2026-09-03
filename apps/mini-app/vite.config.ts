@@ -7,7 +7,7 @@ import { fileURLToPath, URL } from "node:url";
 const API_UPSTREAM = process.env.API_UPSTREAM ?? "http://127.0.0.1:8005";
 
 export default defineConfig(({ command }) => ({
-  // Прод: mini-app раздаётся nginx-ом по пути /tg/ (deploy/nginx-de-press.conf).
+  // Прод: mini-app раздаётся nginx-ом по пути /tg/ (deploy/nginx-de-press.conf.template).
   // В dev base не меняем — дев-сервер остаётся на /.
   base: command === "build" ? "/tg/" : "/",
   plugins: [react()],

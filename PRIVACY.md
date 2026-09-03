@@ -46,7 +46,7 @@ document is a factual inventory of the backend data (code references included).
   the cache.
 - **User-Agent.** Never read, never written.
 - **Access logs with IPs.** Nginx in production uses a privacy format without
-  IP or UA (`deploy/nginx-de-press.conf`, `log_format privacy`).
+  IP or UA (`deploy/nginx-de-press.conf.template`, `log_format privacy`).
 - **Behavioral analytics.** No Google Analytics / Yandex.Metrica / Sentry
   profiles.
 - **Self-support patterns.** ZK patterns never leave the device.
@@ -72,7 +72,8 @@ document is a factual inventory of the backend data (code references included).
 Everything above is a property of the code, not a promise: models —
 `backend/apps/*/models.py`, middleware — `backend/apps/identity/middleware.py`
 (cookie only, no logs), rate limit — `backend/api/v1/i18n.py`, nginx —
-`deploy/nginx-de-press.conf`, fund — `backend/apps/fund/` (ADR-0020), therapy
+`deploy/nginx-de-press.conf.template`, fund — `backend/apps/fund/` (ADR-0020), therapy
 — `backend/apps/therapy/` (ADR-0022).
 The platform is self-hostable: anyone can run their own instance per
-`deploy/DEPLOY.md` and inspect the DB tables themselves.
+`de-press-docs/app/DEPLOY.md` (systemd) or the root `docker-compose.yml`
+(docker) and inspect the DB tables themselves.

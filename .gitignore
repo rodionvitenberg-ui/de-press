@@ -63,3 +63,11 @@ docs-ru-archive/
 
 # Local agent skill library (published by mistake; not part of the product)
 skills/
+
+# Rendered deploy artifacts — produce them with deploy/render.sh
+deploy/nginx-de-press.conf
+deploy/depress-api.service
+deploy/depress-celery.service
+deploy/depress-celery-beat.service
+deploy/depress-backup.service
+deploy/depress-backup.timer

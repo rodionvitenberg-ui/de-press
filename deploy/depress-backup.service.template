@@ -1,0 +1,8 @@
+[Unit]
+Description=de-press Postgres backup (pg_dump -Fc)
+
+[Service]
+Type=oneshot
+User=postgres
+ExecStart=/bin/bash -c 'umask 027 && exec /usr/bin/pg_dump -Fc ${DEPRESS_DB_NAME} > ${DEPRESS_BACKUP_DIR}/depress-$$(date +%%F).dump'
+ExecStartPost=/usr/bin/find ${DEPRESS_BACKUP_DIR} -name 'depress-*.dump' -mtime +14 -delete

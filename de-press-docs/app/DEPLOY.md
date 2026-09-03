@@ -1,5 +1,9 @@
 # DEPLOY — staging/prod on a single VPS (systemd + nginx, no docker)
 
+> Alternative self-host path: **Docker Compose** — see the root `docker-compose.yml`
+> and the *Quick start (docker)* section of the README. This runbook is the bare-VPS
+> systemd path.
+
 The scheme: one origin `https://app.depress.co` (replace with your domain). nginx serves
 the static files (the browser SPA — `/`, the Telegram Mini App — `/tg/`, the staff admin
 console — `/console/`, the Django admin — `/admin/`, the static — `/static/`,
@@ -7,9 +11,10 @@ the media — `/media/`) and proxies `/api` `/admin` `/docs` `/openapi.json` `/w
 daphne `127.0.0.1:8000`. Postgres and Redis — system packages. The Celery worker + beat —
 systemd units. The backups — a systemd timer (`pg_dump -Fc`, a 14-day retention).
 
-The artifacts in the `deploy/` of the repository: `depress-api.service`, `depress-celery.service`,
-`depress-celery-beat.service`, `depress-backup.service` + `depress-backup.timer`,
-`nginx-de-press.conf`; the env template — `.env.prod.example` at the root.
+The `deploy/` directory contains **templates** only: `deploy/*.template` (nginx site,
+the systemd units and the backup timer) plus `deploy/render.sh`, which renders them
+into concrete files from your env values (see `deploy/depress.env.example`). The app
+env template — `.env.prod.example` at the root.
 
 ## 1. The server (Ubuntu 24.04)
 
@@ -45,6 +50,10 @@ Fill in mandatory: `DJANGO_SECRET_KEY`, `POSTGRES_PASSWORD`, the domain in
 `DJANGO_ALLOWED_HOSTS`/`DJANGO_CORS_ALLOWED_ORIGINS`/`PUBLIC_BASE_URL`.
 The rest is optional (AI/translator/Telegram — empty = offline modes).
 
+Append the ops values used by `render.sh` (step 6/8): `DEPRESS_DOMAIN=app.depress.co`
+and the rest from `deploy/depress.env.example` (paths, user, api port, backup dir).
+The app ignores unknown keys, so one env file is enough.
+
 ## 5. Migrations, static, seed
 
 ```bash
@@ -58,8 +67,9 @@ sudo -u depress bash -c 'cd /opt/de-press/backend && set -a && . /etc/depress/de
 ## 6. The systemd units
 
 ```bash
-sudo cp deploy/depress-api.service deploy/depress-celery.service \\
-        deploy/depress-celery-beat.service deploy/depress-backup.service \\
+sudo -u depress bash deploy/render.sh /etc/depress/depress.env
+sudo cp deploy/depress-api.service deploy/depress-celery.service \
+        deploy/depress-celery-beat.service deploy/depress-backup.service \
         deploy/depress-backup.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now depress-api depress-celery depress-celery-beat depress-backup.timer
@@ -84,8 +94,8 @@ admin stays at `/admin/` as the fallback tool.
 ## 8. nginx + TLS
 
 ```bash
+# render.sh (step 6) already produced deploy/nginx-de-press.conf from the template
 sudo cp deploy/nginx-de-press.conf /etc/nginx/sites-available/de-press
-sudo sed -i 's/app.depress.co/<your-domain>/g' /etc/nginx/sites-available/de-press
 sudo ln -sf /etc/nginx/sites-available/de-press /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
