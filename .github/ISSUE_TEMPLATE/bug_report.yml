@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible problem in de-press
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. If this report involves a
+        security or privacy issue (data leak, session problem, secrets), do not
+        file it here — use [SECURITY.md](../../SECURITY.md) instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Backend (API / WS / Celery)
+        - Browser app
+        - Mini App
+        - Admin console
+        - Deploy / Docker / nginx
+        - Docs
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start with `...`
+        2. Open `...`
+        3. Do `...`
+      render: bash
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python/Node versions, commit or tag you tested
+      placeholder: e.g. Linux, Python 3.12, commit 2999ccf
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Backend stderr / browser console. Do not paste other people's content or live data.
+      render: shell

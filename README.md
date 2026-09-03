@@ -15,6 +15,9 @@ A non-profit, empathetic "quiet harbor" platform for people who are struggling:
 | [`de-press-docs/app/TG_SHELL_SPEC.md`](./de-press-docs/app/TG_SHELL_SPEC.md) | Shell geometry "like Telegram Desktop" |
 | [`de-press-docs/app/ROADMAP.md`](./de-press-docs/app/ROADMAP.md) | Product priorities |
 | [`CLAUDE.md`](./CLAUDE.md) | Code rules (some UI-stack parts are outdated — see DESIGN_V2 / PLATFORMS) |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md) | **How to contribute** — DCO (`git commit -s`), tests, commit style |
+| [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) | Contributor Covenant |
+| [`SECURITY.md`](./SECURITY.md) | Reporting vulnerabilities (private) |
 
 > **This is not medicine and not a replacement for therapy / emergency help.**  
 > In a crisis → 112 / 103, not "hold a chatbot".

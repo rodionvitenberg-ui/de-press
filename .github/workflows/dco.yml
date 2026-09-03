@@ -1,0 +1,41 @@
+name: DCO
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    name: Developer Certificate of Origin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the pull request
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Signed-off-by on every PR commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          # In the synthetic merge commit HEAD^1 is the base tip, HEAD the PR merge.
+          base="$(git rev-parse HEAD^1 2>/dev/null || true)"
+          if [ -z "$base" ]; then
+            echo "No base found; nothing to check."
+            exit 0
+          fi
+          commits="$(git rev-list --no-merges "$base..HEAD" || true)"
+          if [ -z "$commits" ]; then
+            echo "No commits to check."
+            exit 0
+          fi
+          for c in $commits; do
+            body="$(git log -1 --format=%B "$c")"
+            if ! grep -qE '^Signed-off-by: .+ <.+>$' <<<"$body"; then
+              echo "::error title=DCO missing::Commit ${c:0:12} has no 'Signed-off-by:' trailer. Commit with 'git commit -s' (see CONTRIBUTING.md)."
+              exit 1
+            fi
+          done
+          echo "All PR commits carry a Signed-off-by trailer."

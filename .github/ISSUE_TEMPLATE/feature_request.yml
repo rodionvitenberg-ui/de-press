@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an idea for de-press
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem you are trying to solve?
+      description: The need, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed approach
+      description: How you imagine it working. Rough is fine.
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Fit with product invariants
+      description: |
+        How does this preserve the de-press rules — no public likes/comments,
+        no open matching, ZK patterns on-device, AI always labeled and never a
+        hidden peer, crisis handled by humans, Mini App ≠ our own mobile?
+        See CONTEXT.md.
+    validations:
+      required: true
