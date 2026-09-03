@@ -12,8 +12,8 @@ from apps.identity.services import require_actor
 router = Router(tags=["ai"])
 
 AI_DISCLAIMER = (
-    "Это ИИ-помощник, не терапевт и не экстренная служба. "
-    "При кризисе — 112 / 103 и режим Anti-Panic."
+    "This is an AI companion, not a therapist and not an emergency service. "
+    "In a crisis — call 112 / 103 and use the Anti-Panic mode."
 )
 
 

@@ -1,6 +1,6 @@
 # de-press.co
 
-A non-profit, empathetic "quiet harbor" platform for people having a hard time:
+A non-profit, empathetic "quiet harbor" platform for people who are struggling:
 
 **monologues without likes** · **silent empathy** · **dialogue only with the author's consent** · **Anti-Panic** · **AI without toxic positivity** · **patterns stay on the device**.
 
@@ -68,7 +68,9 @@ Next: deploy to the live VPS and the closed pilot cohort.
 
 ### Author
 
-- Publish a thought, Hearers (if there is someone to write to), outreach, an inbox of requests, 1-on-1 chat. A cloud is a gesture on your own feed row, not a list under the entry. No pulse in the UI.
+- Publish a thought (a Safe Monologue); the Hearer list, Dialogue Requests, and the inbox are author-only.  
+- Accept a **Dialogue Request** or reach a Hearer first (**author outreach**) → 1-on-1 chat.  
+- Support Clouds (quiet phrases) and the pulse are author-private: a quiet gesture on your feed row, never a public list or counter.
 
 ### Dialogue
 
@@ -113,7 +115,7 @@ de-press/
     └── smoke_api.sh
 ```
 
-**Browser and Mini App share one UI Core** (each app under `apps/`), different hosts. Not two frontend projects.
+**Browser and Mini App are independent apps on the same stack**; they share the design tokens and the API client (`packages/`), not UI code — see [`apps/README.md`](./apps/README.md).
 
 ### Stack
 
@@ -156,7 +158,7 @@ export REDIS_URL=redis://127.0.0.1:6379/0
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\\Scripts\\activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements/local.txt
 
 python manage.py migrate --noinput

@@ -45,15 +45,15 @@ def get_active_profiles() -> list[TherapistProfile]:
 def claim_invite(actor: Actor, token: str) -> TherapistProfile:
     """Bind an admin-created profile to the claiming account."""
     if actor.account is None:
-        raise TherapyError("Занять инвайт может только аккаунт, не анонимная сессия")
+        raise TherapyError("Only an account can claim an invite, not an anonymous session")
     try:
         profile = TherapistProfile.objects.select_for_update().get(
             invite_token=(token or "").strip()
         )
     except TherapistProfile.DoesNotExist:
-        raise TherapyError("Инвайт не найден") from None
+        raise TherapyError("Invite not found") from None
     if profile.account is not None:
-        raise TherapyError("Инвайт уже занят")
+        raise TherapyError("Invite already claimed")
     profile.account = actor.account
     profile.is_active = True
     profile.claimed_at = timezone.now()
@@ -66,21 +66,21 @@ def _client_of(actor: Actor) -> tuple["Account | None", "AnonymousSession | None
         return actor.account, None
     if actor.session is not None:
         return None, actor.session
-    raise TherapyError("Неопознанный клиент")
+    raise TherapyError("Unknown client")
 
 
 def create_session(actor: Actor, therapist_id: str, note: str = "") -> TherapySession:
     try:
         profile = TherapistProfile.objects.get(pk=therapist_id)
     except (ValueError, TypeError, TherapistProfile.DoesNotExist):
-        raise TherapyError("Терапевт не найден") from None
+        raise TherapyError("Therapist not found") from None
     if not profile.is_active or profile.account is None:
-        raise TherapyError("Терапевт сейчас недоступен")
+        raise TherapyError("Therapist is currently unavailable")
     if not (profile.solana_address or "").strip():
-        raise TherapyError("У терапевта ещё не указан платёжный адрес")
+        raise TherapyError("Therapist has no payout address yet")
     account, session = _client_of(actor)
     if account is not None and account.id == profile.account_id:
-        raise TherapyError("Нельзя запросить сессию у самого себя")
+        raise TherapyError("You cannot request a session with yourself")
     duplicate = TherapySession.objects.filter(
         therapist=profile,
         client_account=account,
@@ -88,7 +88,7 @@ def create_session(actor: Actor, therapist_id: str, note: str = "") -> TherapySe
         status__in=OPEN_STATUSES,
     ).exists()
     if duplicate:
-        raise TherapyError("У вас уже есть активная сессия с этим терапевтом")
+        raise TherapyError("You already have an active session with this therapist")
     return TherapySession.objects.create(
         therapist=profile,
         client_account=account,
@@ -104,7 +104,7 @@ def get_session_for_participant(actor: Actor, session_id: str) -> TherapySession
             "therapist", "therapist__account", "client_account", "client_session"
         ).get(pk=session_id)
     except (ValueError, TypeError, TherapySession.DoesNotExist):
-        raise TherapyError("Сессия не найдена") from None
+        raise TherapyError("Session not found") from None
     mine_client = (
         (actor.account is not None and st.client_account_id == actor.account.id)
         or (actor.session is not None and st.client_session_id == actor.session.id)
@@ -113,7 +113,7 @@ def get_session_for_participant(actor: Actor, session_id: str) -> TherapySession
         actor.account is not None and st.therapist.account_id == actor.account.id
     )
     if not (mine_client or mine_therapist):
-        raise TherapyError("Сессия не найдена")
+        raise TherapyError("Session not found")
     return st
 
 
@@ -124,9 +124,9 @@ def mark_i_paid(actor: Actor, session_id: str) -> TherapySession:
         or (actor.session is not None and st.client_session_id == actor.session.id)
     )
     if not mine_client:
-        raise TherapyError("Отметить оплату может только клиент")
+        raise TherapyError("Only the client can mark payment")
     if st.status != TherapySessionStatus.AWAITING_PAYMENT:
-        raise TherapyError("Сессия уже не в статусе ожидания оплаты")
+        raise TherapyError("Session is no longer awaiting payment")
     st.status = TherapySessionStatus.PAYMENT_CLAIMED
     st.save(update_fields=["status", "updated_at"])
     return st
@@ -135,7 +135,7 @@ def mark_i_paid(actor: Actor, session_id: str) -> TherapySession:
 def _therapist_session(actor: Actor, session_id: str) -> TherapySession:
     st = get_session_for_participant(actor, session_id)
     if actor.account is None or st.therapist.account_id != actor.account.id:
-        raise TherapyError("Действие доступно только терапевту")
+        raise TherapyError("Only the therapist can perform this action")
     return st
 
 
@@ -147,7 +147,7 @@ def confirm_payment(actor: Actor, session_id: str) -> TherapySession:
     if st.status != TherapySessionStatus.PAYMENT_CLAIMED:
         if st.status == TherapySessionStatus.PAID:
             return st  # idempotent re-confirm
-        raise TherapyError("Клиент ещё не отметил оплату")
+        raise TherapyError("The client has not marked payment yet")
     if st.dialogue_id is None:
         st.dialogue = Dialogue.objects.create(
             author_account=st.therapist.account,
@@ -167,7 +167,7 @@ def decline_session(actor: Actor, session_id: str) -> TherapySession:
         TherapySessionStatus.AWAITING_PAYMENT,
         TherapySessionStatus.PAYMENT_CLAIMED,
     ):
-        raise TherapyError("Эту сессию нельзя отклонить")
+        raise TherapyError("This session cannot be declined")
     st.status = TherapySessionStatus.DECLINED
     st.save(update_fields=["status", "updated_at"])
     return st
@@ -176,7 +176,7 @@ def decline_session(actor: Actor, session_id: str) -> TherapySession:
 def complete_session(actor: Actor, session_id: str) -> TherapySession:
     st = _therapist_session(actor, session_id)
     if st.status != TherapySessionStatus.PAID:
-        raise TherapyError("Завершить можно только оплаченную сессию")
+        raise TherapyError("Only a paid session can be completed")
     st.status = TherapySessionStatus.DONE
     st.save(update_fields=["status", "updated_at"])
     return st
@@ -215,4 +215,4 @@ def client_label(st: TherapySession) -> str:
         sess = st.client_session
         if sess is not None and (sess.pseudonym or "").strip():
             return sess.pseudonym
-    return "клиент"
+    return "client"

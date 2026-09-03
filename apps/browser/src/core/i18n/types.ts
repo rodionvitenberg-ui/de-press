@@ -3,8 +3,8 @@ export type Locale = string;
 import type { NotificationKind } from "@/core/api/types";
 
 export const HANDWRITTEN_LOCALES = ["ru", "en"] as const;
-export const LOCALES: Locale[] = ["ru", "en"];
-export const DEFAULT_LOCALE: Locale = "ru";
+export const LOCALES: Locale[] = ["en", "ru"];
+export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "depress_locale";
 export const LOCALE_STORAGE_KEY = "depress_locale";
 

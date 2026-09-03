@@ -178,7 +178,7 @@ def _to_view(cloud: SupportCloud) -> SupportCloudView:
         body=cloud.body_snapshot,
         kind=cloud.kind,
         status=cloud.status,
-        pseudonym=cloud.pseudonym_snapshot or "кто-то",
+        pseudonym=cloud.pseudonym_snapshot or "someone",
         sender_ref=_sender_ref(cloud),
         helper_badge=cloud.helper_badge or "",
         is_priority=bool(cloud.is_priority),
@@ -192,10 +192,10 @@ def _assert_can_send_to_story(actor: Actor, story: Story) -> None:
     if actor.account is None and actor.session is None:
         raise SupportError("Actor has no identity")
     if is_author(story, actor):
-        raise SupportError("Нельзя отправить облачко своей истории")
+        raise SupportError("You cannot send a cloud to your own story")
     author = _author_actor(story)
     if is_blocked_between(actor, author):
-        raise SupportError("Отправка недоступна")
+        raise SupportError("Sending is unavailable")
 
 
 @transaction.atomic
@@ -203,7 +203,7 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
     """Send a curated Quiet Phrase as a private Support Cloud (author-only)."""
     key = (phrase_key or "").strip()
     if not key:
-        raise SupportError("Укажи фразу")
+        raise SupportError("Choose a phrase")
 
     story = get_story(story_id, for_public=True)
     _assert_can_send_to_story(actor, story)
@@ -217,12 +217,12 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
         )
         if same_thought:
             return SendCloudResult(cloud=existing, created=False)
-        raise SupportError("Можно одно облачко на этот монолог")
+        raise SupportError("Only one cloud per story")
 
     try:
         phrase = QuietPhrase.objects.get(key=key, is_active=True)
     except QuietPhrase.DoesNotExist as exc:
-        raise SupportError("Фраза не найдена") from exc
+        raise SupportError("Phrase not found") from exc
 
     try:
         assert_under_limit(
@@ -287,7 +287,7 @@ def send_quiet_phrase(actor: Actor, story_id: UUID, phrase_key: str) -> SendClou
             and existing.phrase.key == key
         ):
             return SendCloudResult(cloud=existing, created=False)
-        raise SupportError("Можно одно облачко на этот монолог") from exc
+        raise SupportError("Only one cloud per story") from exc
 
     if created and cloud.status == SupportCloudStatus.DELIVERED:
         notify(
@@ -307,14 +307,14 @@ def submit_moderated_cloud(actor: Actor, story_id: UUID, body: str) -> SendCloud
     """
     text = (body or "").strip()
     if not text:
-        raise SupportError("Напиши короткий текст")
+        raise SupportError("Write a short text")
     if len(text) > FREE_TEXT_MAX:
-        raise SupportError(f"Слишком длинно (макс. {FREE_TEXT_MAX} символов)")
+        raise SupportError(f"Too long (max {FREE_TEXT_MAX} characters)")
 
     story = get_story(story_id, for_public=True)
     _assert_can_send_to_story(actor, story)
     if _existing_cloud(actor, story) is not None:
-        raise SupportError("Можно одно облачко на этот монолог")
+        raise SupportError("Only one cloud per story")
 
     try:
         assert_under_limit(
@@ -486,7 +486,7 @@ def mark_clouds_read(actor: Actor, story_id: UUID) -> Story:
     story = get_story(story_id, for_public=False)
     root = story.parent if story.parent_id else story
     if not is_author(root, actor):
-        raise SupportError("Только автор")
+        raise SupportError("Author only")
     now = timezone.now()
     root.clouds_last_read_at = now
     root.save(update_fields=["clouds_last_read_at"])
@@ -523,7 +523,7 @@ def list_clouds_for_author(actor: Actor, story_id: UUID) -> list[SupportCloudVie
         raise StoryNotFound("Story not found") from exc
 
     if not is_author(story, actor):
-        raise SupportError("Только автор видит облачка")
+        raise SupportError("Only the author can see clouds")
 
     qs = (
         SupportCloud.objects.filter(
@@ -544,13 +544,13 @@ def dismiss_cloud(actor: Actor, story_id: UUID, cloud_id: UUID) -> SupportCloud:
     except Story.DoesNotExist as exc:
         raise StoryNotFound("Story not found") from exc
     if not is_author(story, actor):
-        raise SupportError("Только автор закрывает облачко")
+        raise SupportError("Only the author can close a cloud")
     try:
         cloud = SupportCloud.objects.select_for_update().get(
             pk=cloud_id, story=story
         )
     except SupportCloud.DoesNotExist as exc:
-        raise SupportError("Облачко не найдено") from exc
+        raise SupportError("Cloud not found") from exc
     cloud.dismissed_by_author = True
     cloud.save(update_fields=["dismissed_by_author"])
     return cloud
@@ -559,7 +559,7 @@ def dismiss_cloud(actor: Actor, story_id: UUID, cloud_id: UUID) -> SupportCloud:
 def list_pending_queue(actor: Actor) -> list[QueueCloudView]:
     """Helper/staff moderation queue (pending free-text only)."""
     if not _is_moderator(actor):
-        raise SupportError("Нужна роль Helper или staff")
+        raise SupportError("Helper or staff role required")
 
     qs = (
         SupportCloud.objects.filter(
@@ -596,13 +596,13 @@ def list_pending_queue(actor: Actor) -> list[QueueCloudView]:
 @transaction.atomic
 def approve_cloud(actor: Actor, cloud_id: UUID) -> SupportCloud:
     if not _is_moderator(actor):
-        raise SupportError("Нужна роль Helper или staff")
+        raise SupportError("Helper or staff role required")
     try:
         cloud = SupportCloud.objects.select_for_update().get(pk=cloud_id)
     except SupportCloud.DoesNotExist as exc:
-        raise SupportError("Облачко не найдено") from exc
+        raise SupportError("Cloud not found") from exc
     if cloud.status != SupportCloudStatus.PENDING:
-        raise SupportError("Облачко не в очереди")
+        raise SupportError("Cloud is not in the queue")
     cloud.status = SupportCloudStatus.DELIVERED
     cloud.moderated_at = timezone.now()
     cloud.moderated_by = actor.account
@@ -620,13 +620,13 @@ def approve_cloud(actor: Actor, cloud_id: UUID) -> SupportCloud:
 @transaction.atomic
 def reject_cloud(actor: Actor, cloud_id: UUID) -> SupportCloud:
     if not _is_moderator(actor):
-        raise SupportError("Нужна роль Helper или staff")
+        raise SupportError("Helper or staff role required")
     try:
         cloud = SupportCloud.objects.select_for_update().get(pk=cloud_id)
     except SupportCloud.DoesNotExist as exc:
-        raise SupportError("Облачко не найдено") from exc
+        raise SupportError("Cloud not found") from exc
     if cloud.status != SupportCloudStatus.PENDING:
-        raise SupportError("Облачко не в очереди")
+        raise SupportError("Cloud is not in the queue")
     cloud.status = SupportCloudStatus.REJECTED
     cloud.moderated_at = timezone.now()
     cloud.moderated_by = actor.account

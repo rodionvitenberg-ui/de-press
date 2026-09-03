@@ -461,7 +461,7 @@ def post_pin(request, dialogue_id: UUID, payload: PinIn):
     try:
         d = pin_message(actor, UUID(payload.message_id))
         if d.id != dialogue_id:
-            raise DialogueError("Сообщение из другого диалога")
+            raise DialogueError("Message belongs to a different dialogue")
     except (DialogueError, ValueError) as exc:
         raise HttpError(400, str(exc)) from exc
     return _dialogue_out(d, actor)
@@ -587,13 +587,13 @@ def post_outreach(request, story_id: UUID, payload: OutreachIn):
 
     n = len(result.dialogues)
     if result.created_count and not result.reused_count:
-        msg = f"Открыто диалогов: {result.created_count}."
+        msg = f"Dialogues opened: {result.created_count}."
     elif result.reused_count and not result.created_count:
-        msg = "Диалог уже был открыт — продолжай переписку."
+        msg = "The dialogue was already open — keep the conversation going."
     else:
         msg = (
-            f"Готово: новых {result.created_count}, "
-            f"уже открытых {result.reused_count} (всего {n})."
+            f"Done: {result.created_count} new, "
+            f"{result.reused_count} already open (total {n})."
         )
     return OutreachOut(
         ok=True,

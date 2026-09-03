@@ -39,7 +39,7 @@ def test_list_hearers_author_only():
     stranger = Actor(
         kind="anonymous", session=AnonymousSession.objects.create(pseudonym="чужой")
     )
-    with pytest.raises(EmpathyError, match="автор"):
+    with pytest.raises(EmpathyError, match="author"):
         list_hearers_for_author(stranger, story.id)
 
 

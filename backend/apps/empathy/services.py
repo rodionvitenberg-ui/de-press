@@ -54,14 +54,14 @@ def parse_hearer_ref(ref: str) -> tuple[str, UUID]:
     """Return (kind, id) for account:… or session:…"""
     raw = (ref or "").strip()
     if ":" not in raw:
-        raise EmpathyError("Некорректный hearer_ref")
+        raise EmpathyError("Invalid hearer_ref")
     kind, id_s = raw.split(":", 1)
     if kind not in ("account", "session"):
-        raise EmpathyError("Некорректный hearer_ref")
+        raise EmpathyError("Invalid hearer_ref")
     try:
         return kind, UUID(id_s)
     except ValueError as exc:
-        raise EmpathyError("Некорректный hearer_ref") from exc
+        raise EmpathyError("Invalid hearer_ref") from exc
 
 
 def actor_from_hearer_ref(ref: str) -> Actor:
@@ -70,12 +70,12 @@ def actor_from_hearer_ref(ref: str) -> Actor:
         try:
             account = Account.objects.get(pk=uid)
         except Account.DoesNotExist as exc:
-            raise EmpathyError("Hearer не найден") from exc
+            raise EmpathyError("Hearer not found") from exc
         return Actor(kind="account", account=account)
     try:
         session = AnonymousSession.objects.get(pk=uid)
     except AnonymousSession.DoesNotExist as exc:
-        raise EmpathyError("Hearer не найден") from exc
+        raise EmpathyError("Hearer not found") from exc
     return Actor(kind="anonymous", session=session)
 
 
@@ -84,7 +84,7 @@ def _pseudonym_for_empathy(row: SilentEmpathy) -> str:
         return row.from_account.display_pseudonym
     if row.from_session_id and row.from_session is not None:
         return row.from_session.display_pseudonym
-    return "кто-то"
+    return "someone"
 
 
 def _open_dialogue_peer_keys(story: Story) -> set[str]:
@@ -108,7 +108,7 @@ def offer_empathy(actor: Actor, story_id: UUID) -> OfferResult:
     """Idempotent Silent Empathy. Does not expose pulse to non-authors."""
     story = get_story(story_id, for_public=True)
     if story.parent_id:
-        raise EmpathyError("Лучи только к записи")
+        raise EmpathyError("Empathy applies to top-level stories only")
 
     if actor.account is None and actor.session is None:
         raise EmpathyError("Actor has no identity")
@@ -193,7 +193,7 @@ def list_hearers_for_author(actor: Actor, story_id: UUID) -> list[HearerView]:
     except Story.DoesNotExist as exc:
         raise StoryNotFound("Story not found") from exc
     if not is_author(story, actor):
-        raise EmpathyError("Только автор видит список услышавших")
+        raise EmpathyError("Only the author can see who heard them")
 
     open_keys = _open_dialogue_peer_keys(story)
     rows = (
@@ -233,7 +233,7 @@ def set_outreach_consent(actor: Actor, story_id: UUID, *, opt_in: bool) -> bool:
         ).update(outreach_opt_in=opt_in)
 
     if not updated:
-        raise EmpathyError("Сначала отметь «Я слышу тебя»")
+        raise EmpathyError('Mark "I hear you" first')
     return opt_in
 
 

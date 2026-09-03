@@ -143,7 +143,7 @@ def _default_pseudonym(user: TelegramWebAppUser) -> str:
         return name[:64]
     if user.username:
         return user.username[:64]
-    return "гость"
+    return "guest"
 
 
 @transaction.atomic

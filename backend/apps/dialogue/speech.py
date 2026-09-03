@@ -94,7 +94,7 @@ def _mt_prompt(text: str, *, target: str) -> str:
 
 def is_stub_translation(text: str) -> bool:
     t = (text or "").lstrip()
-    return t.startswith("[offline") or t.startswith("[офлайн")
+    return t.startswith("[offline")
 
 
 class OfflineTranslator:

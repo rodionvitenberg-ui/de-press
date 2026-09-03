@@ -60,9 +60,9 @@ def _translate_per_value(
                     value, target_lang=target, source_lang=source
                 )
         except Exception as exc:
-            raise I18nUiError("Перевод сейчас недоступен") from exc
+            raise I18nUiError("Translation is unavailable right now") from exc
         if not raw or is_stub_translation(raw):
-            raise I18nUiError("Перевод сейчас недоступен")
+            raise I18nUiError("Translation is unavailable right now")
         out[key] = value if len(raw) > cap else raw
     return {k: out.get(k) or strings[k] for k in strings}
 
@@ -98,7 +98,7 @@ def translate_ui_strings(
         )
         raw = translator.translate(prompt, target_lang=target, source_lang=source)
         if not raw or is_stub_translation(raw):
-            raise I18nUiError("Перевод сейчас недоступен")
+            raise I18nUiError("Translation is unavailable right now")
         parsed = _parse_json_object(raw)
         for k, v in parsed.items():
             if k in chunk and isinstance(v, str) and v.strip():

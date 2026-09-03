@@ -126,10 +126,10 @@ def _kid_loop(
                             http.send_cloud(str(story["id"]), phrase)
                         except (KidBusy, KidHttpError) as exc:
                             detail = str(exc).lower()
-                            if "облачко" in detail:
+                            if "cloud" in detail:
                                 clouded.add(str(story["id"]))
                                 log(f"{label} cloud skip {str(story['id'])[:8]}")
-                            elif "фраза" in detail:
+                            elif "phrase" in detail:
                                 phrases = http.quiet_phrases()
                                 log(f"{label} cloud catalog refresh")
                             else:
@@ -159,7 +159,7 @@ def _kid_loop(
                                 str(story["id"]), rng.choice(INTENTS), note
                             )
                         except (KidBusy, KidHttpError) as exc:
-                            if "уже" in str(exc).lower():
+                            if "already" in str(exc).lower():
                                 requested_stories.add(str(story["id"]))
                                 log(f"{label} request skip {str(story['id'])[:8]}")
                             else:

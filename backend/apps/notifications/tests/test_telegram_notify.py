@@ -58,7 +58,7 @@ def test_mini_app_deep_link_web_fallback():
 def test_format_soft_notify_text_contains_label():
     text = format_soft_notify_text("message", {"dialogue_id": str(uuid4())})
     assert "de-press:" in text
-    assert "сообщени" in text.lower() or "диалог" in text.lower()
+    assert "message" in text.lower() or "dialogue" in text.lower()
 
 
 @pytest.mark.django_db
@@ -140,7 +140,7 @@ def test_daily_digest_wants_and_unread_window():
     rows = unread_for_telegram_digest(acc)
     assert n1 in rows
     text = format_digest_text(rows)
-    assert "дайджест" in text.lower()
+    assert "digest" in text.lower()
     assert "de-press:" in text
 
 

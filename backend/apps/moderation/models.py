@@ -210,10 +210,10 @@ class ModerationActionKind(models.TextChoices):
 
 
 class ModerationAction(models.Model):
-    """Audit log (Q12): каждое решение модератора — в журнале.
+    """Audit log (Q12): every moderator decision goes into the journal.
 
-    Хранит решение, обязательную причину, примечание и staff-актора.
-    Никаких данных репортера: только что сделано и почему.
+    Stores the decision, the mandatory reason, a note and the staff actor.
+    No reporter data: only what was done and why.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -251,7 +251,7 @@ class ModerationAction(models.Model):
         choices=ReportReason.choices,
         blank=True,
         default="",
-        help_text="Обязателен для терминальных решений (hide/remove/dismiss).",
+        help_text="Required for terminal decisions (hide/remove/dismiss).",
     )
     note = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)

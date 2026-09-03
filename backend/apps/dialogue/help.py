@@ -34,7 +34,7 @@ HELP_CREATE_LIMIT = 5
 HELP_CREATE_WINDOW_SECONDS = 3600
 
 HELP_INTRO = (
-    "[система] Кто-то попросил человека рядом. Ты Helper, не терапевт и не 112."
+    "[system] Someone asked for a human nearby. You are a Helper, not a therapist and not 112."
 )
 
 
@@ -269,7 +269,7 @@ def accept_help_request(actor: Actor, request_id: UUID) -> Dialogue:
 
     requester = _requester_actor(req)
     if is_blocked_between(actor, requester):
-        raise HelpError("Диалог недоступен")
+        raise HelpError("Dialogue unavailable")
 
     dialogue = Dialogue.objects.create(
         story=None,
@@ -283,7 +283,7 @@ def accept_help_request(actor: Actor, request_id: UUID) -> Dialogue:
     )
     Message.objects.create(
         dialogue=dialogue,
-        body=f"[правила] {RULES_TEXT}",
+        body=f"[rules] {RULES_TEXT}",
         from_account=None,
         from_session=None,
     )

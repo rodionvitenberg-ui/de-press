@@ -105,24 +105,24 @@ def post_cloud(request, story_id: UUID, payload: SendCloudIn):
     has_phrase = bool((payload.phrase_key or "").strip())
     has_body = bool((payload.body or "").strip())
     if has_phrase == has_body:
-        raise HttpError(400, "Укажи либо phrase_key, либо body")
+        raise HttpError(400, "Provide either phrase_key or body")
 
     try:
         if has_phrase:
             result = send_quiet_phrase(actor, story_id, payload.phrase_key or "")
             if result.created:
-                msg = "Тихое облачко отправлено. Его увидит только автор."
+                msg = "Quiet cloud sent. Only the author will see it."
             else:
-                msg = "Эта фраза уже отправлена."
+                msg = "This phrase has already been sent."
         else:
             result = submit_moderated_cloud(actor, story_id, payload.body or "")
             if result.cloud.status == "pending":
                 msg = (
-                    "Текст отправлен на ручную проверку. "
-                    "Автор увидит его после approve."
+                    "Text sent for manual review. "
+                    "The author will see it after approval."
                 )
             else:
-                msg = "Облачко доставлено автору (Helper)."
+                msg = "Cloud delivered to the author (helper)."
     except StoryNotFound as exc:
         raise HttpError(404, str(exc)) from exc
     except SupportError as exc:
@@ -176,7 +176,7 @@ def post_dismiss_cloud(request, story_id: UUID, cloud_id: UUID):
     return ModerationOut(
         ok=True,
         status="dismissed",
-        message="Облачко закрыто.",
+        message="Cloud closed.",
         cloud_id=str(cloud.id),
     )
 
@@ -217,7 +217,7 @@ def post_approve(request, cloud_id: UUID):
     return ModerationOut(
         ok=True,
         status=cloud.status,
-        message="Облачко доставлено автору.",
+        message="Cloud delivered to the author.",
         cloud_id=str(cloud.id),
     )
 
@@ -233,6 +233,6 @@ def post_reject(request, cloud_id: UUID):
     return ModerationOut(
         ok=True,
         status=cloud.status,
-        message="Облачко отклонено.",
+        message="Cloud rejected.",
         cloud_id=str(cloud.id),
     )

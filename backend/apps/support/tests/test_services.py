@@ -132,7 +132,7 @@ def test_one_cloud_per_sender(phrase):
     visitor = Actor(kind="anonymous", session=session)
 
     send_quiet_phrase(visitor, story.id, "i_am_here")
-    with pytest.raises(SupportError, match="одно"):
+    with pytest.raises(SupportError, match="one cloud"):
         send_quiet_phrase(visitor, story.id, "i_hear")
     assert SupportCloud.objects.filter(story=story).count() == 1
 
@@ -155,7 +155,7 @@ def test_cannot_send_to_own_story(phrase):
     account = Account.objects.create_user(email="self@ex.com", password="password123")
     actor = Actor(kind="account", account=account)
     story = publish_story(actor, "Моя история.")
-    with pytest.raises(SupportError, match="своей"):
+    with pytest.raises(SupportError, match="own story"):
         send_quiet_phrase(actor, story.id, "i_am_here")
 
 
@@ -170,7 +170,7 @@ def test_non_author_cannot_list_clouds(phrase):
     other = Actor(
         kind="anonymous", session=AnonymousSession.objects.create(pseudonym="другой")
     )
-    with pytest.raises(SupportError, match="автор"):
+    with pytest.raises(SupportError, match="Author only"):
         list_clouds_for_author(other, story.id)
 
 
@@ -184,7 +184,7 @@ def test_blocked_cannot_send(phrase):
     peer = Actor(kind="account", account=peer_acc)
     block_actor(author, target_account_id=peer_acc.id)
 
-    with pytest.raises(SupportError, match="недоступна"):
+    with pytest.raises(SupportError, match="unavailable"):
         send_quiet_phrase(peer, story.id, "i_am_here")
 
 
@@ -194,7 +194,7 @@ def test_inactive_phrase_rejected(inactive_phrase):
     story = publish_story(Actor(kind="account", account=author_acc), "Текст.")
     session = AnonymousSession.objects.create()
     visitor = Actor(kind="anonymous", session=session)
-    with pytest.raises(SupportError, match="не найдена"):
+    with pytest.raises(SupportError, match="not found"):
         send_quiet_phrase(visitor, story.id, "old")
 
 
@@ -316,7 +316,7 @@ def test_free_text_too_long():
     visitor = Actor(
         kind="anonymous", session=AnonymousSession.objects.create()
     )
-    with pytest.raises(SupportError, match="длинно"):
+    with pytest.raises(SupportError, match="Too long"):
         submit_moderated_cloud(visitor, story.id, "x" * 300)
 
 
@@ -363,7 +363,7 @@ def test_one_cloud_on_post_and_one_on_comment(phrase):
 
     first = send_quiet_phrase(visitor, post.id, "i_am_here")
     assert first.created is True
-    with pytest.raises(SupportError, match="одно"):
+    with pytest.raises(SupportError, match="one cloud"):
         send_quiet_phrase(visitor, comment.id, "i_am_here")
     again = send_quiet_phrase(visitor, post.id, "i_am_here")
     assert again.created is False
@@ -392,7 +392,7 @@ def test_one_cloud_on_comment_blocks_root(phrase):
     sent = send_quiet_phrase(visitor, comment.id, "i_am_here")
     assert sent.cloud.story_id == comment.id
     assert sent.cloud.thread_root_id == post.id
-    with pytest.raises(SupportError, match="одно"):
+    with pytest.raises(SupportError, match="one cloud"):
         send_quiet_phrase(visitor, post.id, "i_am_here")
 
 

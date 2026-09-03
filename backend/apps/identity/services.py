@@ -32,7 +32,7 @@ class Actor:
             return self.account.display_pseudonym
         if self.session is not None:
             return self.session.display_pseudonym
-        return "гость"
+        return "guest"
 
     @property
     def account_id(self) -> UUID | None:

@@ -36,10 +36,10 @@ class OfflineGateway:
                 break
         snippet = (last_user[:120] + "…") if len(last_user) > 120 else last_user
         return (
-            "Я рядом в тексте. То, что ты описываешь, звучит тяжело — и это имеет право "
-            f"так ощущаться. Что из этого сейчас давит сильнее всего?"
-            + (f" (про «{snippet}»)" if snippet else "")
-            + "\n\n[офлайн-режим: API-ключ не настроен; ответ шаблонный]"
+            "I am here in text. What you describe sounds heavy — and it is allowed "
+            "to feel this way. Which part presses the most right now?"
+            + (f' (about "{snippet}")' if snippet else "")
+            + "\n\n[offline mode: no API key configured; template reply]"
         )
 
     def stream(self, messages: list[ChatMessage]) -> Iterator[str]:

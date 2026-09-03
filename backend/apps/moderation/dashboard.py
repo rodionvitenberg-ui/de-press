@@ -1,7 +1,7 @@
-"""Helper dashboard: этичные ops-метрики для модерации (не public metrics).
+"""Helper dashboard: ethical ops metrics for moderation (not public metrics).
 
-Сводка очередей и недавняя активность репортов. Никаких «public vanity metrics»:
-только внутренние агрегаты для команды/хелперов.
+Queue summaries and recent report activity. No "public vanity metrics":
+internal aggregates for the team/helpers only.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ class DashboardView:
 
 
 def build_dashboard() -> DashboardView:
-    """Лёгкая сводка для страницы хелпера (без тяжёлых агрегатов)."""
+    """Light summary for the helper page (no heavy aggregates)."""
     pending_clouds = SupportCloud.objects.filter(
         status=SupportCloudStatus.PENDING
     ).count()
@@ -76,9 +76,9 @@ def build_dashboard() -> DashboardView:
 
 @dataclass(frozen=True, slots=True)
 class AdminOverview:
-    """Стартовая сводка для staff-админки. Только счётчики (Q12):
+    """Staff overview. Counters only (Q12):
 
-    никаких IP/фингерпринтов/списков личностей — агрегаты и очереди.
+    no IPs/fingerprints/identity lists — aggregates and queues.
     """
 
     sessions_24h: int
@@ -98,7 +98,7 @@ class AdminOverview:
 
 
 def build_admin_overview() -> AdminOverview:
-    """Лёгкие count-запросы для /admin/overview (без содержимого)."""
+    """Light count queries for /admin/overview (no content)."""
     from apps.dialogue.models import Dialogue, DialogueStatus
     from apps.empathy.models import SilentEmpathy
     from apps.identity.models import AnonymousSession

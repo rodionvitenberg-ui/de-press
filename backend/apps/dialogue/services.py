@@ -55,14 +55,14 @@ class DialogueError(Exception):
 
 
 RULES_TEXT = (
-    "Краткие правила: не давить советами, если не просили; "
-    "не обесценивать; не доксить; можно уйти в любой момент; "
-    "это не терапия и не экстренная помощь."
+    "Short rules: do not push advice unless asked; "
+    "do not invalidate; do not dox; you may leave at any moment; "
+    "this is not therapy and not emergency help."
 )
 
 OUTREACH_INTRO = (
-    "[система] Автор истории написал тебе, потому что ты отметил(а) "
-    "«Я слышу тебя». Можно ответить или уйти — без обязательств."
+    "[system] The story author wrote to you because you marked "
+    '"I hear you". You can reply or leave — no obligations.'
 )
 
 
@@ -244,7 +244,7 @@ def _create_dialogue(
     )
     Message.objects.create(
         dialogue=dialogue,
-        body=f"[правила] {RULES_TEXT}",
+        body=f"[rules] {RULES_TEXT}",
         from_account=None,
         from_session=None,
     )
@@ -273,9 +273,9 @@ def create_request(
 
     story = get_story(story_id, for_public=True)
     if story.parent_id:
-        raise DialogueError("Запрос только к записи")
+        raise DialogueError("Requests apply to stories only")
     if is_author(story, actor):
-        raise DialogueError("Нельзя запросить диалог по своей истории")
+        raise DialogueError("You cannot request a dialogue on your own story")
 
     author = Actor(
         kind="account" if story.author_account_id else "anonymous",
@@ -283,7 +283,7 @@ def create_request(
         session=story.author_session,
     )
     if is_blocked_between(actor, author):
-        raise DialogueError("Диалог недоступен")
+        raise DialogueError("Dialogue unavailable")
 
     note_s = (note or "").strip()[:280]
     open_q = Q(
@@ -298,7 +298,7 @@ def create_request(
     else:
         open_q &= Q(from_session=actor.session)
     if DialogueRequest.objects.filter(open_q).exists():
-        raise DialogueError("Запрос уже отправлен")
+        raise DialogueError("Request already sent")
 
     try:
         req = DialogueRequest.objects.create(
@@ -310,7 +310,7 @@ def create_request(
             status=DialogueRequestStatus.PENDING,
         )
     except IntegrityError as exc:
-        raise DialogueError("Запрос уже отправлен") from exc
+        raise DialogueError("Request already sent") from exc
 
     _notify_author_dialogue_request(req)
     return req
@@ -431,7 +431,7 @@ def accept_request(actor: Actor, request_id: UUID) -> Dialogue:
 
     peer = _peer_actor_from_request(req)
     if is_blocked_between(actor, peer):
-        raise DialogueError("Диалог недоступен")
+        raise DialogueError("Dialogue unavailable")
 
     req.status = DialogueRequestStatus.ACCEPTED
     req.save(update_fields=["status", "updated_at"])
@@ -624,9 +624,9 @@ def _resolve_reply(
     try:
         reply = Message.objects.get(pk=reply_to_id, dialogue=dialogue)
     except Message.DoesNotExist as exc:
-        raise DialogueError("Сообщение для ответа не найдено") from exc
+        raise DialogueError("Message to reply to not found") from exc
     if reply.deleted_at:
-        raise DialogueError("Нельзя ответить на удалённое")
+        raise DialogueError("Cannot reply to a deleted message")
     if actor.account:
         hidden = MessageHide.objects.filter(
             message=reply, account=actor.account
@@ -638,7 +638,7 @@ def _resolve_reply(
     else:
         hidden = False
     if hidden:
-        raise DialogueError("Сообщение для ответа не найдено")
+        raise DialogueError("Message to reply to not found")
     return reply
 
 
@@ -662,9 +662,9 @@ def edit_message(actor: Actor, message_id: UUID, body: str) -> Message:
     if _abandoned(d) or d.status != DialogueStatus.OPEN:
         raise DialogueError("Dialogue is closed")
     if not _is_msg_author(msg, actor):
-        raise DialogueError("Можно править только своё")
+        raise DialogueError("You can edit only your own messages")
     if msg.kind != MessageKind.TEXT or msg.deleted_at:
-        raise DialogueError("Это нельзя редактировать")
+        raise DialogueError("This cannot be edited")
     msg.body = text
     msg.edited_at = timezone.now()
     msg.save(update_fields=["body", "edited_at"])
@@ -707,7 +707,7 @@ def moderator_scrub_message(message_id: UUID) -> Message | None:
     """Moderator (staff) removes a reported message for everyone (Q12).
 
     Same scrub path as `delete_message_for_everyone`, but without the
-    participant check — только для staff-модерации репортов.
+    participant check — staff report moderation only.
     """
     try:
         msg = Message.objects.select_related("dialogue").get(pk=message_id)
@@ -747,9 +747,9 @@ def forward_message(
 ) -> Message:
     src, src_d = _get_live_message(actor, message_id)
     if src.deleted_at:
-        raise DialogueError("Нельзя переслать удалённое")
+        raise DialogueError("Cannot forward a deleted message")
     if target_dialogue_id == src_d.id:
-        raise DialogueError("Нельзя переслать в этот же чат")
+        raise DialogueError("Cannot forward into the same chat")
     dest = get_dialogue_for_participant(actor, target_dialogue_id)
     if dest.status != DialogueStatus.OPEN or _abandoned(dest):
         raise DialogueError("Dialogue is closed")
@@ -789,7 +789,7 @@ def pin_message(actor: Actor, message_id: UUID) -> Dialogue:
     if d.status != DialogueStatus.OPEN or _abandoned(d):
         raise DialogueError("Dialogue is closed")
     if msg.deleted_at:
-        raise DialogueError("Нельзя закрепить удалённое")
+        raise DialogueError("Cannot pin a deleted message")
     d.pinned_message = msg
     d.save(update_fields=["pinned_message", "updated_at"])
     from apps.dialogue.realtime import broadcast_dialogue_pinned
@@ -835,12 +835,12 @@ def send_voice_message(
 
     size = getattr(uploaded_file, "size", 0) or 0
     if size <= 0:
-        raise DialogueError("Пустой аудиофайл")
+        raise DialogueError("Empty audio file")
     if size > VOICE_MAX_BYTES:
-        raise DialogueError("Голосовое слишком большое (макс. 5 МБ)")
+        raise DialogueError("Voice note is too large (max 5 MB)")
 
     if duration_ms is not None and duration_ms > VOICE_MAX_DURATION_MS:
-        raise DialogueError("Голосовое слишком длинное (макс. 2 мин)")
+        raise DialogueError("Voice note is too long (max 2 min)")
 
     try:
         assert_under_limit(
@@ -859,7 +859,7 @@ def send_voice_message(
     msg = Message(
         dialogue=d,
         kind=MessageKind.VOICE,
-        body="[голосовое сообщение]",
+        body="[voice note]",
         duration_ms=duration_ms,
         source_lang=lang,
         from_account=actor.account,
@@ -912,12 +912,12 @@ def send_circle_message(
 
     size = getattr(uploaded_file, "size", 0) or 0
     if size <= 0:
-        raise DialogueError("Пустой видеофайл")
+        raise DialogueError("Empty video file")
     if size > CIRCLE_MAX_BYTES:
-        raise DialogueError("Кружочек слишком большой (макс. 20 МБ)")
+        raise DialogueError("Video circle is too large (max 20 MB)")
 
     if duration_ms is not None and duration_ms > CIRCLE_MAX_DURATION_MS:
-        raise DialogueError("Кружочек слишком длинный (макс. 60 с)")
+        raise DialogueError("Video circle is too long (max 60 s)")
 
     try:
         assert_under_limit(
@@ -935,7 +935,7 @@ def send_circle_message(
     msg = Message(
         dialogue=d,
         kind=MessageKind.CIRCLE,
-        body="[кружочек]",
+        body="[video circle]",
         duration_ms=duration_ms,
         source_lang=lang,
         ephemeral=True,
@@ -980,17 +980,17 @@ def translate_message(
 
     code = (target_lang or "en")[:8].lower()
     if not code:
-        raise DialogueError("Укажи target_lang")
+        raise DialogueError("target_lang is required")
     if msg.kind == MessageKind.VOICE and not msg.transcript.strip():
         # Voice transcription is removed — there is no text to translate.
-        raise DialogueError("Нечего переводить")
+        raise DialogueError("Nothing to translate")
 
     source_text = msg.display_text
     if not source_text or source_text.startswith("["):
         # Still allow translating offline markers / body
         source_text = msg.body or msg.transcript or source_text
     if not source_text.strip():
-        raise DialogueError("Нечего переводить")
+        raise DialogueError("Nothing to translate")
 
     from apps.dialogue.speech import get_translator, is_stub_translation
 
@@ -1010,7 +1010,7 @@ def translate_message(
             cached.pop(code, None)
             msg.translations = cached
             msg.save(update_fields=["translations"])
-        raise DialogueError("Перевод сейчас недоступен")
+        raise DialogueError("Translation is unavailable right now")
 
     cached[code] = translated
     msg.translations = cached
@@ -1107,14 +1107,14 @@ def reopen_dialogue(actor: Actor, dialogue_id: UUID) -> Dialogue:
     if _hidden_for(d, actor):
         raise DialogueError("Dialogue not found")
     if d.status != DialogueStatus.CLOSED:
-        raise DialogueError("Диалог уже открыт")
+        raise DialogueError("Dialogue is already open")
     if _abandoned(d):
-        raise DialogueError("Диалог удалён")
+        raise DialogueError("Dialogue deleted")
     if not _is_closer(d, actor):
-        raise DialogueError("Открыть может только тот, кто закрыл")
+        raise DialogueError("Only the one who closed it can reopen it")
     other = _other_participant_actor(d, actor)
     if other is not None and is_blocked_between(actor, other):
-        raise DialogueError("Диалог недоступен")
+        raise DialogueError("Dialogue unavailable")
     d.status = DialogueStatus.OPEN
     d.closed_at = None
     d.closed_by_account = None
@@ -1392,15 +1392,15 @@ def _outreach_one(
 ) -> tuple[Dialogue, bool]:
     """Return (dialogue, created)."""
     if is_author(story, peer):
-        raise DialogueError("Нельзя открыть диалог с собой")
+        raise DialogueError("You cannot open a dialogue with yourself")
     if is_blocked_between(author, peer):
-        raise DialogueError("Диалог недоступен")
+        raise DialogueError("Dialogue unavailable")
 
     empathy = get_empathy_for_hearer(story, peer)
     if empathy is None:
-        raise DialogueError("Этот человек не отмечал «Я слышу тебя»")
+        raise DialogueError('This person did not mark "I hear you"')
     if not empathy.outreach_opt_in:
-        raise DialogueError("Hearer отключил outreach")
+        raise DialogueError("Hearer disabled outreach")
 
     existing = _find_open_dialogue(story, peer)
     if existing is not None:
@@ -1430,7 +1430,7 @@ def start_author_outreach(
     Modes: one (single ref), many (list of refs), random (one opt-in Hearer).
     """
     if mode not in ("one", "many", "random"):
-        raise DialogueError("Некорректный mode")
+        raise DialogueError("Invalid mode")
     if intent not in DialogueIntent.values:
         raise DialogueError("Invalid intent")
     if actor.account is None and actor.session is None:
@@ -1444,7 +1444,7 @@ def start_author_outreach(
         raise StoryNotFound("Story not found") from exc
 
     if not is_author(story, actor):
-        raise DialogueError("Только автор может написать услышавшим")
+        raise DialogueError("Only the author can write to hearers")
 
     try:
         assert_under_limit(
@@ -1487,19 +1487,19 @@ def start_author_outreach(
             # Fall back to any opt-in (may reuse open dialogue)
             pool = candidates
         if not pool:
-            raise DialogueError("Нет услышавших с согласием на outreach")
+            raise DialogueError("No hearers opted in to outreach")
         chosen = random.choice(pool)
         refs = [hearer_ref_for_empathy(chosen)]
     else:
         refs = list(hearer_refs or [])
         if mode == "one":
             if len(refs) != 1:
-                raise DialogueError("Для mode=one нужен ровно один hearer_ref")
+                raise DialogueError("mode=one requires exactly one hearer_ref")
         elif mode == "many":
             if not refs:
-                raise DialogueError("Укажи hearer_refs")
+                raise DialogueError("hearer_refs is required")
             if len(refs) > 10:
-                raise DialogueError("Слишком много адресатов (макс. 10)")
+                raise DialogueError("Too many recipients (max 10)")
 
     dialogues: list[Dialogue] = []
     created_n = 0

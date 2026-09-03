@@ -74,12 +74,12 @@ class BlockItemOut(Schema):
 
 @router.get("/moderation/dashboard", response=DashboardOut)
 def helper_dashboard(request):
-    """Сводка очередей и недавние репорты для хелперов (этичные метрики)."""
+    """Queue summary and recent reports for helpers (ethical metrics)."""
     actor = require_actor(request)
     if actor.account is None or not (
         actor.account.is_helper or actor.account.is_staff or actor.account.is_superuser
     ):
-        raise HttpError(403, "Нужна роль Helper или staff")
+        raise HttpError(403, "Helper or staff role required")
     from apps.moderation.dashboard import build_dashboard
 
     view = build_dashboard()
@@ -127,9 +127,9 @@ def report_story(request, story_id: UUID, payload: ReportIn):
         created=result.created,
         report_id=str(result.report.id),
         message=(
-            "Жалоба принята. Спасибо, что помогаешь держать место безопасным."
+            "Report received. Thank you for helping keep this place safe."
             if result.created
-            else "Ты уже отправлял жалобу на эту историю."
+            else "You have already reported this story."
         ),
     )
 
@@ -158,9 +158,9 @@ def report_message(request, message_id: UUID, payload: ReportIn):
         created=result.created,
         report_id=str(result.report.id),
         message=(
-            "Жалоба на сообщение принята."
+            "Message report received."
             if result.created
-            else "Ты уже отправлял жалобу."
+            else "You have already reported this."
         ),
     )
 
@@ -181,14 +181,14 @@ def create_block(request, payload: BlockIn):
     return BlockOut(
         ok=True,
         created=result.created,
-        message="Человек скрыт из твоей ленты." if result.created else "Уже в списке.",
+        message="Person hidden from your feed." if result.created else "Already hidden.",
     )
 
 
 def _require_helper(actor) -> None:
     acc = actor.account
     if acc is None or not (acc.is_helper or acc.is_staff or acc.is_superuser):
-        raise HttpError(403, "Нужна роль Helper или staff")
+        raise HttpError(403, "Helper or staff role required")
 
 
 @router.get("/moderation/dialogue-requests", response=list[RequestOut])
@@ -233,9 +233,9 @@ def block_dialogue_peer(request, dialogue_id: UUID):
         ok=True,
         created=result.created,
         message=(
-            "Собеседник скрыт. Новые запросы и истории от него не появятся."
+            "Person hidden. New requests and stories from them will not appear."
             if result.created
-            else "Уже в списке."
+            else "Already hidden."
         ),
     )
 
@@ -251,9 +251,9 @@ def unblock_dialogue_peer(request, dialogue_id: UUID):
         ok=True,
         created=removed > 0,
         message=(
-            "Собеседник снова виден в ленте."
+            "Person visible in your feed again."
             if removed
-            else "Он и так не был скрыт."
+            else "They were not hidden."
         ),
     )
 
@@ -284,9 +284,9 @@ def delete_block(request, block_id: UUID):
         ok=removed,
         created=False,
         message=(
-            "Собеседник снова виден в ленте."
+            "Person visible in your feed again."
             if removed
-            else "Блокировка не найдена."
+            else "Block not found."
         ),
     )
 
@@ -349,11 +349,11 @@ class AdminActionOut(Schema):
 def _require_staff_only(actor) -> None:
     acc = actor.account
     if acc is None or not (acc.is_staff or acc.is_superuser):
-        raise HttpError(403, "Нужен staff-доступ")
+        raise HttpError(403, "Staff access required")
 
 
 def _admin_report_out(report: Report) -> AdminReportOut:
-    """Модератор видит только сам контент жалобы (Q12), не личность репортера."""
+    """The moderator sees only the reported content itself (Q12), never the reporter identity."""
     if report.story_id and report.story is not None:
         target_kind = "story"
         target_text = report.story.body or ""
@@ -380,7 +380,7 @@ def _admin_report_out(report: Report) -> AdminReportOut:
 
 @router.get("/admin/overview", response=AdminOverviewOut)
 def admin_overview(request):
-    """Стартовая сводка для staff: только счётчики, без содержимого."""
+    """Staff overview: counters only, no content."""
     actor = require_actor(request)
     _require_staff_only(actor)
     from apps.moderation.dashboard import build_admin_overview
@@ -406,7 +406,7 @@ def admin_overview(request):
 
 @router.get("/admin/reports", response=list[AdminReportOut])
 def admin_reports(request, status: str = "open", limit: int = 50):
-    """Очередь жалоб для staff: фильтр по статусу, без личностей репортеров."""
+    """Staff report queue: status filter, no reporter identities."""
     actor = require_actor(request)
     _require_staff_only(actor)
     if status != "all" and status not in ReportStatus.values:
@@ -423,7 +423,7 @@ def admin_reports(request, status: str = "open", limit: int = 50):
 
 @router.post("/admin/reports/{report_id}/resolve", response=AdminResolveOut)
 def admin_resolve_report(request, report_id: UUID, payload: AdminResolveIn):
-    """Решение по жалобе: hide|remove|dismiss + обязательная причина (Q12)."""
+    """Report decision: hide|remove|dismiss + a mandatory reason (Q12)."""
     actor = require_actor(request)
     _require_staff_only(actor)
     try:
@@ -443,7 +443,7 @@ def admin_resolve_report(request, report_id: UUID, payload: AdminResolveIn):
 
 @router.get("/admin/moderation-log", response=list[AdminActionOut])
 def admin_moderation_log(request, limit: int = 100):
-    """Журнал действий модерации: кто, что, почему."""
+    """Moderation action log: who, what, why."""
     actor = require_actor(request)
     _require_staff_only(actor)
     limit = max(1, min(limit, 200))

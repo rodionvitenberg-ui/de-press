@@ -54,7 +54,7 @@ def test_dialogue_request_accept_message():
 
     msgs = list_messages(author, dialogue.id)
     assert len(msgs) >= 1
-    assert "правила" in msgs[0].body
+    assert "rules" in msgs[0].body
 
     send_message(author, dialogue.id, "Спасибо, что написал.")
     send_message(peer, dialogue.id, "Я просто здесь.")
@@ -94,8 +94,8 @@ def test_author_outreach_one():
 
     msgs = list_messages(peer, d.id)
     bodies = " ".join(m.body for m in msgs)
-    assert "правила" in bodies
-    assert "Я слышу тебя" in bodies or "написал" in bodies
+    assert "rules" in bodies
+    assert "I hear you" in bodies or "wrote to you" in bodies
 
     # Reuse open dialogue
     again = start_author_outreach(
@@ -132,7 +132,7 @@ def test_author_outreach_random_and_opt_out():
     # opt-out peer cannot be targeted
     row = SilentEmpathy.objects.get(story=story, from_session=p2.session)
     ref = hearer_ref_for_empathy(row)
-    with pytest.raises(DialogueError, match="отключил"):
+    with pytest.raises(DialogueError, match="disabled outreach"):
         start_author_outreach(author, story.id, mode="one", hearer_refs=[ref])
 
 
@@ -173,7 +173,7 @@ def test_non_author_cannot_outreach():
         kind="anonymous", session=AnonymousSession.objects.create(pseudonym="x")
     )
     offer_empathy(peer, story.id)
-    with pytest.raises(DialogueError, match="автор"):
+    with pytest.raises(DialogueError, match="author"):
         start_author_outreach(peer, story.id, mode="random")
 
 
@@ -209,13 +209,13 @@ def test_voice_message_and_translate(tmp_path, settings):
     assert msg.kind == MessageKind.VOICE
     assert msg.audio
     assert msg.transcript == ""  # voice transcription is removed
-    assert msg.body == "[голосовое сообщение]"
+    assert msg.body == "[voice note]"
 
-    with pytest.raises(DialogueError, match="Нечего переводить"):
+    with pytest.raises(DialogueError, match="Nothing to translate"):
         translate_message(peer, msg.id, target_lang="en")
 
     text = send_message(peer, dialogue.id, "Я рядом.", source_lang="ru")
-    with pytest.raises(DialogueError, match="недоступен"):
+    with pytest.raises(DialogueError, match="unavailable"):
         translate_message(author, text.id, target_lang="en")
 
 
@@ -239,7 +239,7 @@ def test_translate_does_not_cache_offline_stub(settings):
     settings.AI_API_KEY = ""
     author, peer, dialogue = _open_pair("stub-cache@ex.com")
     text = send_message(peer, dialogue.id, "How do you do?", source_lang="en")
-    with pytest.raises(DialogueError, match="недоступен"):
+    with pytest.raises(DialogueError, match="unavailable"):
         translate_message(author, text.id, target_lang="ru")
     text.refresh_from_db()
     assert not (text.translations or {}).get("ru")
@@ -275,7 +275,7 @@ def test_message_kind_circle_and_display_text(tmp_path, settings):
     assert msg.display_text == "[кружочек]"
     msg.video.delete(save=False)
     msg.video = None
-    assert "удал" in msg.display_text.lower()
+    assert "delet" in msg.display_text.lower()
 
 
 @pytest.mark.django_db
@@ -312,10 +312,10 @@ def test_send_circle_rejects_too_large_and_too_long(tmp_path, settings):
     big = SimpleUploadedFile(
         "c.webm", b"x" * (CIRCLE_MAX_BYTES + 1), content_type="video/webm"
     )
-    with pytest.raises(DialogueError, match="больш"):
+    with pytest.raises(DialogueError, match="too large"):
         send_circle_message(author, dialogue.id, uploaded_file=big, duration_ms=1000)
     small = SimpleUploadedFile("c.webm", b"xxxx", content_type="video/webm")
-    with pytest.raises(DialogueError, match="длинн"):
+    with pytest.raises(DialogueError, match="too long"):
         send_circle_message(
             author, dialogue.id, uploaded_file=small, duration_ms=61_000
         )
@@ -378,7 +378,7 @@ def test_reopen_only_closer_and_delete_hides_for_me():
 
     author, peer, dialogue = _open_pair("reopen@ex.com")
     close_dialogue(author, dialogue.id)
-    with pytest.raises(DialogueError, match="кто закрыл"):
+    with pytest.raises(DialogueError, match="who closed it"):
         reopen_dialogue(peer, dialogue.id)
     opened = reopen_dialogue(author, dialogue.id)
     assert opened.status == DialogueStatus.OPEN
@@ -407,7 +407,7 @@ def test_delete_blocks_reopen_and_reuse():
     delete_dialogue_for_me(author, dialogue.id)
     dialogue.refresh_from_db()
     assert dialogue_flags(dialogue, peer)["can_reopen"] is False
-    with pytest.raises(DialogueError, match="удал"):
+    with pytest.raises(DialogueError, match="deleted"):
         reopen_dialogue(peer, dialogue.id)
     with pytest.raises(DialogueError):
         send_message(peer, dialogue.id, "ещё раз")
@@ -473,7 +473,7 @@ def test_reply_edit_delete_hide_pin_forward():
     delete_message_for_everyone(author, other.id)
     stub = [m for m in list_messages(peer, d1.id) if m.id == other.id][0]
     assert stub.deleted_at
-    assert "удален" in stub.display_text
+    assert "deleted" in stub.display_text
 
 
 @pytest.mark.django_db
@@ -486,7 +486,7 @@ def test_peer_can_delete_others_message_for_everyone():
     for who in (author, peer):
         stub = [m for m in list_messages(who, dialogue.id) if m.id == msg.id][0]
         assert stub.deleted_at
-        assert "удален" in stub.display_text
+        assert "deleted" in stub.display_text
 
 
 @pytest.mark.django_db

@@ -73,7 +73,7 @@ class KidHttp:
         if resp.status_code >= 400:
             detail = _detail(resp)
             low = detail.lower()
-            if resp.status_code == 429 or "подожди" in low or "уже" in low:
+            if resp.status_code == 429 or "wait" in low or "already" in low:
                 raise KidBusy(detail)
             raise KidHttpError(f"{resp.status_code} {detail}")
         if not resp.content:

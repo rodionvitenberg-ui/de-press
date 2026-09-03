@@ -1,8 +1,8 @@
 """Soft-notify (email/web digests) for private nudge events.
 
-Письмо-дайджест собирает непрочитанные Notification получателя
-(Account или AnonymousSession) и отправляет одно письмо со ссылкой-токеном
-на веб-инбокс (без пароля). В dev используется console.EmailBackend.
+The digest email collects the recipient's unread Notifications
+(Account or AnonymousSession) and sends one email with a token link
+to the web inbox (no password). Dev uses console.EmailBackend.
 """
 
 from __future__ import annotations
@@ -57,16 +57,16 @@ def _recipient_frequency(actor: Actor) -> str:
 
 
 def _build_digest_body(notifications: list[Notification]) -> str:
-    """Простые текстовые строки для дайджеста (без HTML в MVP)."""
+    """Plain text lines for the digest (no HTML in MVP)."""
     lines: list[str] = []
     kind_labels = {
-        "dialogue_request": "Запрос диалога по твоей истории",
-        "support_cloud": "Новое облачко поддержки",
-        "cloud_approved": "Облачко поддержки одобрено",
-        "dialogue_opened": "Диалог открыт",
-        "outreach_intro": "Написано услышавшим твою историю",
-        "message": "Новое сообщение в диалоге",
-        "dialogue_deleted": "Собеседник удалил диалог",
+        "dialogue_request": "Dialogue request on your story",
+        "support_cloud": "New support cloud",
+        "cloud_approved": "Support cloud approved",
+        "dialogue_opened": "Dialogue opened",
+        "outreach_intro": "A hearer of your story wrote to you",
+        "message": "New message in a dialogue",
+        "dialogue_deleted": "Your dialogue partner deleted the dialogue",
     }
     for n in notifications:
         label = kind_labels.get(n.kind, n.kind)
@@ -77,9 +77,9 @@ def _build_digest_body(notifications: list[Notification]) -> str:
 def _create_digest(actor: Actor, *, notifications: list[Notification]) -> EmailDigest:
     to_email = _recipient_contact(actor)
     if not to_email:
-        raise SoftNotifyError("Нет email для soft-notify")
+        raise SoftNotifyError("No email for soft-notify")
     if not _recipient_opt_in(actor):
-        raise SoftNotifyError("Soft-notify отключено получателем")
+        raise SoftNotifyError("Soft-notify is disabled by the recipient")
 
     kinds = sorted({n.kind for n in notifications if n.kind})
     digest = EmailDigest.objects.create(
@@ -87,7 +87,7 @@ def _create_digest(actor: Actor, *, notifications: list[Notification]) -> EmailD
         recipient_session=actor.session if actor.account is None else None,
         to_email=to_email,
         token=secrets.token_urlsafe(32),
-        subject=f"de-press: {len(notifications)} новое",
+        subject=f"de-press: {len(notifications)} new",
         body_text=_build_digest_body(notifications),
         payload={
             "unread": len(notifications),
@@ -103,8 +103,8 @@ def _send_digest(digest: EmailDigest) -> EmailDigest:
     magic_url = f"{settings.PUBLIC_BASE_URL}/inbox?token={digest.token}"
     text = (
         f"{digest.body_text}\n\n"
-        f"Открыть приватный инбокс: {magic_url}\n\n"
-        "Если это не вы — просто проигнорируйте письмо."
+        f"Open your private inbox: {magic_url}\n\n"
+        "If this is not you — simply ignore this email."
     )
     try:
         send_mail(
@@ -114,7 +114,7 @@ def _send_digest(digest: EmailDigest) -> EmailDigest:
             recipient_list=[digest.to_email],
             fail_silently=False,
         )
-    except Exception as exc:  # SMTP unavailable → не роняем транзакцию
+    except Exception as exc:  # SMTP unavailable → do not break the transaction
         digest.status = EmailDigestStatus.FAILED
         digest.failed_reason = str(exc)[:2000]
         digest.save(update_fields=["status", "failed_reason"])
@@ -132,10 +132,10 @@ def send_soft_notify(
     *,
     notifications: list[Notification] | None = None,
 ) -> EmailDigest | None:
-    """Создать и отправить дайджест для получателя (или None, если нельзя).
+    """Create and send a digest for the recipient (or None if not possible).
 
-    - Требует email (account.email или anon.contact_email) и opt-in.
-    - Дайджест отправляется только от имени текущего получателя.
+    - Requires an email (account.email or anon.contact_email) and opt-in.
+    - The digest is sent on behalf of the current recipient only.
     """
     if not _recipient_opt_in(actor):
         return None
@@ -143,8 +143,8 @@ def send_soft_notify(
     if not to_email:
         return None
 
-    # Явно переданный список (даже пустой) — тестовый режим: использовать как есть.
-    # None — обычный режим: собрать непрочитанные уведомления получателя.
+    # An explicitly passed list (even empty) — test mode: use it as is.
+    # None — normal mode: collect the recipient's unread notifications.
     if notifications is None:
         q = Notification.objects.filter(is_read=False)
         if actor.account is not None:
@@ -168,9 +168,9 @@ def resolve_digest(token: str) -> EmailDigest:
     try:
         digest = EmailDigest.objects.get(token=(token or "").strip())
     except EmailDigest.DoesNotExist as exc:
-        raise SoftNotifyError("Неверная ссылка") from exc
+        raise SoftNotifyError("Invalid link") from exc
     if timezone.now() - digest.created_at > timedelta(days=MAGIC_LINK_TTL_DAYS):
-        raise SoftNotifyError("Ссылка устарела")
+        raise SoftNotifyError("Link expired")
     return digest
 
 
@@ -193,7 +193,7 @@ def open_inbox(request, token: str) -> tuple[EmailDigest, Actor]:
         request._anon_session_just_created = True  # type: ignore[attr-defined]
         actor = Actor(kind="anonymous", session=digest.recipient_session)
     else:
-        raise SoftNotifyError("Дайджест без получателя")
+        raise SoftNotifyError("Digest has no recipient")
 
     ids = list(digest.payload.get("notification_ids") or [])
     if ids:
@@ -203,20 +203,20 @@ def open_inbox(request, token: str) -> tuple[EmailDigest, Actor]:
 
 
 def verify_session_email(actor: Actor, email: str | None = None) -> None:
-    """Подтвердить/обновить contact_email у анонимной сессии."""
+    """Verify/update contact_email for the anonymous session."""
     if actor.account is not None:
-        # Для аккаунтов email уже подтверждён регистрацией.
+        # For accounts the email is already verified at registration.
         acc = actor.account
         if email and (email.strip().lower() != acc.email):
-            raise SoftNotifyError("Нельзя менять email аккаунта через этот endpoint")
+            raise SoftNotifyError("Account email cannot be changed via this endpoint")
         return
     session = actor.session
     if session is None:
-        raise SoftNotifyError("Нет анонимной сессии")
+        raise SoftNotifyError("No anonymous session")
     if email:
         session.contact_email = email.strip().lower()
         session.contact_email_verified = False
     else:
         if not session.contact_email:
-            raise SoftNotifyError("Укажи email")
+            raise SoftNotifyError("Provide an email")
     session.save(update_fields=["contact_email", "contact_email_verified"])

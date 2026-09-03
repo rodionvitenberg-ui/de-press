@@ -27,14 +27,14 @@ class StoryStatus(models.TextChoices):
 class StoryTopic(models.TextChoices):
     """Fixed themes — no free-tag chaos."""
 
-    LONELINESS = "loneliness", "Одиночество"
-    ANXIETY = "anxiety", "Тревога"
-    GRIEF = "grief", "Горе / утрата"
-    EXHAUSTION = "exhaustion", "Выгорание"
-    RELATIONSHIPS = "relationships", "Отношения"
-    SELF = "self", "Отношение к себе"
-    CRISIS = "crisis", "Кризисный момент"
-    OTHER = "other", "Другое"
+    LONELINESS = "loneliness", "Loneliness"
+    ANXIETY = "anxiety", "Anxiety"
+    GRIEF = "grief", "Grief / loss"
+    EXHAUSTION = "exhaustion", "Burnout"
+    RELATIONSHIPS = "relationships", "Relationships"
+    SELF = "self", "Relationship with self"
+    CRISIS = "crisis", "Crisis moment"
+    OTHER = "other", "Other"
 
 
 class Story(models.Model):

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from apps.ai.crisis import CRISIS_REPLY_RU, looks_like_crisis
+from apps.ai.crisis import CRISIS_REPLY, looks_like_crisis
 from apps.ai.gateway import ChatMessage, get_gateway
 from apps.ai.prompts import SYSTEM_ANTI_PANIC, SYSTEM_COMPANION
 from apps.common.rate_limit import RateLimitExceeded
@@ -55,7 +55,7 @@ def _rate_limit_ai(actor: Actor) -> None:
 
     count = cache.get(key, 0)
     if count >= AI_LIMIT:
-        raise RateLimitExceeded("Слишком много обращений к помощнику. Подожди немного.")
+        raise RateLimitExceeded("Too many requests to the companion. Please wait a bit.")
     cache.set(key, count + 1, timeout=AI_WINDOW_SECONDS)
 
 
@@ -87,7 +87,7 @@ def _prepare(
         cleaned.append(ChatMessage(role=role, content=content[:MAX_MSG_LEN]))
 
     if not cleaned or cleaned[-1].role != "user":
-        raise AIError("Нужно последнее сообщение от пользователя")
+        raise AIError("The last message must be from the user")
     return cleaned
 
 
@@ -101,7 +101,7 @@ def support_chat(
 
     last_user = cleaned[-1].content
     if looks_like_crisis(last_user):
-        return SupportReply(reply=CRISIS_REPLY_RU, crisis=True, offline=False)
+        return SupportReply(reply=CRISIS_REPLY, crisis=True, offline=False)
 
     system = SYSTEM_ANTI_PANIC if surface == "anti_panic" else SYSTEM_COMPANION
     gateway = get_gateway()
@@ -111,7 +111,7 @@ def support_chat(
     try:
         text = gateway.complete(full)
     except Exception as exc:  # noqa: BLE001 — surface as soft error
-        raise AIError(f"Помощник временно недоступен: {exc}") from exc
+        raise AIError(f"Companion is temporarily unavailable: {exc}") from exc
 
     # Second-pass crisis on model output not needed; on input already handled
     return SupportReply(reply=text, crisis=False, offline=offline)
@@ -133,7 +133,7 @@ def stream_support_chat(
 
     last_user = cleaned[-1].content
     if looks_like_crisis(last_user):
-        return SupportStream(chunks=iter([CRISIS_REPLY_RU]), crisis=True, offline=False)
+        return SupportStream(chunks=iter([CRISIS_REPLY]), crisis=True, offline=False)
 
     system = SYSTEM_ANTI_PANIC if surface == "anti_panic" else SYSTEM_COMPANION
     gateway = get_gateway()
@@ -148,6 +148,6 @@ def stream_support_chat(
         except AIError:
             raise
         except Exception as exc:  # noqa: BLE001 — surface as soft error
-            raise AIError(f"Помощник временно недоступен: {exc}") from exc
+            raise AIError(f"Companion is temporarily unavailable: {exc}") from exc
 
     return SupportStream(chunks=_chunks(), crisis=False, offline=offline)

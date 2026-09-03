@@ -1,4 +1,4 @@
-"""Личный кабинет: настройки soft-notify, контактный email, тест дайджеста."""
+"""Personal area: soft-notify settings, contact email, digest test."""
 
 from __future__ import annotations
 
@@ -144,28 +144,28 @@ def update_notify_settings(request, payload: NotifySettingsIn):
             update_fields=["notify_email_opt_in", "notify_digest_frequency"]
         )
     else:
-        raise HttpError(400, "Нет идентичности")
+        raise HttpError(400, "No identity")
 
     return _settings_out(actor)
 
 
 @router.post("/me/notify-settings/test", response=DigestTestOut)
 def send_test_digest(request):
-    """Отправить тестовый дайджест на контактный email (для проверки SMTP)."""
+    """Send a test digest to the contact email (SMTP check)."""
     actor = require_actor(request)
     try:
         digest = send_soft_notify(actor, notifications=[])
     except SoftNotifyError as exc:
         raise HttpError(400, str(exc)) from exc
     if digest is None:
-        raise HttpError(400, "Нет email или soft-notify отключено")
+        raise HttpError(400, "No email or soft-notify is disabled")
     return DigestTestOut(
         ok=True,
         sent_to=digest.to_email,
         message=(
-            "Дайджест отправлен на почту."
+            "Digest sent to your email."
             if digest.status == "sent"
-            else f"Не удалось отправить: {digest.failed_reason or 'ошибка SMTP'}"
+            else f"Could not send: {digest.failed_reason or 'SMTP error'}"
         ),
     )
 
@@ -175,12 +175,12 @@ def send_test_telegram_digest(request):
     """Force-run Telegram digest logic for the current account (dev / check bot)."""
     actor = require_actor(request)
     if actor.account is None:
-        raise HttpError(400, "Нужен аккаунт (войди через Mini App)")
+        raise HttpError(400, "Account required (sign in via Mini App)")
     acc = actor.account
     if not acc.telegram_id:
-        raise HttpError(400, "Аккаунт не связан с Telegram")
+        raise HttpError(400, "Account is not linked to Telegram")
     if not acc.notify_telegram_opt_in:
-        raise HttpError(400, "Включи тихие напоминания в Telegram")
+        raise HttpError(400, "Enable quiet reminders in Telegram")
     # Temporarily treat as daily for the test path if frequency is immediate —
     # still only sends when there is unread (or skipped_empty).
     status = send_telegram_daily_digest_for_account(acc)
@@ -203,11 +203,11 @@ def send_test_telegram_digest(request):
             status = "sent" if ok else "failed"
 
     messages = {
-        "sent": "Дайджест отправлен в Telegram.",
-        "skipped_empty": "Нет новых непрочитанных — сообщение не слали.",
-        "skipped_config": "Бот не настроен (TELEGRAM_BOT_TOKEN).",
-        "skipped_freq": "Частота не daily.",
-        "failed": "Bot API не принял сообщение.",
+        "sent": "Digest sent to Telegram.",
+        "skipped_empty": "Nothing unread — no message was sent.",
+        "skipped_config": "Bot is not configured (TELEGRAM_BOT_TOKEN).",
+        "skipped_freq": "Frequency is not daily.",
+        "failed": "Bot API rejected the message.",
     }
     return DigestTestOut(
         ok=status in ("sent", "skipped_empty"),

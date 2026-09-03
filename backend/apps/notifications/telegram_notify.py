@@ -23,14 +23,14 @@ from apps.notifications.models import Notification
 
 logger = logging.getLogger(__name__)
 
-KIND_LABELS_RU = {
-    "dialogue_request": "Запрос диалога по твоей истории",
-    "support_cloud": "Новое облачко поддержки",
-    "cloud_approved": "Облачко поддержки одобрено",
-    "dialogue_opened": "Диалог открыт",
-    "outreach_intro": "Тебе написали по истории",
-    "message": "Новое сообщение в диалоге",
-    "dialogue_deleted": "Собеседник удалил диалог",
+KIND_LABELS = {
+    "dialogue_request": "Dialogue request on your story",
+    "support_cloud": "New support cloud",
+    "cloud_approved": "Support cloud approved",
+    "dialogue_opened": "Dialogue opened",
+    "outreach_intro": "A hearer of your story wrote to you",
+    "message": "New message in a dialogue",
+    "dialogue_deleted": "Your dialogue partner deleted the dialogue",
 }
 
 DigestStatus = Literal[
@@ -101,15 +101,15 @@ def mini_app_deep_link(startapp: str) -> str:
 
 
 def format_soft_notify_text(kind: str, payload: dict[str, Any] | None) -> str:
-    label = KIND_LABELS_RU.get(kind, "Новое уведомление в de-press")
+    label = KIND_LABELS.get(kind, "New notification in de-press")
     startapp = startapp_for_notification(kind, payload)
     link = mini_app_deep_link(startapp)
     lines = [f"de-press: {label}"]
     if link:
         lines.append("")
-        lines.append(f"Открыть: {link}")
+        lines.append(f"Open: {link}")
     lines.append("")
-    lines.append("Тихое напоминание. Отключить: меню → уведомления в Telegram.")
+    lines.append("Quiet reminder. Turn off: menu → notifications in Telegram.")
     return "\n".join(lines)
 
 
@@ -222,16 +222,16 @@ def unread_for_telegram_digest(
 def format_digest_text(notifications: list[Notification]) -> str:
     """One soft digest message: counts by kind + open inbox link."""
     counts = Counter(n.kind for n in notifications)
-    lines = [f"de-press: тихий дайджест ({len(notifications)})"]
+    lines = [f"de-press: quiet digest ({len(notifications)})"]
     for kind, count in sorted(counts.items(), key=lambda x: (-x[1], x[0])):
-        label = KIND_LABELS_RU.get(kind, kind)
+        label = KIND_LABELS.get(kind, kind)
         lines.append(f"• {count}× {label}")
     link = mini_app_deep_link("notifications")
     if link:
         lines.append("")
-        lines.append(f"Открыть: {link}")
+        lines.append(f"Open: {link}")
     lines.append("")
-    lines.append("Тихо. Отключить: меню → уведомления в Telegram.")
+    lines.append("Quiet. Turn off: menu → notifications in Telegram.")
     return "\n".join(lines)
 
 

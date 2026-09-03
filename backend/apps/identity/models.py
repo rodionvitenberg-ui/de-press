@@ -198,7 +198,7 @@ class AnonymousSession(models.Model):
 
     @property
     def display_pseudonym(self) -> str:
-        return self.pseudonym or "аноним"
+        return self.pseudonym or "anonymous"
 
     @property
     def notify_email(self) -> str:

@@ -10,10 +10,10 @@ from django.db.models import Q
 
 
 class DialogueIntent(models.TextChoices):
-    LISTEN = "listen", "Просто выговориться / выслушать"
-    SHARE = "share", "Поделиться похожим опытом"
-    ADVICE_OK = "advice_ok", "Советы допустимы"
-    MUTUAL = "mutual", "Обмен историями"
+    LISTEN = "listen", "Vent / be heard"
+    SHARE = "share", "Share a similar experience"
+    ADVICE_OK = "advice_ok", "Advice is welcome"
+    MUTUAL = "mutual", "Exchange stories"
 
 
 class DialogueRequestStatus(models.TextChoices):
@@ -385,22 +385,22 @@ class Message(models.Model):
     @property
     def display_text(self) -> str:
         if self.deleted_at:
-            return "сообщение удалено"
+            return "message deleted"
         if self.kind == MessageKind.VOICE:
             if self.transcript.strip():
                 return self.transcript.strip()
             if not self.audio:
-                return "[голосовое удалено]"
-            return self.body or "[голосовое сообщение]"
+                return "[voice note deleted]"
+            return self.body or "[voice note]"
         if self.kind == MessageKind.CIRCLE:
             if not self.video:
-                return "[кружочек удалён]"
-            return self.body or "[кружочек]"
+                return "[video circle deleted]"
+            return self.body or "[video circle]"
         return self.body
 
 
 class MessageHide(models.Model):
-    """Per-viewer hide («удалить у себя»)."""
+    """Per-viewer hide ("delete for me")."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     message = models.ForeignKey(

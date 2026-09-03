@@ -10,7 +10,7 @@ from apps.identity.services import Actor
 
 
 class RateLimitExceeded(Exception):
-    def __init__(self, message: str = "Too many actions. Подожди немного."):
+    def __init__(self, message: str = "Too many actions. Please wait a bit."):
         super().__init__(message)
 
 

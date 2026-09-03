@@ -226,14 +226,14 @@ def resolve_report(
     reason: str = "",
     note: str = "",
 ) -> Report:
-    """Модераторское решение (Q12): причина обязательна, каждое действие — в лог.
+    """Moderator decision (Q12): a reason is mandatory, every action is logged.
 
-    `hide` — дефолт и обратимо: история скрывается из ленты,
-    сообщение стирается у всех (тот же scrub-путь, что и удаление).
-    `remove` — исключительное жёсткое удаление истории.
-    `dismiss` — контент не трогаем.
-    Смежные открытые жалобы на тот же контент закрываются тем же решением,
-    автор каждой жалобы получает уведомление без данных второй стороны.
+    `hide` — the default and reversible: the story is hidden from the feed,
+    the message is scrubbed for everyone (same scrub path as deletion).
+    `remove` — exceptional hard deletion of the story.
+    `dismiss` — the content is left untouched.
+    Sibling open reports on the same content are closed with the same decision,
+    each reporter is notified without the other party's data.
     """
     if decision not in _DECISION_STATUS:
         raise ReportError("Invalid decision")
@@ -301,7 +301,7 @@ def _apply_decision(
             try:
                 moderate_story(story.id, new_status)
             except StoryNotFound:
-                pass  # история уже удалена — фиксируем только решение
+                pass  # story already deleted — record the decision only
         if message is not None:
             from apps.dialogue.services import moderator_scrub_message
 
@@ -322,7 +322,7 @@ def _apply_decision(
 
 
 def _notify_reporter(report: Report, decision: str) -> None:
-    """Уведомить автора жалобы о решении — без данных второй стороны."""
+    """Notify the reporter about the decision — without the other party's data."""
     if report.from_account is not None:
         recipient = Actor(kind="account", account=report.from_account)
     elif report.from_session is not None:

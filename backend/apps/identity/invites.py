@@ -68,18 +68,18 @@ def get_helper_invite(token: str) -> HelperInvite:
 
 def accept_helper_invite(actor: Actor, token: str, *, pledge: bool) -> Account:
     if actor.account is None:
-        raise InviteError("Нужен аккаунт, чтобы стать Helperом")
+        raise InviteError("An account is required to become a Helper")
     if not pledge:
-        raise InviteError("Нужно принять обещание")
+        raise InviteError("The promise must be accepted first")
     invite = get_helper_invite(token)
     now = timezone.now()
     if invite.used_at is not None:
-        raise InviteError("Инвайт уже использован")
+        raise InviteError("Invite already used")
     if invite.expires_at <= now:
-        raise InviteError("Инвайт истёк")
+        raise InviteError("Invite expired")
     account = actor.account
     if account.is_helper:
-        raise InviteError("Ты уже Helper")
+        raise InviteError("You are already a Helper")
     account.is_helper = True
     if invite.org:
         account.helper_org = invite.org

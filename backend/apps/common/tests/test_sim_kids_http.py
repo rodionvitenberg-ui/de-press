@@ -57,7 +57,7 @@ def test_busy_on_429_and_duplicate_message():
         if "clouds" in request.url.path:
             return httpx.Response(429, json={"detail": "Slow down"})
         if "dialogue-requests" in request.url.path:
-            return httpx.Response(400, json={"detail": "Запрос уже отправлен"})
+            return httpx.Response(400, json={"detail": "Request already sent"})
         return httpx.Response(400, json={"detail": "нет"})
 
     http = _client(handler)

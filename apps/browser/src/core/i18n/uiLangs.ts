@@ -2,10 +2,11 @@ export const HANDWRITTEN = new Set(["ru", "en"]);
 
 export const RTL_LANGS = new Set(["ar", "he", "fa", "ur"]);
 
-/** Picker codes — handwritten first, then the rest. Translator fills gaps. */
+/** Picker codes — en, es, ru lead, then the rest. Translator fills gaps. */
 export const UI_LANGS: string[] = [
-  "ru",
   "en",
+  "es",
+  "ru",
   "uk",
   "be",
   "kk",

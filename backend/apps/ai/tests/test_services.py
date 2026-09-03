@@ -68,7 +68,7 @@ def test_stream_offline_single_chunk():
     assert stream.offline is True
     assert stream.crisis is False
     chunks = list(stream.chunks)
-    assert len(chunks) == 1  # офлайн-стаб — одним куском
+    assert len(chunks) == 1  # offline stub — one piece
     assert len(chunks[0]) > 10
 
 

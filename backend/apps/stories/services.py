@@ -99,7 +99,7 @@ def publish_story(
     except RateLimitExceeded as exc:
         raise StoryError(str(exc)) from exc
 
-    name = (pseudonym or actor.display_pseudonym).strip()[:64] or "аноним"
+    name = (pseudonym or actor.display_pseudonym).strip()[:64] or "anonymous"
     now = timezone.now()
 
     if actor.account is not None:
@@ -140,11 +140,11 @@ def publish_story(
 def _assert_voice_file(uploaded_file, duration_ms: int | None) -> None:
     size = getattr(uploaded_file, "size", 0) or 0
     if size <= 0:
-        raise StoryError("Пустой аудиофайл")
+        raise StoryError("Empty audio file")
     if size > VOICE_MAX_BYTES:
-        raise StoryError("Голосовое слишком большое (макс. 5 МБ)")
+        raise StoryError("Voice note is too large (max 5 MB)")
     if duration_ms is not None and duration_ms > VOICE_MAX_DURATION_MS:
-        raise StoryError("Голосовое слишком длинное (макс. 2 мин)")
+        raise StoryError("Voice note is too long (max 2 min)")
 
 
 def _voice_rate_limit(actor: Actor) -> None:
@@ -196,7 +196,7 @@ def publish_story_voice(
         raise StoryError(str(exc)) from exc
     _voice_rate_limit(actor)
 
-    name = (pseudonym or actor.display_pseudonym).strip()[:64] or "аноним"
+    name = (pseudonym or actor.display_pseudonym).strip()[:64] or "anonymous"
     now = timezone.now()
     if actor.account is not None:
         story = Story(
@@ -312,9 +312,9 @@ def list_story_thread(story_id: UUID, *, viewer: Actor | None = None) -> list[St
 def add_comment(actor: Actor, post_id: UUID, body: str) -> Story:
     post = get_story(post_id, for_public=False)
     if post.parent_id:
-        raise StoryError("Нельзя комментировать комментарий")
+        raise StoryError("Replies to replies are not allowed")
     if not is_author(post, actor):
-        raise StoryPermissionError("Только автор")
+        raise StoryPermissionError("Author only")
     if post.status == StoryStatus.REMOVED:
         raise StoryNotFound("Story not found")
 
@@ -369,9 +369,9 @@ def add_comment_voice(
 ) -> Story:
     post = get_story(post_id, for_public=False)
     if post.parent_id:
-        raise StoryError("Нельзя комментировать комментарий")
+        raise StoryError("Replies to replies are not allowed")
     if not is_author(post, actor):
-        raise StoryPermissionError("Только автор")
+        raise StoryPermissionError("Author only")
     if post.status == StoryStatus.REMOVED:
         raise StoryNotFound("Story not found")
 
@@ -489,7 +489,7 @@ def _owned_story(actor: Actor, story_id: UUID) -> Story:
     except Story.DoesNotExist as exc:
         raise StoryNotFound("Story not found") from exc
     if not is_author(story, actor):
-        raise StoryPermissionError("Только автор")
+        raise StoryPermissionError("Author only")
     if story.status == StoryStatus.REMOVED:
         raise StoryNotFound("Story not found")
     return story

@@ -87,11 +87,11 @@ def post_accept(request, token: str, payload: AcceptIn):
         acc = accept_helper_invite(actor, token, pledge=payload.pledge)
     except InviteError as exc:
         msg = str(exc)
-        code = 404 if "not found" in msg.lower() or "не найден" in msg.lower() else 400
+        code = 404 if "not found" in msg.lower() else 400
         raise HttpError(code, msg) from exc
     return AcceptOut(
         ok=True,
         is_helper=True,
         helper_org=acc.helper_org or "",
-        message="Теперь ты Helper. Не врач и не экстренная служба.",
+        message="You are a Helper now. Not a doctor and not an emergency service.",
     )

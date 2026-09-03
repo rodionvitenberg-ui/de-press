@@ -373,9 +373,9 @@ def my_stories(request):
                 author_key=author_key_for(story),
                 pulse_count=count,
                 pulse_message=(
-                    f"{count} человек прочитали и посидели с тобой молча."
+                    f"{count} people read this and sat with you silently."
                     if count
-                    else "Пока тихо. Это тоже нормально."
+                    else "Quiet so far. That is okay too."
                 ),
                 cloud_unread=unread.get(story.id, 0),
                 cloud_gesture=gestures.get(story.id, ""),

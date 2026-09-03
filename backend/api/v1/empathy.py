@@ -61,7 +61,7 @@ def post_empathy(request, story_id: UUID):
     return EmpathyOut(
         ok=True,
         created=result.created,
-        message="Я слышу тебя" if result.created else "Уже отмечено",
+        message="I hear you" if result.created else "Already marked",
         outreach_opt_in=result.outreach_opt_in,
     )
 
@@ -78,9 +78,9 @@ def get_pulse(request, story_id: UUID):
     return PulseOut(
         story_id=str(story_id),
         count=count,
-        message=f"{count} человек прочитали и посидели с тобой молча."
+        message=f"{count} people read this and sat with you silently."
         if count
-        else "Пока тихо. Это тоже нормально.",
+        else "Quiet so far. That is okay too.",
     )
 
 
@@ -120,7 +120,7 @@ def post_outreach_consent(request, story_id: UUID, payload: OutreachConsentIn):
     except EmpathyError as exc:
         raise HttpError(400, str(exc)) from exc
     if opt_in:
-        msg = "Автор сможет написать тебе, если отметишь «Я слышу тебя»."
+        msg = 'The author can write to you if you mark "I hear you".'
     else:
-        msg = "Автор не сможет написать тебе через outreach по этой истории."
+        msg = "The author will not be able to reach you via outreach for this story."
     return OutreachConsentOut(ok=True, outreach_opt_in=opt_in, message=msg)

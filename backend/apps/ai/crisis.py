@@ -17,6 +17,9 @@ _CRISIS_PATTERNS = [
     r"\bend\s+my\s+life",
     r"\bпорезать\s+себя",
     r"\bсвести\s+сч[её]ты",
+    r"\bwant\s+to\s+die",
+    r"\bno\s+reason\s+to\s+live",
+    r"\bhurt\s+myself",
 ]
 
 _COMPILED = [re.compile(p, re.IGNORECASE) for p in _CRISIS_PATTERNS]
@@ -28,8 +31,8 @@ def looks_like_crisis(text: str) -> bool:
     return any(p.search(text) for p in _COMPILED)
 
 
-CRISIS_REPLY_RU = (
-    "Слышу, что тебе сейчас очень тяжело — и это важно не оставаться с этим одному. "
-    "Если есть риск себе: экстренные службы 112 / 103, телефон доверия. "
-    "На сайте можно открыть режим Anti-Panic. Я не замена помощи рядом."
+CRISIS_REPLY = (
+    "I hear that things are very heavy right now — and it matters not to stay alone with this. "
+    "If there is risk to yourself: emergency services 112 / 103, a crisis hotline. "
+    "You can open the Anti-Panic mode on the site. I am not a replacement for help nearby."
 )
