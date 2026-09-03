@@ -1,6 +1,8 @@
 {
   "name": "@de-press/api-client",
   "version": "1.0.0",
+  "license": "AGPL-3.0-or-later",
+
   "private": true,
   "description": "Shared API client for @de-press/browser and @de-press/mini-app (audit Q3). Ships TS source; apps compile it.",
   "type": "module",

@@ -294,8 +294,13 @@ We do not do: public likes/comments, open matching, a server-side trauma map, AI
 
 ## License
 
-**AGPL-3.0-or-later** — see [`LICENSE`](./LICENSE).  
-The vendored Telegram Web A sources in `apps/mini-app/vendor/telegram-tt/` remain **GPLv3** — third-party code, kept as-is and separable.
+**AGPL-3.0-or-later** — see [`LICENSE`](./LICENSE). All first-party code (backend,
+browser, Mini App, admin, `packages/`) is AGPL; every `package.json` declares the
+same SPDX id. Telegram Web A (GPLv3) is **not committed**: `apps/mini-app/vendor/telegram-tt/`
+is gitignored and fetched at a pinned revision by `scripts/fetch_telegram_tt.sh`; the
+Browser and Backend never import it. When a Mini App build links the vendor, the
+shipped client is an AGPL/GPLv3 combination whose source is this repository plus the
+pinned upstream — see [`apps/mini-app/NOTICE.GPL.md`](./apps/mini-app/NOTICE.GPL.md).
 
 ---
 
