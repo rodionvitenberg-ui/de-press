@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@de-press/api-client": "file:../../packages/api-client",
+    "@de-press/theme": "file:../../packages/theme",
     "@tanstack/react-query": "^5.62.0",
     "@tanstack/react-virtual": "^3.14.9",
     "qrcode": "^1.5.4",
