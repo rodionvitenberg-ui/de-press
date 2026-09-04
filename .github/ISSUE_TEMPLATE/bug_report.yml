@@ -7,7 +7,7 @@ body:
       value: |
         Thanks for taking the time to report a bug. If this report involves a
         security or privacy issue (data leak, session problem, secrets), do not
-        file it here — use [SECURITY.md](../../SECURITY.md) instead.
+        file it here — use [SECURITY.md](SECURITY.md) instead.
   - type: dropdown
     id: area
     attributes:

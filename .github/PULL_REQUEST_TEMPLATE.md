@@ -4,7 +4,7 @@
 
 ## Checklist
 
-- [ ] I read [`CONTRIBUTING.md`](../CONTRIBUTING.md) and [`CONTEXT.md`](../CONTEXT.md).
+- [ ] I read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`CONTEXT.md`](CONTEXT.md).
 - [ ] My commits follow Conventional Commits and carry a `Signed-off-by` trailer
       (`git commit -s`) — DCO.
 - [ ] Backend changes: `pytest` passes (`DEPRESS_USE_SQLITE=1 CHANNEL_LAYER=memory pytest -q`).
